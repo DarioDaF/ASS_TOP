@@ -1,0 +1,9 @@
+.vscode
+instances/**
+!instances/.keep
+outputs/**
+!outputs/.keep
+src/**/*.o
+Main.exe
+node_modules
+web/*.js

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Load Map</title>
+    <style>
+#fileList {
+  max-height: 10em;
+  overflow-y: scroll;
+  border: 1px solid black;
+}
+    </style>
+  </head>
+  <body>
+    <select id="selSolver"><option value="">None</option></select>
+    <select id="selInstance"><option value="">---</option></select>
+    <button id="bSolve">Solve</button>
+    <h1 id="fileName"></h1>
+    <button id="bFirstThunder">First Thunder</button>
+    <button id="bStartThunder">Start Thunder</button>
+    <button id="bStopThunder">Stop Thunder</button>
+    <div id="mapCanvasContainer"></div>
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>

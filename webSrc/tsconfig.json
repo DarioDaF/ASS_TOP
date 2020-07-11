@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "lib": [ "ES2017", "DOM" ],
+    "module": "ESNext",
+    "outDir": "../web",
+  },
+  "exclude": [
+    "node_modules",
+  ],
+}
