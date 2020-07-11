@@ -1,4 +1,4 @@
-import { toName, lerp, createSvg, emptyElement, createSvgArrow } from './lib.js'; // No extension will fail in import on browser
+import { toName, lerp, createSvg, emptyElement, createSvgArrow, createCompoundSlider } from './lib.js'; // No extension will fail in import on browser
 // To use modules you need type="module" but this forces CORS checks...
 
 import { parseTOPMap, TOPMap, TOPPoint } from './top.js';
@@ -12,6 +12,20 @@ const $bStopThunder = document.getElementById('bStopThunder');
 const $selInstance = document.getElementById('selInstance') as HTMLSelectElement;
 const $selSolver = document.getElementById('selSolver') as HTMLSelectElement;
 const $bSolve = document.getElementById('bSolve');
+const $cbAutoUpdate = document.getElementById('cbAutoUpdate') as HTMLInputElement;
+const $divOptions = document.getElementById('divOptions');
+
+const optionSliders = ['a', 'b', 'c', 'd', 'e', 'f'];
+let options = {};
+for(const sl of optionSliders) {
+  const compoundSl = createCompoundSlider(sl, (value) => {
+    options[sl] = value;
+    if($cbAutoUpdate.checked) {
+      $bSolve.click();
+    }
+  }, 0, 100, 0.1);
+  $divOptions.append(compoundSl.$cont);
+}
 
 const fileList: Record<string, File> = {};
 const relMargin = 0.015;
@@ -174,9 +188,10 @@ $bSolve.addEventListener('click', async() => {
     // Show input
     content = await apiInstance(inst);
   } else {
-    const res = await apiSolve(inst, solver === '' ? undefined : parseInt(solver));
+    const res = await apiSolve(inst, solver === '' ? undefined : parseInt(solver), options);
     console.log(JSON.stringify(res));
     content = res.solution;
+    console.log(`Solution found with profit: ${res.profit}`);
   }
 
   const map = parseTOPMap(content);
@@ -275,16 +290,39 @@ function NextThunder(map: TOPMap, thunder: ThunderData, K: number, dt: number, r
       }
       if(pDistSq(map.points[p], thunder.carPartialPos[c]) <= rangeSq) {
         // Assign car and break
-        map.hops.push({ car: c, point: p });
-        thunder.visited[p] = true;
-        thunder.carActPos[c] = map.points[p];
-        thunder.carStallIterations[c] += thunder.stallIterations;
-        thunder.stallIterations = 0;
-        console.log(thunder);
-        for(let c = 0; c < map.m; ++c) {
-          thunder.carPartialPos[c] = { ...thunder.carActPos[c] }; // Reset all cars (discharge!)
+        // Only if feasible
+        
+        let travelTime = 0;
+        {
+          let lastPoint = map.points[0];
+          for(const h of map.hops) {
+            if(h.car != c) continue;
+            const stepTime = pDist(lastPoint, map.points[h.point]);
+            travelTime += stepTime;
+            lastPoint = map.points[h.point];
+          }
+          {
+            const stepTime = pDist(lastPoint, map.points[p]);
+            travelTime += stepTime;
+            lastPoint = map.points[p];
+          }
+          {
+            const stepTime = pDist(lastPoint, map.points[map.n - 1]);
+            travelTime += stepTime;
+          }
         }
-        break;
+        if(travelTime <= map.tmax) {
+          map.hops.push({ car: c, point: p });
+          thunder.visited[p] = true;
+          thunder.carActPos[c] = map.points[p];
+          thunder.carStallIterations[c] += thunder.stallIterations;
+          thunder.stallIterations = 0;
+          console.log(thunder);
+          for(let c = 0; c < map.m; ++c) {
+            thunder.carPartialPos[c] = { ...thunder.carActPos[c] }; // Reset all cars (discharge!)
+          }
+          break;
+        }
       }
     }
   }

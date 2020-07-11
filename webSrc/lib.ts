@@ -65,3 +65,36 @@ export function createSvgArrow(type: string, attrs: Record<string, any>, $svg: S
   }
   return createSvg(type, { ...attrs, 'marker-end': 'url(#' + idHead + ')' });
 }
+
+export function createCompoundSlider(label: string, onChange: (value: number) => void, min: number, max: number, step: number) {
+  const $label = document.createElement('label');
+  $label.innerText = label;
+  const $range = document.createElement('input');
+  $range.type = 'range';
+  $range.min = min.toString();
+  $range.max = max.toString();
+  $range.step = step.toString();
+  //$range.id = id + '__range';
+  const $number = document.createElement('input');
+  $number.type = 'number';
+  $number.min = min.toString();
+  $number.max = max.toString();
+  $number.step = step.toString();
+  //$numeric.id = id;
+
+  const $div = document.createElement('div');
+  $div.append($label);
+  $div.append($range);
+  $div.append($number);
+
+  $range.addEventListener('change', (e) => {
+    $number.value = $range.value;
+    onChange(parseFloat($number.value));
+  });
+  $number.addEventListener('change', (e) => {
+    $range.value = $number.value;
+    onChange(parseFloat($number.value));
+  });
+
+  return { $cont: $div, $input: $number };
+}

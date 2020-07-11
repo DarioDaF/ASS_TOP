@@ -19,7 +19,7 @@ export async function apiGetList() {
   return await resp.json() as ApiList;
 }
 
-export async function apiSolve(inst: string, solver?: number, options?: Record<string, unknown>) {
+export async function apiSolve(inst: string, solver: number, options: Record<string, unknown> = {}) {
   const resp = await fetch('/solve', {
     method: "POST",
     body: JSON.stringify({ inst, solver, options })

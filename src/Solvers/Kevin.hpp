@@ -7,6 +7,6 @@
 
 using namespace nlohmann;
 
-void SolveKevin(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, const json& options);
+void SolveKevin(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, json& options);
 
 #endif

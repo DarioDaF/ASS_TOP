@@ -8,7 +8,7 @@
 
 using namespace nlohmann;
 
-typedef void (*SolveFunction)(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, const json& options);
+typedef void (*SolveFunction)(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, json& options);
 struct SolverEntry_s {
   SolveFunction fn;
   std::string name;

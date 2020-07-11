@@ -103,14 +103,16 @@ void InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevi
   }
 }
 
-void SolveKevin(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, const json& options) {
+void SolveKevin(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, json& options) {
+  double maxDeviationAmmitted = json_get_or_default<float>(options["a"], 2);
+  //double maxDeviationAmmitted = 2;
+
   // Sover
   NumberRange<idx_t> carIdxs(in.Cars());
   NumberRange<idx_t> pointIdxs(in.Points());
 
   vector<bool> markedCars(in.Cars());
 
-  double maxDeviationAmmitted = 2; //in.MaxTime() / in.Points();
   int notVisitedCount = 0;
   int sumProfit = 0;
 
