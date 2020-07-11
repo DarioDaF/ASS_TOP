@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 typedef int idx_t;
 
@@ -106,6 +107,11 @@ typename _MAP::mapped_type value_or_default(const _MAP map, const typename _MAP:
     return def;
   }
   return it->second;
+}
+
+template<typename T>
+T json_get_or_default(const nlohmann::json& j, T def) {
+  return j.is_null() ? def : j.get<T>();
 }
 
 #endif

@@ -100,6 +100,7 @@ class HSR_List : public hs::http_resource {
     }
 };
 
+/*
 class HSR_Solver : public hs::http_resource {
   public:
     const http_resp_ptr render_GET(const hs::http_request& req) {
@@ -181,11 +182,7 @@ class HSR_Solver : public hs::http_resource {
       return http_resp_ptr(new hs::string_response(j.dump()));
     }
 };
-
-template<typename T>
-T json_get_or_default(const json& j, T def) {
-  return j.is_null() ? def : j.get<T>();
-}
+*/
 
 class HSR_SolverPlus : public hs::http_resource {
   public:
@@ -312,9 +309,11 @@ int main(int argc, char* argv[]) {
   HSR_StaticResources hsrServeSolutions(SOL_PATH, 1);
   ws.register_resource("/outputs", &hsrServeSolutions, true);
   
+  /*
   HSR_Solver hsrSolver;
   ws.register_resource("/solve/{solver}/{inst}", &hsrSolver);
   ws.register_resource("/solve/{inst}", &hsrSolver);
+  */
 
   HSR_SolverPlus hsrSolverPlus;
   ws.register_resource("/solve", &hsrSolverPlus);

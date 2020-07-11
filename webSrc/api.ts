@@ -19,8 +19,11 @@ export async function apiGetList() {
   return await resp.json() as ApiList;
 }
 
-export async function apiSolve(inst: string, solver?: number) {
-  const resp = await fetch(solver === undefined ? `/solve/${inst}` : `/solve/${inst}?solver=${solver}`);
+export async function apiSolve(inst: string, solver?: number, options?: Record<string, unknown>) {
+  const resp = await fetch('/solve', {
+    method: "POST",
+    body: JSON.stringify({ inst, solver, options })
+  });
   return await resp.json() as ApiSolve;
 }
 
