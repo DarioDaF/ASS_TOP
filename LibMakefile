@@ -1,7 +1,0 @@
-LIBHTTPSERVER=/home/dario/Test/libhttpserver/build/install
-NLOHMANNJSON=/home/dario/Test/json
-
-CPPFLAGS+=-I$(LIBHTTPSERVER)/include -I$(NLOHMANNJSON)/include
-LDFLAGS+=-L$(LIBHTTPSERVER)/lib
-
-LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
