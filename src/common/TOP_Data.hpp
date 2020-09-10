@@ -143,7 +143,7 @@ class TOP_Output {
     } 
 
     idx_t Hop(idx_t car, idx_t hop) const { // Return the point index reached by the car in its one specific hop
-      if(hop == 0) return in.StartPoint();
+      if(hop <= 0) return in.StartPoint();
       if(hop > car_hops[car].size()) return in.EndPoint();
       return car_hops[car][hop - 1];
     }

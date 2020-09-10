@@ -60,7 +60,7 @@ _SEED GenSeed() {
 
 class HSR_StaticResources : public hs::http_resource {
   public:
-    HSR_StaticResources(std::string basePath, int pathDiscard = 0): http_resource(), basePath(basePath), pathDiscard(pathDiscard) {}
+    HSR_StaticResources(std::string basePath, unsigned int pathDiscard = 0): http_resource(), basePath(basePath), pathDiscard(pathDiscard) {}
     const http_resp_ptr render_GET(const hs::http_request& req) {
       auto httpPath = req.get_path_pieces();
       if(httpPath.size() < pathDiscard) {

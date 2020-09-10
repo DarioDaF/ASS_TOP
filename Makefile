@@ -10,7 +10,7 @@ LDFLAGS_HTTP+=-L$(LIBHTTPSERVER)/lib -lhttpserver
 
 LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 
-CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas
+CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
 ALL_EXE=MainWeb.exe MainTest.exe MainSolver.exe MainMapper.exe MainBT.exe
