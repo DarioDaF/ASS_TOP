@@ -6,14 +6,17 @@ CPPFLAGS_JSON=-I$(NLOHMANNJSON)/include
 LDFLAGS_JSON=
 
 CPPFLAGS_HTTP=-I$(LIBHTTPSERVER)/include
-LDFLAGS_HTTP+=-L$(LIBHTTPSERVER)/lib -lhttpserver
+LDFLAGS_HTTP=-L$(LIBHTTPSERVER)/lib -lhttpserver
+
+CPPFLAGS_EASYLOCAL=-I$(EASYLOCAL)/include
+LDFLAGS_EASYLOCAL=-lboost_program_options -pthread
 
 LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 
 CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
-ALL_EXE=MainWeb.exe MainTest.exe MainSolver.exe MainMapper.exe MainBT.exe
+ALL_EXE=MainWeb.exe MainTest.exe MainSolver.exe MainMapper.exe MainBT.exe MainLocal.exe
 
 all: $(ALL_EXE)
 
@@ -21,6 +24,9 @@ all: $(ALL_EXE)
 
 MainWeb.exe: CPPFLAGS+=$(CPPFLAGS_HTTP) $(CPPFLAGS_JSON)
 MainWeb.exe: LDFLAGS+=$(LDFLAGS_HTTP) $(LDFLAGS_JSON)
+
+MainLocal.exe: CPPFLAGS+=$(CPPFLAGS_EASYLOCAL)
+MainLocal.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 
 # WebViewer #
 MainWeb.exe: src/MainWeb.o src/greedy/Kevin.o $(COMMON_OBJ_FILES)
@@ -35,6 +41,8 @@ MainSolver.exe: src/MainSolver.o src/greedy/Kevin.o $(COMMON_OBJ_FILES)
 MainMapper.exe: src/MainMapper.o src/greedy/Kevin.o $(COMMON_OBJ_FILES)
 
 MainBT.exe: src/MainBT.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
+
+MainLocal.exe: src/MainLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 
 %.o: %.cpp
 	g++ $(CPPFLAGS) -c -o $@ $< -MD

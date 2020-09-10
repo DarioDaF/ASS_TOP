@@ -1,0 +1,9 @@
+{
+    "moves": [
+        "Swap"
+    ],
+    "costs": [
+        { "name": "Profit_Swap", "weight": 1, "hard": false, "type": "int" },
+        { "name": "Car_Swap", "weight": 1, "hard": true, "type": "int" }
+    ]
+}

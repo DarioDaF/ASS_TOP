@@ -1,0 +1,4 @@
+LIBHTTPSERVER=./libs/libhttpserver
+NLOHMANNJSON=./libs/nlohmann
+EASYLOCAL=./libs/easylocal-3
+

@@ -10,5 +10,4 @@ src/**/*.d
 *.exe
 node_modules
 web/*.js
-LibMakefile
 
