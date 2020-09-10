@@ -70,7 +70,7 @@ double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double a, dou
  * @param out output that can be modified
  * @param car the car which path is modified 
  * @param maxDeviationAdmitted max deviation admitted on the path of the car
- * @return integer value rappresentative of the number of points inserted by the recorsive call
+ * @return integer value rappresentative of the number of points inserted by the recursive call
  */
 int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDeviationAdmitted);
 
@@ -87,9 +87,8 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
  * @param b weight that multiplies the second (travel time) factor of the rating equation
  * @param maxDeviationAdmitted max deviation admitted on the path of the car
  * @param d weight that multiplies the third (no choosing cost or losses) factor of the rating equation
- * @return number of partial solution solved
  */
-int SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d);
+void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d);
 
 /******************
  * Implementation *
@@ -262,11 +261,10 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
   }
 }
 
-int SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d) {
+void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d) {
   NumberRange<idx_t> carIdxs(in.Cars());
   NumberRange<idx_t> pointIdxs(in.Points());
   vector<bool> markedCars(in.Cars());
-  int backhops, partSolCnt = 0;
 
   while(true) {
     
@@ -303,10 +301,9 @@ int SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP
 
       // Evaluate the partial solution
       if(!out.Visited(chosenPoint) && out.MoveCar(chosenCar, chosenPoint, false).feasible) { 
-        backhops = InsertPoint(in, out, chosenCar, maxDeviationAdmitted);
+        int backhops = InsertPoint(in, out, chosenCar, maxDeviationAdmitted);
         
         partial_solutions.push_back(out);
-        ++partSolCnt;
 
         // Rollback InsertPoint
         for(int j = 0; j <= backhops; j++){
@@ -347,13 +344,10 @@ int SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP
   //     "TravelTime car " << cr << " " << out.TravelTime(cr) <<
   //     " on MaxTravel " << in.MaxTime() << " (" << out.TravelTime(cr) / in.MaxTime() * 100 << "%)" << endl;
   // }
-
-  return partSolCnt;
 }
 
 void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d) {
-  vector<TOP_Output> partial_solutions; 
-  double c = maxDeviationAdmitted;
+  vector<TOP_Output> partial_solutions;
   int cnt = 0;
 
   partial_solutions.clear(); // Start solving
@@ -364,7 +358,8 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a
     auto lastSol = partial_solutions.back(); // To next partial solution
     partial_solutions.pop_back();
     
-    cnt += SolverGreedy(partial_solutions, in, lastSol, rng, a, b, c, d); // Solve
+    ++cnt;
+    SolverGreedy(partial_solutions, in, lastSol, rng, a, b, maxDeviationAdmitted, d); // Solve
     
     if(lastSol.PointProfit() > out.PointProfit()) { // Update the best solution found
       out = lastSol;
