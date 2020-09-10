@@ -1,0 +1,2 @@
+Usage: timeMax [time in second]
+timeMax 1.0

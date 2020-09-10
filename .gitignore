@@ -3,8 +3,12 @@ instances/**
 !instances/.keep
 outputs/**
 !outputs/.keep
+solutions/**
+!solutions/.keep
 src/**/*.o
-Main.exe
+src/**/*.d
+*.exe
 node_modules
 web/*.js
 LibMakefile
+

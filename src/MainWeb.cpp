@@ -1,6 +1,6 @@
-#include "TOP_Data.hpp"
-
-#include "Utils.hpp"
+#include "common/TOP_Data.hpp"
+#include "common/Utils.hpp"
+#include "common/JsonUtils.hpp"
 
 #include <fstream>
 #include <filesystem>
@@ -25,7 +25,7 @@ typedef std::shared_ptr<hs::http_response> http_resp_ptr;
 #define PORT 8080
 #define INST_PATH "./instances"
 #define INST_EXT ".txt"
-#define SOL_PATH "./outputs"
+#define SOL_PATH "./outputs/web"
 #define SOL_EXT ".out"
 #define WEB_PATH "./web"
 
@@ -39,8 +39,11 @@ const std::map<std::string, std::string> mimes = {
 };
 #define DEF_MIME "text/plain"
 
-#include "Solvers/Solver.hpp"
-#include "Solvers/Kevin.hpp"
+#define WITH_JSON_OPTIONS
+
+#include "greedy/Solver.hpp"
+#include "greedy/Kevin.hpp"
+
 const std::vector<SolverEntry_s> solvers = {
   { .fn = SolveKevin, .name = "Kevin" },
 };
@@ -196,7 +199,7 @@ class HSR_SolverPlus : public hs::http_resource {
       try {
         solver = json_get_or_default<int>(jReq["solver"], DEF_SOLVER);
         instStr = json_get_or_default<std::string>(jReq["inst"], "");
-      } catch(detail::type_error e) {
+      } catch(detail::type_error& e) {
         return http_resp_ptr(new hs::string_response("Schema error", hs_utils::http_internal_server_error));
       }
 

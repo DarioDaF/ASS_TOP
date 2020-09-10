@@ -4,7 +4,7 @@
 #include <string>
 #include <random>
 #include <nlohmann/json.hpp>
-#include "../TOP_Data.hpp"
+#include "../common/TOP_Data.hpp"
 
 using namespace nlohmann;
 
