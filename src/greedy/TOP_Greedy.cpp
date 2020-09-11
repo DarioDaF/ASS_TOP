@@ -1,8 +1,10 @@
 #include "TOP_Greedy.hpp"
 #include "../common/Utils.hpp"
 
-#include <vector>
 #include <algorithm>
+#include <iostream>
+#include <random>
+#include <vector>
 
 using namespace std;
 
@@ -19,7 +21,7 @@ using namespace std;
  * @param car the car from which obtain the second point to evaluate the distance
  * @return distance between the two point
  */
-double calculateDistance(const TOP_Input& in, const TOP_Output& out, idx_t p, idx_t car);
+double CalculateDistance(const TOP_Input& in, const TOP_Output& out, idx_t p, idx_t car);
 
 /**
  * Verify if there is at least one car that can insert the point p
@@ -29,7 +31,17 @@ double calculateDistance(const TOP_Input& in, const TOP_Output& out, idx_t p, id
  * @param p the point considered
  * @return true if feasible, false otherwise
  */
-bool verifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p);
+bool VerifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p);
+
+/**
+ * 
+ *
+ * @param rng
+ * @param counterPartial
+ * @param lenPartialSol
+ * @return true if
+ */
+bool EvaluatePartial (std::mt19937& rng, int counterPartial, int lenPartialSol);
 
 /**
  * Calculate one component of the rating assigned to one point. Estimate the possible profit losses
@@ -77,28 +89,33 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
 /**
  * Solve the problem with the greedy algorithm assigning to the point with the highest rating to its nearest
  * car and the applying the InsertPoint function. Besides if there is some points with differents rating, the
- * algorithm save the partial solution and also solve it. 
+ * algorithm save the partial solution and also solve it. Not all the partial solution are saved: it is found 
+ * empirically that most of all the instances have less than 100 partial solution. Only a few have more than 600.
+ * If the partial_solution size is less than 100, all the instances are inserted. Between 100 and 600 a random number 
+ * generator is used to calculate the probability of insertion. Out of 600 all the partial solution are rejected.
  *
  * @param partial_solutions vector of partial solutions
  * @param in constant input
  * @param out constant output
  * @param rng seed generator to save the solution and its informations
+ * @param counter parametr that allow to evaluate the insertion of one partial solution
  * @param wProfit weight that multiplies the first (profit) factor of the rating equation
  * @param wTime weight that multiplies the second (travel time) factor of the rating equation
  * @param maxDeviationAdmitted max deviation admitted on the path of the car
  * @param wNonCost weight that multiplies the third (no choosing cost or losses) factor of the rating equation
+ * @return number of partial solution inserted
  */
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost);
+int SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int counter, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost);
 
 /******************
  * Implementation *
  ******************/
 
-double calculateDistance(const TOP_Input& in, const TOP_Output& out, idx_t p, idx_t car) {
+double CalculateDistance(const TOP_Input& in, const TOP_Output& out, idx_t p, idx_t car) {
   return in.Distance(p, out.CarPoint(car));
 }
 
-bool verifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p) {
+bool VerifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p) {
   NumberRange<idx_t> carIdxs(in.Cars());
 
   // Verify that there is at least one car that can insert the point
@@ -108,6 +125,18 @@ bool verifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p) {
     }
   }
   return false; // Otherwise
+}
+
+bool EvaluatePartial (std::mt19937& rng, int counterPartial, int lenPartialSol) {
+  uniform_real_distribution<double> distribution(0.0, 1.0);
+  double resultPerc = distribution(rng);
+  double passPerc = ((double)counterPartial - 100.0) / 500.0; 
+  
+  // cerr << "LOG: <" << resultPerc << " on " << passPerc << ">" << endl;
+  if (resultPerc < passPerc) {
+    return false;
+  }
+  return true;
 }
 
 double NonChoicheCost(const TOP_Input& in, TOP_Output& out, idx_t car, idx_t p, double sumProfit) {
@@ -138,7 +167,7 @@ double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double wProfi
   double sumProfit = 0.0;
 
   // If the point is already visited or unfeasible, waste it by putting it in the vector's queue
-  if(out.Visited(p) || !verifyFeasibility(in, out, p)) {                                                        
+  if(out.Visited(p) || !VerifyFeasibility(in, out, p)) {                                                        
     return -INFINITY;
   }
   
@@ -160,7 +189,7 @@ double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double wProfi
 
   // Factor dependent on the traveltime
   idx_t chosenCar = *min_element(carIdxs.begin(), carIdxs.end(), [&in, &out, &p](idx_t c1, idx_t c2) {
-    return calculateDistance(in, out, p, c1) < calculateDistance(in, out, p, c2);
+    return CalculateDistance(in, out, p, c1) < CalculateDistance(in, out, p, c2);
   });
   double gamma = out.TravelTime(chosenCar) / in.MaxTime();
 
@@ -249,7 +278,7 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
         }
         return 0;
       }
-      return 0; // Symbolic
+      runtime_error("ERROR: This point of the code cannot be reached : check feasibility"); // Symbolic (Debugging porpouse)
     }
     else { // If the ellipse is empty
       return 0;
@@ -261,7 +290,7 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
   }
 }
 
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
+int SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int partialCounter, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   NumberRange<idx_t> carIdxs(in.Cars());
   NumberRange<idx_t> pointIdxs(in.Points());
   vector<bool> markedCars(in.Cars());
@@ -270,7 +299,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
     
     // Look for the best points insertion based on the rating of the point (to nearest car)
     auto maxPoints = min_elements(in.Points(), so_negcmp<double>, [&in, &out, &wProfit, &wTime, &wNonCost] (idx_t p) -> double {
-      if(!verifyFeasibility(in, out, p)) {
+      if(!VerifyFeasibility(in, out, p)) {
         return -INFINITY;
       }
       return RatingChoice(in, out, p, wProfit, wTime, wNonCost);
@@ -292,7 +321,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
         // If marked travel time is infinite!
         if(markedCars[c1]) return false;
         if(markedCars[c2]) return true;
-        return calculateDistance(in, out, chosenPoint, c1) < calculateDistance(in, out, chosenPoint, c2);
+        return CalculateDistance(in, out, chosenPoint, c1) < CalculateDistance(in, out, chosenPoint, c2);
       });
 
       if(markedCars[chosenCar]) {
@@ -303,7 +332,17 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
       if(!out.Visited(chosenPoint) && out.MoveCar(chosenCar, chosenPoint, false).feasible) { 
         int backhops = InsertPoint(in, out, chosenCar, maxDeviationAdmitted);
         
-        partial_solutions.push_back(out);
+        // cerr << "LOG: partialCounter: " << partialCounter << endl; 
+        if (partialCounter <= 100) { // Evaluate if insert the partial solution based on the partial solutions processed
+          partial_solutions.push_back(out);
+          ++partialCounter;
+        }
+        else if (partialCounter > 100 && partialCounter <= 600) {
+          if (EvaluatePartial(rng, partialCounter, partial_solutions.size())) {
+            partial_solutions.push_back(out);
+            ++partialCounter;
+          }
+        }
 
         // Rollback InsertPoint
         for(int j = 0; j <= backhops; j++){
@@ -320,7 +359,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
       // If marked travel time is infinite!
       if(markedCars[c1]) return false;
       if(markedCars[c2]) return true;
-      return calculateDistance(in, out, chosenPoint, c1) < calculateDistance(in, out, chosenPoint, c2);
+      return CalculateDistance(in, out, chosenPoint, c1) < CalculateDistance(in, out, chosenPoint, c2);
     });
 
     if(markedCars[chosenCar]) {
@@ -344,11 +383,14 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
   //     "TravelTime car " << cr << " " << out.TravelTime(cr) <<
   //     " on MaxTravel " << in.MaxTime() << " (" << out.TravelTime(cr) / in.MaxTime() * 100 << "%)" << endl;
   // }
+
+  // cerr << "LOG: counter of partial solution inserted " << partialCounter << endl;
+  return partialCounter;
 }
 
 void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   vector<TOP_Output> partial_solutions;
-  int cnt = 0;
+  int partialCounter = 0;
 
   partial_solutions.clear(); // Start solving
   partial_solutions.push_back(out);
@@ -358,12 +400,7 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double w
     auto lastSol = partial_solutions.back(); // To next partial solution
     partial_solutions.pop_back();
     
-    ++cnt;
-    if (cnt == 512) {
-      break;
-    }
-    
-    SolverGreedy(partial_solutions, in, lastSol, rng, wProfit, wTime, maxDeviationAdmitted, wNonCost); // Solve
+    partialCounter = SolverGreedy(partial_solutions, in, lastSol, rng, partialCounter, wProfit, wTime, maxDeviationAdmitted, wNonCost); // Solve
     
     if(lastSol.PointProfit() > out.PointProfit()) { // Update the best solution found
       out = lastSol;
@@ -376,5 +413,5 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double w
       // }
     }
   }
-  // cerr << "LOG: Currently solved the instance " << cnt << " times" << endl;
+  // cerr << "LOG: Currently solved the instance " << partialCounter << " times" << endl;
 }
