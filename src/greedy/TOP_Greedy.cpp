@@ -36,7 +36,8 @@ bool VerifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p);
 /**
  * Evaluate with random algorithm if one partial solution could be inserted into its vector. It use a 
  * random number which is compared with the number of partial solutions already inserted into the vector.
- * In this way, the probability of one insertion is inve 
+ * In this way, the probability of one insertion is inversely proportional to the number of partial solutions
+ * already solved (100 is equal 100% of possibility of insertion, 600 is 0%).
  *
  * @param rng
  * @param counterPartial

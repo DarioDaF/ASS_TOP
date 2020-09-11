@@ -63,6 +63,10 @@ int main(int argc, char* argv[]) {
   vector<chaoResults> chaoRes;
   string line;
   
+  if (argc < 1) {
+    cerr << argc <<  "  ERROR: insert Backtracking algorithm's version [#1 or #2]" << endl;
+    return 1;
+  }
 
   //Open the file conteining the max time for execute the program for each instance
   ifstream paramTime("./paramIn/paramTimeBt.txt"); 
@@ -102,7 +106,10 @@ int main(int argc, char* argv[]) {
 
   //Open and write the file of results for each instance
   fs::create_directories("solutions");
-  ofstream solutionsStream("solutions/SolBacktracking.csv");
+  string titleFile = "solutions/SolBacktracking#";
+  titleFile.push_back(*argv[1]);
+  ofstream solutionsStream(titleFile + ".csv");
+
   if(!solutionsStream) {
     throw runtime_error("  ERROR: Unable to open Solution file");
   }
@@ -111,7 +118,6 @@ int main(int argc, char* argv[]) {
   for (const auto &file : fs::directory_iterator("./instances")) { //For each instance
     TOP_Input in;
     string line;
-    bool foundParam = true;
 
     // Default weight parameters
     double wProfit = 1.1; 
@@ -133,15 +139,16 @@ int main(int argc, char* argv[]) {
       is >> in;
       in.name = file.path().filename().replace_extension("").string();
     }
-    
-    //Open the file conteining the param maxDeviation
-    ifstream paramStream("./outputs/greedy/paramGreedy/" + in.name + ".out"); 
-    if (!paramStream) {
-      std::cerr << "  ERROR: Unable to open Parameter file or not found" << endl;
-      foundParam = false;
-    }
 
-    if (foundParam) { // If found param, set it, otherwise use default value
+    if(*argv[1] == '2') { // Second version without greedy parameters, otherwise with default parameters
+      
+      //Open the file conteining the params
+      // If found param, set it, otherwise use default value
+      ifstream paramStream("./outputs/greedy/paramGreedy/" + in.name + ".out"); 
+      if (!paramStream) {
+        throw runtime_error("ERROR: Cannot find Greedy parameter file: run Greedy algorithm or use default parameters");
+      }
+
       while(getline(paramStream, line)) {
         std::istringstream iss(line); //Split the input string
         std::vector<string> results(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
@@ -168,14 +175,18 @@ int main(int argc, char* argv[]) {
       }
       paramStream.close();
     }
-    
+
+    cerr << "LOG: param <" << wProfit << "; " << wTime << "; " << maxDeviation << "; " << wNonCost << ">" << endl; 
     TOP_Walker tw(in);
     TOP_Checker ck;
     Backtrack(tw, ck, maxTime, wProfit, wTime, maxDeviation, wNonCost);
     
     { // Print the output
-      fs::create_directories("outputs/backtracking");
-      std::ofstream os("outputs/backtracking" / file.path().filename().replace_extension(".out"));
+      string titleDir = "outputs/backtracking/#";
+      titleDir.push_back(*argv[1]);
+      fs::create_directories(titleDir);
+      std::ofstream os(titleDir / file.path().filename().replace_extension(".out"));
+      
       if (!os) {
         ++errors;
         std::cerr << "  ERROR: Unable to open output file" << std::endl;
@@ -190,8 +201,11 @@ int main(int argc, char* argv[]) {
       }
     }
     {
-      fs::create_directories("outputs/routeHops/backtracking");
-      std::ofstream os("outputs/routeHops/backtracking" / file.path().filename().replace_extension(".out"));
+      string titleDir = "outputs/routeHops/backtracking/#";
+      titleDir.push_back(*argv[1]);
+      fs::create_directories(titleDir);
+      std::ofstream os(titleDir / file.path().filename().replace_extension(".out"));
+
       if (!os) {
         ++errors;
         std::cerr << "  ERROR: Unable to open output file" << std::endl;

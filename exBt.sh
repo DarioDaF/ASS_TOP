@@ -7,4 +7,8 @@ make
 ## EXECUTE ALL ISTANCES ## 
 # Solve all istances and with the specified parameters and print the results
 
-./MainBT.exe
+# Version 1 : with default parameters #
+./MainBT.exe 1
+
+#Version 2 : with readed Greedy parameters #
+./MainBT.exe 2

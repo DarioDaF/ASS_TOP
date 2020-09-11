@@ -104,6 +104,11 @@ int main(int argc, char *argv[]) {
   TOP_Input in;
   string line;
 
+  if (argc < 9) {
+    cerr << "  ERROR: insert map, parameter and it's range to test [see documentation for command line format]" << endl;
+    return 1;
+  }
+
   //Open and read the file of Chao's results
   ifstream optStream("./paramIn/chaoResultsModified.txt"); 
   if (!optStream) {
