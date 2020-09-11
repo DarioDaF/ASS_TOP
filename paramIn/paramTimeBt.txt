@@ -1,2 +1,2 @@
 Usage: timeMax [time in second]
-timeMax 1.0
+timeMax 15.0

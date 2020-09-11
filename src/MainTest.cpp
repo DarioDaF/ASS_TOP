@@ -69,17 +69,17 @@ struct paramGraphs { // Using a struct for manage the data in input
  *    
  *    Usage:
  *      [map] -> 0 to select all the maps
- *      if [paramToTest] is "C" , then [otherparam1] is "A", [otherParam2] is "B", [otherParam3] is "D" ... 
+ *      if [paramToTest] is "maxDeviation" , then [otherparam1] is "wProfit", [otherParam2] is "wTime", [otherParam3] is "wNonCost" ... 
  *
- *    Specific example: solve all instance, variable param A from 0 to 3.1 plus 0.1, other param fixed to 1.0 
- *      ./MainTest.exe 0 A 0.0 3.1 0.1 1.0 1.0 1.0 
+ *    Specific example: solve all instance, variable param wProfit from 0 to 3.1 plus 0.1, other param fixed to 1.0 
+ *      ./MainTest.exe 0 wProfit 0.0 3.1 0.1 1.0 1.0 1.0 
  * 
  * Plot with python script the variation of parameter:
  *    Usage:
  *      python3 ./plots/plotParams.py [map] [parameter]
  * 
- *    Example: plot all the maps with param A
- *      python3 ./plotter/plotParams.py 0 A
+ *    Example: plot all the maps with param wProfit
+ *      python3 ./plotter/plotParams.py 0 wProfit
  *      
  * @param argc number of items in the command line
  * @param argv items in the command line
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
   //Open and read the file of Chao's results
   ifstream optStream("./paramIn/chaoResultsModified.txt"); 
   if (!optStream) {
-    throw runtime_error("  ERROR: Unable to open file");
+    throw runtime_error("  ERROR: Unable to open Input file");
   }
 
   // Read all the lines into chao's file
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
     
   ofstream solStream(path);
   if (!solStream) {
-    throw runtime_error("   ERROR: Unable to open file");
+    throw runtime_error("   ERROR: Unable to open Ouput file");
   }
 
   string init = (string)argv[3];
@@ -167,27 +167,27 @@ int main(int argc, char *argv[]) {
   double param3 = stod(argvparam3);
   
   if(*argv[1] == '0') { // All maps
-     std::cerr << "LOG: Processing All maps" << endl;
+    std::cerr << "LOG: Processing All maps" << endl;
   }
   else { // One specified map
     std::cerr << "LOG: Processing map  " << *argv[1] << endl;
   }  
 
-  for(double paramChose = from; paramChose <= to; paramChose+=over) { //For every parameter
+  for(double paramChose = from; paramChose <= to; paramChose += over) { // For every parameter
     
     std::cerr << "LOG: Processing param <" << (string)argv[2] << ": " << paramChose << "> ";
 
-    if((string)argv[2] == "A") {
-      cerr << "<B: " << param1 << ", C: " << param2 << ", D: " << param3 << ">" << endl;
+    if((string)argv[2] == "wProfit") {
+      cerr << "<wTime: " << param1 << ", maxDeviation: " << param2 << ", wNonCost: " << param3 << ">" << endl;
     }
-    else if ((string)argv[2] == "B") {
-      cerr << "<A: " << param1 << ", C: " << param2 << ", D: " << param3 << ">" << endl;
+    else if ((string)argv[2] == "wTime") {
+      cerr << "<wProfit: " << param1 << ", maxDeviation: " << param2 << ", wNonCost: " << param3 << ">" << endl;
     }
-    else if((string)argv[2] == "C") {
-      cerr << "<A: " << param1 << ", B: " << param2 << ", D: " << param3 << ">" << endl;
+    else if((string)argv[2] == "maxDeviation") {
+      cerr << "<wProfit: " << param1 << ", wTime: " << param2 << ", wNonCost: " << param3 << ">" << endl;
     }
-    else if((string)argv[2] == "D") {
-      cerr << "<A: " << param1 << ", B: " << param2 << ", C: " << param3 << ">" << endl;
+    else if((string)argv[2] == "wNonCost") {
+      cerr << "<wProfit: " << param1 << ", wTime: " << param2 << ", maxDeviation: " << param3 << ">" << endl;
     }
 
     res.clear();
@@ -197,24 +197,25 @@ int main(int argc, char *argv[]) {
         ifstream is("./Instances/" + chao[idx].file);
         if (!is) {
           ++errors;
-          throw runtime_error("  ERROR: Unable to open file");
+          throw runtime_error("  ERROR: Unable to open Instance file");
+          // continue;
         }
         is >> in;
       }
 
-      TOP_Output out(in); //Solve the greedy and print the results for python plot 
+      TOP_Output out(in); // Solve the greedy and print the results for python plot 
       out.Clear();
 
-      if((string)argv[2] == "A") {
+      if((string)argv[2] == "wProfit") {
         SolverAll(in, out, rng, paramChose, param1, param2, param3);
       }
-      else if ((string)argv[2] == "B") {
+      else if ((string)argv[2] == "wTime") {
         SolverAll(in, out, rng, param1, paramChose, param2, param3);
       }
-      else if((string)argv[2] == "C") {
+      else if((string)argv[2] == "maxDeviation") {
         SolverAll(in, out, rng, param1, param2, paramChose, param3);
       }
-      else if((string)argv[2] == "D") {
+      else if((string)argv[2] == "wNonCost") {
         SolverAll(in, out, rng, param1, param2, param3, paramChose);
       }
 
@@ -237,7 +238,7 @@ int main(int argc, char *argv[]) {
     double minElem = *min_element(res.begin(), res.end()); //min and max 
     double maxElem = *max_element(res.begin(), res.end());
         
-    //cerr <<  c << " " << sumSol << " " << dstd << " " << minElem << " " << maxElem << endl;
+    //cerr <<  maxDeviation << " " << sumSol << " " << dstd << " " << minElem << " " << maxElem << endl;
     sol.push_back({.parameter = paramChose, .result = sumSol, .minimum = minElem, .maximum = maxElem, .devStd = dstd});
   }
   

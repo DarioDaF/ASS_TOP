@@ -25,16 +25,18 @@ import sys
 if(sys.argv[1] == '0'): 
   # Process all the instances
   # For all the files to print
-  files = ['./outputs/greedy/plots/solParA.csv', \
-           './outputs/greedy/plots/solParB.csv', \
-           './outputs/greedy/plots/solParC.csv', \
-           './outputs/greedy/plots/solParD.csv']
-
+  files = ['./outputs/greedy/plots/solParwProfit.csv', \
+           './outputs/greedy/plots/solParwTime.csv', \
+           './outputs/greedy/plots/solParmaxDeviation.csv', \
+           './outputs/greedy/plots/solParwNonCost.csv']
+  
+  print("Processing all Maps")
   for file in files:
     # Check the correct instance
-    x = file.split('.') 
-    mapLetter = x[1][-1]
-    if(mapLetter != sys.argv[2]):
+    x = file.split('/') 
+    y = x[4].split('Par')
+    z = y[1].split('.')
+    if(z[0] != sys.argv[2]):
       continue
 
     print("Processign file: " + file)
@@ -75,18 +77,18 @@ if(sys.argv[1] == '0'):
     plt.legend(["profit", "minElem", "maxElem", "Prf+dStd", "Prf-dStd"])
 
     # For all the maps print axes and labels and titles 
-    if(file == './outputs/greedy/plots/solParA.csv'):
-      plt.title("Plot A params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramA")
-    elif(file == './outputs/greedy/plots/solParB.csv'):
-      plt.title("Plot B params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramB")
-    elif(file == './outputs/greedy/plots/solParC.csv'):
-      plt.title("Plot C params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramC")
-    elif(file == './outputs/greedy/plots/solParD.csv'):
-      plt.title("Plot D params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramD")
+    if(file == './outputs/greedy/plots/solParwProfit.csv'):
+      plt.title("a.Plot wProfit params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param wProfit")
+    elif(file == './outputs/greedy/plots/solParwTime.csv'):
+      plt.title("b.Plot wTime params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param wTime")
+    elif(file == './outputs/greedy/plots/solParmaxDeviation.csv'):
+      plt.title("c.Plot maxDeviation params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param maxDeviation")
+    elif(file == './outputs/greedy/plots/solParwNonCost.csv'):
+      plt.title("d.Plot wNonCost params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param wNonCost")
 
     plt.ylabel("Profit, minElem, maxElem, Prf+dStd, Prf-dStd")
         
@@ -97,16 +99,18 @@ if(sys.argv[1] == '0'):
 else:
   # Process one particular map
   # For all the files to print
-  files = ['./outputs/greedy/plots/Map' + sys.argv[1] + '/solParA.csv', \
-           './outputs/greedy/plots/Map' + sys.argv[1] + '/solParB.csv', \
-           './outputs/greedy/plots/Map' + sys.argv[1] + '/solParC.csv', \
-           './outputs/greedy/plots/Map' + sys.argv[1] + '/solParD.csv']
+  files = ['./outputs/greedy/plots/Map' + sys.argv[1] + '/solParwProfit.csv', \
+           './outputs/greedy/plots/Map' + sys.argv[1] + '/solParwTime.csv', \
+           './outputs/greedy/plots/Map' + sys.argv[1] + '/solParmaxDeviation.csv', \
+           './outputs/greedy/plots/Map' + sys.argv[1] + '/solParwNonCost.csv']
   
+  print("Processing Map " + sys.argv[1])
   # Check the correct instance
   for file in files: 
-    x = file.split('.')
-    mapLetter = x[1][-1]
-    if(mapLetter != sys.argv[2]):
+    x = file.split('/') 
+    y = x[5].split('Par')
+    z = y[1].split('.')
+    if(z[0] != sys.argv[2]):
       continue
         
     print("Processign file: " + file) 
@@ -147,18 +151,18 @@ else:
     plt.legend(["profit", "minElem", "maxElem", "devStd", "Prf+dStd", "Prf-dStd"])
 
     # For all the maps print axes and labels and titles
-    if(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParA.csv'):
-      plt.title("Plot A params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramA")
-    elif(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParB.csv'):
-      plt.title("Plot B params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramB")
-    elif(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParC.csv'):
-      plt.title("Plot C params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramC")
-    elif(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParD.csv'):
-      plt.title("Plot D params", loc='left', fontsize=12, fontweight=0, color='orange')
-      plt.xlabel("paramD")
+    if(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParwProfit.csv'):
+      plt.title("a.Plot wProfit params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param wProfit")
+    elif(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParwTime.csv'):
+      plt.title("b.Plot wTime params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param wTime")
+    elif(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParmaxDeviation.csv'):
+      plt.title("c.Plot maxDeviation params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param maxDeviation")
+    elif(file == './outputs/greedy/plots/Map' + sys.argv[1] + '/solParwNonCost.csv'):
+      plt.title("d.Plot wNonCost params", loc='left', fontsize=12, fontweight=0, color='orange')
+      plt.xlabel("param wNonCost")
 
     plt.ylabel("Profit, minElem, maxElem, Prf+dStd, Prf-dStd")
             

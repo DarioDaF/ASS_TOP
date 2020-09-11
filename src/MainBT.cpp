@@ -111,8 +111,13 @@ int main(int argc, char* argv[]) {
   for (const auto &file : fs::directory_iterator("./instances")) { //For each instance
     TOP_Input in;
     string line;
-    double maxDeviation = 0.3; // Default Max deviation admitted: 0.3 for insertion point with min deviation from real path
     bool foundParam = true;
+
+    // Default weight parameters
+    double maxDeviation = 1.5; // Max deviation admitted: 0.3 for insertion point with min deviation from real path
+    double wProfit = 0; 
+    double wTime = 0;
+    double wNonCost = 0;
 
     if (file.path().extension() != ".txt")
       continue;
@@ -141,21 +146,32 @@ int main(int argc, char* argv[]) {
         std::istringstream iss(line); //Split the input string
         std::vector<string> results(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
 
-        if (results[2] == "null") {
+        if (results[2] == "null") { // Default parameters
           break;
         }
-
-        if(results[1] != "C:") { // Not other param or 
+        if (results[0] == "Profit") { // Skip first line
           continue;
         }
-        maxDeviation = stod(results[2]);   
+
+        if(results[1] == "A:") {
+          wProfit = stod(results[2]);
+        }
+        else if(results[1] == "B:") {
+          wTime = stod(results[2]);
+        }
+        else if(results[1] == "C:") {
+          maxDeviation = stod(results[2]);
+        }
+        else if(results[1] == "D:") {
+          wNonCost = stod(results[2]);
+        }  
       }
       paramStream.close();
     }
     
     TOP_Walker tw(in);
     TOP_Checker ck;
-    Backtrack(tw, ck, maxTime, maxDeviation);
+    //Backtrack(tw, ck, maxTime, wProfit, wTime, maxDeviation, wNonCost);
     
     { // Print the output
       fs::create_directories("outputs/backtracking");

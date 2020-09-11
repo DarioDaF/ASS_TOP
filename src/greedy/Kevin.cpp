@@ -359,6 +359,10 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a
     partial_solutions.pop_back();
     
     ++cnt;
+    if (cnt == 512) {
+      break;
+    }
+    
     SolverGreedy(partial_solutions, in, lastSol, rng, a, b, maxDeviationAdmitted, d); // Solve
     
     if(lastSol.PointProfit() > out.PointProfit()) { // Update the best solution found
