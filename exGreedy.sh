@@ -14,10 +14,10 @@ make
 #       - [map] -> 0 to select all the maps
 #       - if [paramToTest] is "maxDeviation" , then [otherparam1] is "wProfit", [otherParam2] is "wTime", [otherParam3] is "wNonCost" ... 
 
-# ./MainTest.exe 0 wProfit 0.5 2.0 0.5 1.0 1.0 1.0 
-# ./MainTest.exe 0 wTime 0.5 2.0 0.5 1.0 1.0 1.0
-# ./MainTest.exe 0 maxDeviation 4.0 10.0 1.0 1.0 1.0 0.0
-# ./MainTest.exe 0 wNonCost 0.5 2.0 0.5 1.0 1.0 1.0
+./MainTest.exe 0 wProfit 0.5 2.0 0.5 1.0 1.0 1.0 
+./MainTest.exe 0 wTime 0.5 2.0 0.5 1.0 1.0 1.0
+./MainTest.exe 0 maxDeviation 4.0 10.0 1.0 1.0 1.0 0.0
+./MainTest.exe 0 wNonCost 0.5 2.0 0.5 1.0 1.0 1.0
 
 # ./MainTest.exe 1 wProfit 0.5 2.0 0.5 1.0 1.0 1.0 
 # ./MainTest.exe 1 wTime 0.5 2.0 0.5 1.0 1.0 1.0
@@ -62,10 +62,10 @@ python3 ./plotter/plotParams.py 0 wTime
 python3 ./plotter/plotParams.py 0 maxDeviation
 python3 ./plotter/plotParams.py 0 wNonCost
 
-python3 ./plotter/plotParams.py 1 wProfit
-python3 ./plotter/plotParams.py 1 wTime
-python3 ./plotter/plotParams.py 1 maxDeviation
-python3 ./plotter/plotParams.py 1 wNonCost
+# python3 ./plotter/plotParams.py 1 wProfit
+# python3 ./plotter/plotParams.py 1 wTime
+# python3 ./plotter/plotParams.py 1 maxDeviation
+# python3 ./plotter/plotParams.py 1 wNonCost
 
 # python3 ./plotter/plotParams.py 2 wProfit
 # python3 ./plotter/plotParams.py 2 wTime

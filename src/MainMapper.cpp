@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
   fs::create_directories("outputs/greedy/mapScaler");
   ofstream osMap("outputs/greedy/mapScaler/mapper.txt");
   if(!osMap) {
-    throw runtime_error("  ERROR: Unable to open file");
+    throw runtime_error("  ERROR: Unable to open Output file");
   }
 
   for(idx_t idx = 0; idx < chao.size(); ++idx) { // For every file in chao vector
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
       ifstream isPar("./outputs/greedy/paramGreedy/" + file + ".out");
       if (!isPar) {
         ++errors;
-        throw runtime_error("  ERROR: Unable to open file");
+        throw runtime_error("  ERROR: Unable to open Parameter file");
       }
 
       // Read all the lines into chao's file
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
         if(results[0] == "Profit") {
           optimum = stod(results[2]) / chao[idx].chaoOptimum * 100;
         }
-        if(results[1] != "C:") {
+        if(results[1] != "maxDeviation:") {
           continue;
         }
         c = stod(results[2]);
@@ -165,7 +165,8 @@ int main(int argc, char *argv[]) {
     }
     meanDist = dist / (in.Points() * in.Points());
     area = (maxX - minX) * (maxY - minY);
-    maps.push_back({.name = chao[idx].file, .meanDist = meanDist, .c = c, .opt = optimum, .area = area, .areaCompared = 0, .maxX = maxX, .maxY = maxY, .minX = minX, .minY = minY});
+    maps.push_back({.name = chao[idx].file, .meanDist = meanDist, .c = c, .opt = optimum, .area = area,
+                    .areaCompared = 0, .maxX = maxX, .maxY = maxY, .minX = minX, .minY = minY});
   }
   
   std::sort(maps.begin(), maps.end(), [] (const typeMap m1, const typeMap m2) { 
@@ -180,9 +181,13 @@ int main(int argc, char *argv[]) {
     return m1.c > m2.c;
   });
 
-  osMap << "name | meanDist | c | comparedDist (c/meanDist) | opt (res/chaoOpt) | area | comparedArea (area/maxArea) |  maxX | minX | maxY | minY" << endl;
+  osMap << 
+    "name | meanDist | maxDeviation | comparedDist (maxDeviation/meanDist) | opt (res/chaoOpt) | area | comparedArea (area/maxArea)"
+    << endl;
   for(idx_t idx = 0; idx < maps.size(); ++idx) {
-    osMap << maps[idx].name << " | " << maps[idx].meanDist << " | " << maps[idx].c << " | " << maps[idx].c / maps[idx].meanDist << "% | " << maps[idx].opt << "% | " << maps[idx].area << " | " << maps[idx].areaCompared << "% | " << maps[idx].maxX << " | " << maps[idx].minX << " | " << maps[idx].maxY << " | " << maps[idx].minY << endl;
+    osMap << maps[idx].name << " | " << maps[idx].meanDist <<
+    " | " << maps[idx].c << " | " << maps[idx].c / maps[idx].meanDist << "% | " << maps[idx].opt << "% | " <<
+    maps[idx].area << " | " << maps[idx].areaCompared << endl;
   }
   osMap.close();
 }

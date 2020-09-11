@@ -74,9 +74,10 @@ int main(int argc, char *argv[]) {
   TOP_Input in;
   string line;
   vector<chaoResults> chaoRes;
-  double from_a = 1, from_b = 1, from_c = 1, from_d = 1; // Default Parameters
-  double to_a = 1, to_b = 1, to_c = 1, to_d = 1;
-  double up_a = 0.1, up_b = 0.1, up_c = 0.1, up_d = 0.1;
+
+  double from_wProfit = 1, from_wTime = 1, from_maxDeviation = 1, from_wNonCost = 1; // Default Parameters
+  double to_wProfit = 1, to_wTime = 1, to_maxDeviation = 1, to_wNonCost = 1;
+  double up_wProfit = 0.1, up_wTime = 0.1, up_maxDeviation = 0.1, up_wNonCost = 0.1;
         
   //Open and write the file of results for each instance
   fs::create_directories("solutions");
@@ -95,40 +96,55 @@ int main(int argc, char *argv[]) {
     std::istringstream iss(line); //Split the input string
     std::vector<string> results(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
 
-    if(results[0] == "A") {
-      from_a = stod(results[2]);
-      to_a = stod(results[3]);
-      up_a = stod(results[4]);
+    if(results[0] == "wProfit") {
+      from_wProfit = stod(results[2]);
+      to_wProfit = stod(results[3]);
+      up_wProfit = stod(results[4]);
     }
-    if(results[0] == "B") {
-      from_b = stod(results[2]);
-      to_b = stod(results[3]);
-      up_b = stod(results[4]);
+    if(results[0] == "wTime") {
+      from_wTime = stod(results[2]);
+      to_wTime = stod(results[3]);
+      up_wTime = stod(results[4]);
     }
-    if(results[0] == "C") {
-      from_c = stod(results[2]);
-      to_c = stod(results[3]);
-      up_c = stod(results[4]);
+    if(results[0] == "maxDeviation") {
+      from_maxDeviation = stod(results[2]);
+      to_maxDeviation = stod(results[3]);
+      up_maxDeviation = stod(results[4]);
     }
-    if(results[0] == "D") {
-      from_d = stod(results[2]);
-      to_d = stod(results[3]);
-      up_d = stod(results[4]);
+    if(results[0] == "wNonCost") {
+      from_wNonCost = stod(results[2]);
+      to_wNonCost = stod(results[3]);
+      up_wNonCost = stod(results[4]);
       break;
     }
   }
   paramStream.close();
 
-  if (up_a == 0.0 || up_b == 0.0 || up_c == 0.0 || up_d == 0.0) {
+  if (up_wProfit == 0.0 || up_wTime == 0.0 || up_maxDeviation == 0.0 || up_wNonCost == 0.0) {
     throw runtime_error("  ERROR: Cannot increment by 0 the parameters: Loop");
   }
 
   // Print the parameters readed into the solutions file
   solutionsStream << "Param:" << ";" << "[from]" << ";" << "[to]" << ";" << "[plus]" << endl;
-  solutionsStream << "A" << ";" << to_string(from_a) << ";" << to_string(to_a) << ";" << to_string(up_a) << endl;
-  solutionsStream << "B" << ";" << to_string(from_b) << ";" << to_string(to_b) << ";" << to_string(up_b) << endl;
-  solutionsStream << "C" << ";" << to_string(from_c) << ";" << to_string(to_c) << ";" << to_string(up_c) << endl;
-  solutionsStream << "D" << ";" << to_string(from_d) << ";" << to_string(to_d) << ";" << to_string(up_d) << endl;
+  solutionsStream << "wProfit" << ";" <<
+                     "#" + to_string(from_wProfit) << ";" <<
+                     "#" + to_string(to_wProfit) << ";" <<
+                     "#" + to_string(up_wProfit) << endl;
+
+  solutionsStream << "wTime" << ";" << 
+                     "#" + to_string(from_wTime) << ";" << 
+                     "#" + to_string(to_wTime) << ";" << 
+                     "#" + to_string(up_wTime) << endl;
+
+  solutionsStream << "maxDeviation" << ";" << 
+                     "#" + to_string(from_maxDeviation) << ";" << 
+                     "#" + to_string(to_maxDeviation) << ";" << 
+                     "#" + to_string(up_maxDeviation) << endl;
+
+  solutionsStream << "wNonProfit" << ";" << 
+                     "#" + to_string(from_wNonCost) << ";" <<
+                     "#" + to_string(to_wNonCost) << ";" << 
+                     "#" + to_string(up_wNonCost) << endl;
 
   //Open and read the file of Chao's results
   ifstream optStream("./paramIn/chaoResults.txt"); 
@@ -168,15 +184,15 @@ int main(int argc, char *argv[]) {
     TOP_Output out(in);
     
     // Solve all the instances with the set of parameters and print the outputs
-    for (double a = from_a; a <= to_a; a += up_a) {
-      for (double b = from_b; b <= to_b; b += up_b) {
-        for(double c = from_c; c <= to_c; c += up_c) {
-          for(double d = from_d; d <= to_d; d += up_d) {
+    for (double wProfit = from_wProfit; wProfit <= to_wProfit; wProfit += up_wProfit) {
+      for (double wTime = from_wTime; wTime <= to_wTime; wTime += up_wTime) {
+        for(double maxDeviation = from_maxDeviation; maxDeviation <= to_maxDeviation; maxDeviation += up_maxDeviation) {
+          for(double wNonCost = from_wNonCost; wNonCost <= to_wNonCost; wNonCost += up_wNonCost) {
             
             // cerr << "LOG: Solving with parmeters <A: " << a << ", B: " << b << ", C: " << c << ", D: " << d << ">" << endl;
 
             out.Clear();
-            SolverAll(in, out, rng, a, b, c, d);
+            SolverAll(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
 
             if (out.PointProfit() > best) {
               best = out.PointProfit();
@@ -220,10 +236,10 @@ int main(int argc, char *argv[]) {
                   continue;
                 }
                 os << "Profit found: " << out.PointProfit() << endl;
-                os << "Param A: " << a << endl;
-                os << "Param B: " << b << endl;
-                os << "Param C: " << c << endl;
-                os << "Param D: " << d << endl;
+                os << "Param wProfit: " << wProfit << endl;
+                os << "Param wTime: " << wTime << endl;
+                os << "Param maxDeviation: " << maxDeviation << endl;
+                os << "Param wNonCost: " << wNonCost << endl;
               } 
             }
           }
@@ -252,10 +268,10 @@ int main(int argc, char *argv[]) {
           continue;
         }
         os << "Profit found: " << out.PointProfit() << " (No solution found)" << endl;
-        os << "Param A: " << "null" << endl;
-        os << "Param B: " << "null" << endl;
-        os << "Param C: " << "null" << endl;
-        os << "Param D: " << "null" << endl;
+        os << "Param wProfit: " << "null" << endl;
+        os << "Param wTime: " << "null" << endl;
+        os << "Param maxDeviation: " << "null" << endl;
+        os << "Param wNonCost: " << "null" << endl;
       } 
       
       {

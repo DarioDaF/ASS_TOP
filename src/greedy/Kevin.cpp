@@ -53,12 +53,12 @@ double NonChoicheCost(const TOP_Input& in, TOP_Output& out, idx_t car, idx_t p, 
  * @param in constant input
  * @param out output that can be modified
  * @param p the point considered
- * @param a weight that multiplies the first (profit) factor of the rating equation
- * @param b weight that multiplies the second (travel time) factor of the rating equation
- * @param d weight that multiplies the third (cost of no choice) factor of the rating equation
+ * @param wProfit weight that multiplies the first (profit) factor of the rating equation
+ * @param wTime weight that multiplies the second (travel time) factor of the rating equation
+ * @param wNonCost weight that multiplies the third (cost of no choice) factor of the rating equation
  * @return rating of the point p
  */
-double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double a, double b, double d);
+double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double wProfit, double wTime, double wNonCost);
 
 /**
  * After choosing one point to insert in the nearest car, determinate if there is one (or more) point
@@ -83,12 +83,12 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
  * @param in constant input
  * @param out constant output
  * @param rng seed generator to save the solution and its informations
- * @param a weight that multiplies the first (profit) factor of the rating equation
- * @param b weight that multiplies the second (travel time) factor of the rating equation
+ * @param wProfit weight that multiplies the first (profit) factor of the rating equation
+ * @param wTime weight that multiplies the second (travel time) factor of the rating equation
  * @param maxDeviationAdmitted max deviation admitted on the path of the car
- * @param d weight that multiplies the third (no choosing cost or losses) factor of the rating equation
+ * @param wNonCost weight that multiplies the third (no choosing cost or losses) factor of the rating equation
  */
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d);
+void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost);
 
 /******************
  * Implementation *
@@ -130,7 +130,7 @@ double NonChoicheCost(const TOP_Input& in, TOP_Output& out, idx_t car, idx_t p, 
   return profitEllipse / sumProfit;
 }
 
-double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double a, double b, double d) {
+double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double wProfit, double wTime, double wNonCost) {
   NumberRange<idx_t> carIdxs(in.Cars());
   NumberRange<idx_t> pointIdxs(in.Points());
   double profit = in.Point(p).Profit();
@@ -175,7 +175,7 @@ double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double a, dou
   // Factor dependent on the cost (losses) of chosing another point
   double noChoice = NonChoicheCost(in, out, chosenCar, p, sumProfit);
 
-  return (profit / meanProfit) * a - (gamma * extraTravelTimeNorm) * b + noChoice * d;
+  return (profit / meanProfit) * wProfit - (gamma * extraTravelTimeNorm) * wTime + noChoice * wNonCost;
 }
 
 int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDeviationAdmitted) {
@@ -261,7 +261,7 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
   }
 }
 
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d) {
+void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   NumberRange<idx_t> carIdxs(in.Cars());
   NumberRange<idx_t> pointIdxs(in.Points());
   vector<bool> markedCars(in.Cars());
@@ -269,11 +269,11 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
   while(true) {
     
     // Look for the best points insertion based on the rating of the point (to nearest car)
-    auto maxPoints = min_elements(in.Points(), so_negcmp<double>, [&in, &out, &a, &b, &d] (idx_t p) -> double {
+    auto maxPoints = min_elements(in.Points(), so_negcmp<double>, [&in, &out, &wProfit, &wTime, &wNonCost] (idx_t p) -> double {
       if(!verifyFeasibility(in, out, p)) {
         return -INFINITY;
       }
-      return RatingChoice(in, out, p, a, b, d);
+      return RatingChoice(in, out, p, wProfit, wTime, wNonCost);
     });
     // cerr << "LOG: Size " << maxPoints.size() << endl;
 
@@ -346,7 +346,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
   // }
 }
 
-void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a, double b, double maxDeviationAdmitted, double d) {
+void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   vector<TOP_Output> partial_solutions;
   int cnt = 0;
 
@@ -363,7 +363,7 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double a
       break;
     }
     
-    SolverGreedy(partial_solutions, in, lastSol, rng, a, b, maxDeviationAdmitted, d); // Solve
+    SolverGreedy(partial_solutions, in, lastSol, rng, wProfit, wTime, maxDeviationAdmitted, wNonCost); // Solve
     
     if(lastSol.PointProfit() > out.PointProfit()) { // Update the best solution found
       out = lastSol;

@@ -93,8 +93,8 @@ class TreeWalker {
   public:
     TreeWalker(_Node current) : current(current) {}
     virtual void GoToRoot() = 0; // Resets walker
-    virtual bool GoToChild(double maxDeviation) = 0; // Fails if leaf
-    virtual bool GoToSibiling(double maxDeviation) = 0; // Fails if last sibiling
+    virtual bool GoToChild(double wProfit, double wTime, double maxDeviation, double wNonCost) = 0; // Fails if leaf
+    virtual bool GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost) = 0; // Fails if last sibiling
     virtual bool GoToParent() = 0; // Fails if root
     //bool IsRoot() const; // Can be not implemented
     //bool IsLeaf() const; // Can be not implemented
@@ -114,7 +114,7 @@ class TreeWalker {
  * @return void
  */
 template<typename _Node>
-void Backtrack(TreeWalker<_Node>& walker, BoundChecker<_Node>& checker, double maxTime, double maxDeviation) {
+void Backtrack(TreeWalker<_Node>& walker, BoundChecker<_Node>& checker, double maxTime, double wProfit, double wTime, double maxDeviation, double wNonCost) {
   checker.Reset();
   walker.GoToRoot();
 
@@ -139,7 +139,7 @@ void Backtrack(TreeWalker<_Node>& walker, BoundChecker<_Node>& checker, double m
       //std::cerr << "Backtrack... ";
       //while(!walker.GoToSibiling() && walker.GoToParent());
       while(true) {
-        if(walker.GoToSibiling(maxDeviation)) {
+        if(walker.GoToSibiling(wProfit, wTime, maxDeviation, wNonCost)) {
           //std::cerr << "SIBILING" << std::endl;
           ++count;
           backtrack = false;
@@ -156,7 +156,7 @@ void Backtrack(TreeWalker<_Node>& walker, BoundChecker<_Node>& checker, double m
 		  }
     } else {
       //std::cerr << "Descend... ";
-      if(walker.GoToChild(maxDeviation)) {
+      if(walker.GoToChild(wProfit, wTime, maxDeviation, wNonCost)) {
         // std::cerr << "OK" << std::endl;
         ++count;
       } else {

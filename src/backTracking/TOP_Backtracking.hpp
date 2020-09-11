@@ -29,7 +29,7 @@ cost_t GetMinCost();
  * @param none
  * @return true if there is one child to go to, false otherwise
  */
-bool GoToChild (double maxDeviation);
+bool GoToChild (double wProfit, double wTime, double maxDeviation, double wNonCost);
 
 /**
  * Walker function that allow to go the sibiling on at one level. In particular takes 
@@ -40,7 +40,7 @@ bool GoToChild (double maxDeviation);
  * @param none
  * @return true if there is one sibiling to go to, false otherwise and rollback to start the car
  */
-bool GoToSibiling(double maxDeviation);
+bool GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost);
 
 /**
  * Walker function that allow to go the parent level of one selected car. In particular takes 
@@ -116,8 +116,8 @@ class TOP_Walker : public TreeWalker<TOP_Node> {
     }
 
     // Walker functions
-    bool GoToChild(double maxDeviation);
-    bool GoToSibiling(double maxDeviation);
+    bool GoToChild(double wProfit, double wTime, double maxDeviation, double wNonCost);
+    bool GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost);
     bool GoToParent();
 
   private:
