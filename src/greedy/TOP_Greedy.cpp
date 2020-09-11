@@ -41,10 +41,9 @@ bool VerifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p);
  *
  * @param rng
  * @param counterPartial
- * @param lenPartialSol
- * @return true if
+ * @return true if the random generation of number allow the insertion
  */
-bool EvaluatePartial (std::mt19937& rng, int counterPartial, int lenPartialSol);
+bool EvaluatePartial (std::mt19937& rng, int counterPartial);
 
 /**
  * Calculate one component of the rating assigned to one point. Estimate the possible profit losses
@@ -130,7 +129,7 @@ bool VerifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p) {
   return false; // Otherwise
 }
 
-bool EvaluatePartial (std::mt19937& rng, int counterPartial, int lenPartialSol) {
+bool EvaluatePartial (std::mt19937& rng, int counterPartial) {
   uniform_real_distribution<double> distribution(0.0, 1.0);
   double resultPerc = distribution(rng);
   double passPerc = ((double)counterPartial - 100.0) / 500.0; 
@@ -341,7 +340,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
           ++partialCounter;
         }
         else if (partialCounter > 100 && partialCounter <= 600) {
-          if (EvaluatePartial(rng, partialCounter, partial_solutions.size())) {
+          if (EvaluatePartial(rng, partialCounter)) {
             partial_solutions.push_back(out);
             ++partialCounter;
           }
