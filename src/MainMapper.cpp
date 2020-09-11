@@ -1,5 +1,5 @@
 #include "common/TOP_Data.hpp"
-#include "greedy/Kevin.hpp"
+#include "greedy/TOP_Greedy.hpp"
 #include "common/Utils.hpp"
 
 #include <sstream>

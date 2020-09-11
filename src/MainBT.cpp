@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
     // Default weight parameters
     double wProfit = 1.1; 
     double wTime = 0.7;
-    double maxDeviation = 1.5; // Max deviation admitted: 0.3 for insertion point with min deviation from real path
+    double maxDeviation = 1.5; // Max deviation admitted to the path
     double wNonCost = 0.0;
 
     if (file.path().extension() != ".txt")

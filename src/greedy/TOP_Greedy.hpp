@@ -1,5 +1,5 @@
-#ifndef SOLVERS_KEVIN_HPP
-#define SOLVERS_KEVIN_HPP
+#ifndef SOLVERS_TOP_Greedy_HPP
+#define SOLVERS_TOP_Greedy_HPP
 
 #include "../common/TOP_Data.hpp"
 #include <random>
@@ -35,7 +35,7 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double w
  * @param options the file json in which are written the parameters for the web viewer
  * @return [void]
  */
-void SolveKevin(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) {
+void SolveGreedy(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) {
   // Exctract the parameters from the json file. Default value: 1
   double wProfit = json_get_or_default<float>(options["wProfit"], 1.1);
   double wTime = json_get_or_default<float>(options["wTime"], 0.7);

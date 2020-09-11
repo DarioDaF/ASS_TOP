@@ -20,7 +20,7 @@ ALL_EXE=MainWeb.exe MainTest.exe MainSolver.exe MainMapper.exe MainBT.exe MainLo
 
 all: $(ALL_EXE)
 
-### Imposta le dipendenze ###
+### Set the dependences ###
 
 MainWeb.exe: CPPFLAGS+=$(CPPFLAGS_HTTP) $(CPPFLAGS_JSON)
 MainWeb.exe: LDFLAGS+=$(LDFLAGS_HTTP) $(LDFLAGS_JSON)
@@ -29,16 +29,16 @@ MainLocal.exe: CPPFLAGS+=$(CPPFLAGS_EASYLOCAL)
 MainLocal.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 
 # WebViewer #
-MainWeb.exe: src/MainWeb.o src/greedy/Kevin.o $(COMMON_OBJ_FILES)
+MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
 # Parameter Tester #
-MainTest.exe: src/MainTest.o src/greedy/Kevin.o $(COMMON_OBJ_FILES)
+MainTest.exe: src/MainTest.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
 # Greedy Solver #
-MainSolver.exe: src/MainSolver.o src/greedy/Kevin.o $(COMMON_OBJ_FILES)
+MainSolver.exe: src/MainSolver.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
 # maxdeviation Scaler #
-MainMapper.exe: src/MainMapper.o src/greedy/Kevin.o $(COMMON_OBJ_FILES)
+MainMapper.exe: src/MainMapper.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
 MainBT.exe: src/MainBT.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
 

@@ -42,10 +42,10 @@ const std::map<std::string, std::string> mimes = {
 #define WITH_JSON_OPTIONS
 
 #include "greedy/Solver.hpp"
-#include "greedy/Kevin.hpp"
+#include "greedy/TOP_Greedy.hpp"
 
 const std::vector<SolverEntry_s> solvers = {
-  { .fn = SolveKevin, .name = "Kevin" },
+  { .fn = SolveGreedy, .name = "Greedy" },
 };
 #define DEF_SOLVER 0
 
