@@ -94,7 +94,7 @@ class TreeWalker {
     TreeWalker(_Node current) : current(current) {}
     virtual void GoToRoot() = 0; // Resets walker
     virtual bool GoToChild(double wProfit, double wTime, double maxDeviation, double wNonCost) = 0; // Fails if leaf
-    virtual bool GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost) = 0; // Fails if last sibiling
+    virtual bool GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost) = 0; // Fails if last sibiling, SOULD ALWAYS KEEP SAME DEPH
     virtual bool GoToParent() = 0; // Fails if root
     //bool IsRoot() const; // Can be not implemented
     //bool IsLeaf() const; // Can be not implemented

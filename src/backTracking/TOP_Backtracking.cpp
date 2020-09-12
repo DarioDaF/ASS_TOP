@@ -401,31 +401,27 @@ bool TOP_Walker::GoToSibiling(double wProfit, double wTime, double maxDeviation,
   //   cerr << ratingPoints[p].point << " " << ratingPoints[p].rating << " " << ratingPoints[p].car << ", "; }
   // cerr << ")" << endl;
 
-  for(idx_t idx = 0; idx < ratingPoints.size(); idx++) {
-    if(ratingPoints[idx].point != point || (idx+1) >= ratingPoints.size()) { // At the end of the vector
+  idx_t prev_idx = 0;
+  // Go to point in ratingPoints matching (point, car)
+  while(prev_idx < ratingPoints.size() && (ratingPoints[prev_idx].point != point || ratingPoints[prev_idx].car != car)) {
+    ++prev_idx;
+  }
+  // For all points after the previous match
+  for(idx_t idx = prev_idx + 1; idx < ratingPoints.size(); idx++) {
+    // Skip already visited points (shouldn't happen because they have -INF rating)
+    if(current.Visited(ratingPoints[idx].point)) {
       continue;
-      // forse andava break e sopra anche car  NOTAMIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
     }
-    if(current.Visited(ratingPoints[idx].point)) { // Skip point in vector but already visited from other cars
-      continue;
-    }
-    if(ratingPoints[idx].point == point && ratingPoints[idx].car != car) { 
-      continue; // non è lo stesso della condizione precedente?
-    }
-    
-    // if(current.Visited(ratingPoints[idx+1].point)) {
-    //   continue;
-    // }
-    
-    if(current.MoveCar(ratingPoints[idx+1].car, ratingPoints[idx+1].point, false).feasible) { // If it is feasible to move
-      carAssignmentOrder.back() = ratingPoints[idx+1].car;
-      // std::cerr << "LOG: Assign to car " << ratingPoints[idx+1].car << " point " << ratingPoints[idx+1].point << std::endl;
-      // std::cerr <<LOG: car << ":" << current.Hop(car, current.Hops(car)-1) << " " << ratingPoints[idx+1].point << std::endl;
+    // Valid candidate, try to insert in current state
+    if(current.MoveCar(ratingPoints[idx].car, ratingPoints[idx].point, false).feasible) {
+      carAssignmentOrder.back() = ratingPoints[idx].car;
+      // std::cerr << "LOG: Assign to car " << ratingPoints[idx].car << " point " << ratingPoints[idx].point << std::endl;
       return true;
     }
   }
 
-  current.MoveCar(car, 0, true); // Finished the sibilings: rollback to start the car
+  // If no alternatives return false but in a state where GoToParent rolls back (insert dummy hop)
+  current.MoveCar(car, 0, true);
   return false;
 }
 
