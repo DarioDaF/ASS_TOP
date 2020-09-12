@@ -113,7 +113,14 @@ int main(int argc, char* argv[]) {
   if(!solutionsStream) {
     throw runtime_error("  ERROR: Unable to open Solution file");
   }
-  solutionsStream << "timeMax limit set to " << maxTime << "s" << endl;
+
+  if(*argv[1] == '2') {
+    solutionsStream << "# TimeMax limit set to " << maxTime << "s [Custom parameters] " << endl;
+  }
+  else {
+    solutionsStream << "# TimeMax limit set to " << maxTime << "s [Default parameters] " << endl;
+  }
+  
 
   for (const auto &file : fs::directory_iterator("./instances")) { //For each instance
     TOP_Input in;
@@ -223,15 +230,19 @@ int main(int argc, char* argv[]) {
     // Print a ".csv" file with all the scores
     if(chaoRes[cnt_istances].file == file.path().filename()) { // Compare with Chao
       if(chaoRes[cnt_istances].chaoOptimum == -ck.GetBestCost()) {
-        solutionsStream << file.path().filename() << ";" << chaoRes[cnt_istances].chaoOptimum << ";" << -ck.GetBestCost() << ";" << 1.0 << endl;
+        solutionsStream << file.path().filename() << "," << 
+                           chaoRes[cnt_istances].chaoOptimum << "," << 
+                           -ck.GetBestCost() << "," << 1.0 << "," << endl;
         ++cnt_istances;
         continue;
       }
-      solutionsStream << file.path().filename() << ";" << chaoRes[cnt_istances].chaoOptimum << ";" << -ck.GetBestCost() << ";0," << static_cast<int>(-ck.GetBestCost() / chaoRes[cnt_istances].chaoOptimum *10000) << endl;
+      solutionsStream << file.path().filename() << "," << 
+                         chaoRes[cnt_istances].chaoOptimum << ";" << -ck.GetBestCost() << 
+                         -ck.GetBestCost() / chaoRes[cnt_istances].chaoOptimum << "," << endl;
       ++cnt_istances;
     }
     else { // New map found
-      solutionsStream << file.path().filename() << ";" << -ck.GetBestCost() << ";" << "(new map)" << endl;
+      solutionsStream << file.path().filename() << "," << -ck.GetBestCost() << "," << "(new map)" << "," << endl;
     } 
   }
   solutionsStream.close();
