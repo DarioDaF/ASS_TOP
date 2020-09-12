@@ -56,7 +56,6 @@ TOP_Input::TOP_Input(const std::string& filename) {
 /**
  * Clear the input
  *
- * @param None
  * @return [void]
  */
 void TOP_Input::Clear() {
@@ -123,7 +122,6 @@ bool operator==(const TOP_Output& out1, const TOP_Output& out2) {
 /**
  * Clear the outputs 
  *
- * @param None
  * @return [void]
  */
 void TOP_Output::Clear() {

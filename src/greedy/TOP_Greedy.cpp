@@ -36,14 +36,17 @@ bool VerifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p);
 /**
  * Evaluate with random algorithm if one partial solution could be inserted into its vector. It use a 
  * random number which is compared with the number of partial solutions already inserted into the vector.
- * In this way, the probability of one insertion is inversely proportional to the number of partial solutions
- * already solved (100 is equal 100% of possibility of insertion, 600 is 0%).
+ * In this way, the probability of one insertion is linearly proportional to the number of partial solutions 
+ * already solved (EVALUATEPARTIAL_MINCOUNT_RNG is equal 100% of possibility of insertion, EVALUATEPARTIAL_MAXCOUNT_RNG is 0%).
  *
  * @param rng
- * @param counterPartial
+ * @param totalQueuedAndSolvedSolutions
  * @return true if the random generation of number allow the insertion
  */
-bool EvaluatePartial (std::mt19937& rng, int counterPartial);
+bool EvaluatePartial(std::mt19937& rng, int totalQueuedAndSolvedSolutions);
+
+#define EVALUATEPARTIAL_MINCOUNT_RNG 100.0
+#define EVALUATEPARTIAL_MAXCOUNT_RNG 600.0
 
 /**
  * Calculate one component of the rating assigned to one point. Estimate the possible profit losses
@@ -61,7 +64,7 @@ double NonChoicheCost(const TOP_Input& in, TOP_Output& out, idx_t car, idx_t p, 
  * Calculate the rating assigned to one point, which is made up of three components: the first is 
  * referring to the point profit on the mean of remaining points profit, the second one is referring 
  * to the remaining traveltime of the nearest car to the point and the impact it would have in entering 
- * that point and at least the cost (losses) of no choosing that point. All these components are weighted to adapt
+ * that point and at least the cost (losses) of no choosing that point. All these components are weighted to adapt 
  * them to differents maps and their conformation.
  *
  * @param in constant input
@@ -75,9 +78,9 @@ double NonChoicheCost(const TOP_Input& in, TOP_Output& out, idx_t car, idx_t p, 
 double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double wProfit, double wTime, double wNonCost);
 
 /**
- * After choosing one point to insert in the nearest car, determinate if there is one (or more) point
- * to insert between the point and the last inserted in the car. The maximum deviation admitted in its path
- * is passed by argument of the function. This function is called recursively to not let the car move randomly
+ * After choosing one point to insert in the nearest car, determinate if there is one (or more) point 
+ * to insert between the point and the last inserted in the car. The maximum deviation admitted in its path 
+ * is passed by argument of the function. This function is called recursively to not let the car move randomly 
  * (i.e. avoid divergent and broken movements).
  *
  * @param in constant input
@@ -89,25 +92,26 @@ double RatingChoice(const TOP_Input& in, TOP_Output& out, idx_t p, double wProfi
 int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDeviationAdmitted);
 
 /**
- * Solve the problem with the greedy algorithm assigning to the point with the highest rating to its nearest
- * car and the applying the InsertPoint function. Besides if there is some points with differents rating, the
+ * Solve the problem with the greedy algorithm assigning to the point with the highest rating to its nearest 
+ * car and the applying the InsertPoint function. Besides if there is some points with differents rating, the 
  * algorithm save the partial solution and also solve it. Not all the partial solution are saved: it is found 
  * empirically that most of all the instances have less than 100 partial solution. Only a few have more than 600.
- * If the partial_solution size is less than 100, all the instances are inserted. Between 100 and 600 a random number 
- * generator is used to calculate the probability of insertion. Out of 600 all the partial solution are rejected.
+ * If the partial_solution size is less than 100, all the instances are inserted. Between EVALUATEPARTIAL_MINCOUNT_RNG 
+ * and EVALUATEPARTIAL_MAXCOUNT_RNG a random number generator is used to calculate the probability of insertion. 
+ * Out of EVALUATEPARTIAL_MAXCOUNT_RNG all the partial solution are rejected.
  *
  * @param partial_solutions vector of partial solutions
  * @param in constant input
  * @param out constant output
  * @param rng seed generator to save the solution and its informations
- * @param counter parametr that allow to evaluate the insertion of one partial solution
+ * @param solvedSolutions parametr that allow to evaluate the insertion of one partial solution
  * @param wProfit weight that multiplies the first (profit) factor of the rating equation
  * @param wTime weight that multiplies the second (travel time) factor of the rating equation
  * @param maxDeviationAdmitted max deviation admitted on the path of the car
  * @param wNonCost weight that multiplies the third (no choosing cost or losses) factor of the rating equation
  * @return [void]
  */
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int counter, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost);
+void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int solvedSolutions, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost);
 
 /******************
  * Implementation *
@@ -129,16 +133,20 @@ bool VerifyFeasibility(const TOP_Input& in, const TOP_Output& out, idx_t p) {
   return false; // Otherwise
 }
 
-bool EvaluatePartial (std::mt19937& rng, int counterPartial) {
-  uniform_real_distribution<double> distribution(0.0, 1.0);
-  double resultPerc = distribution(rng);
-  double passPerc = ((double)counterPartial - 100.0) / 500.0; 
-  
-  cerr << "LOG: <" << resultPerc << " on " << passPerc << ">" << endl;
-  if (resultPerc < passPerc) {
+bool EvaluatePartial(std::mt19937& rng, int totalQueuedAndSolvedSolutions) {
+  if(totalQueuedAndSolvedSolutions <= EVALUATEPARTIAL_MINCOUNT_RNG) {
+    return true;
+  }
+  if(totalQueuedAndSolvedSolutions >= EVALUATEPARTIAL_MAXCOUNT_RNG) {
     return false;
   }
-  return true;
+
+  uniform_real_distribution<double> distribution(0.0, 1.0);
+  double resultPerc = distribution(rng);
+  double passPerc = ((double)totalQueuedAndSolvedSolutions - EVALUATEPARTIAL_MINCOUNT_RNG) / (EVALUATEPARTIAL_MAXCOUNT_RNG - EVALUATEPARTIAL_MINCOUNT_RNG);
+  
+  // cerr << "LOG: <" << resultPerc << " on " << passPerc << ">" << endl;
+  return resultPerc >= passPerc;
 }
 
 double NonChoicheCost(const TOP_Input& in, TOP_Output& out, idx_t car, idx_t p, double sumProfit) {
@@ -267,7 +275,7 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
           throw runtime_error("ERROR: Insert failed but check feasibility passed");
         }
         else {
-          //cerr << "LOG: Inserted point " << node << " with cnt : " << cnt << endl;
+          // cerr << "LOG: Inserted point " << node << " with cnt : " << cnt << endl;
           if(!out.MoveCar(car, lastNode, false).feasible) {
             throw runtime_error("ERROR: Cannot reinsert the last point but check feasibility passed");
           }
@@ -292,7 +300,7 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
   }
 }
 
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int partialCounter, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
+void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int solvedSolutions, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   NumberRange<idx_t> carIdxs(in.Cars());
   NumberRange<idx_t> pointIdxs(in.Points());
   vector<bool> markedCars(in.Cars());
@@ -308,14 +316,13 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
     });
     // cerr << "LOG: Size " << maxPoints.size() << endl;
 
-    // auto sortedPoints = pointIdxs.Vector();
-    // sort(sortedPoints.begin(), sortedPoints.end(), [&in, &out](idx_t p1, idx_t p2) -> double {
-    //   if(!verifyFeasibility(in, out, p1)) { return false; }
-    //   if(!verifyFeasibility(in, out, p2)) { return true; }
-    //   return RatingChoice(in, out, p1) > RatingChoice(in, out, p2);
-    // });
-   
-    for(int i = 1; i < maxPoints.size(); ++i) {
+    // Choose a random point as main path (tie breaking)
+    idx_t mainBranchPoint = std::uniform_int_distribution<idx_t>(0, maxPoints.size()-1)(rng);
+
+    for(int i = 0; i < maxPoints.size(); ++i) {
+      if(i == mainBranchPoint) {
+        continue; // Main branch, no need to queue
+      }
 
       // Assign the current point to its nearest car
       idx_t chosenPoint = maxPoints[i];
@@ -335,17 +342,22 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
         int backhops = InsertPoint(in, out, chosenCar, maxDeviationAdmitted);
         
         // cerr << "LOG: partialCounter: " << partialCounter << endl; 
-        if (partialCounter <= 100) { // Evaluate if insert the partial solution based on the partial solutions processed
+        
+        // Evaluate if insert the partial solution based on the partial solutions processed
+        if(EvaluatePartial(rng, solvedSolutions + partial_solutions.size())) {
           partial_solutions.push_back(out);
-          ++partialCounter;
-        }
-        else if (partialCounter > 100 && partialCounter <= 600) {
-          if (EvaluatePartial(rng, partialCounter)) {
-            partial_solutions.push_back(out);
-            ++partialCounter;
+        } else {
+          // Reject or substitute
+          // Probability of rejection on subsequent calls sould be uniform (even though order is dependent, and sort of depth first)
+          // To solve this sould use random to select next partial solution, but this can reduce tree traversal
+          // Because initial splits will be randomized
+          // For semplicity an ordered evaluation is preferred and 50% rejection or random substitution is applied
+          if(uniform_int_distribution<int>(0, 1)(rng)) {
+            idx_t subedPartial = uniform_int_distribution<idx_t>(0, partial_solutions.size()-1)(rng);
+            partial_solutions[subedPartial] = out;
           }
         }
-
+        
         // Rollback InsertPoint
         for(int j = 0; j <= backhops; j++){
           out.RollbackCar(chosenCar);
@@ -353,7 +365,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
       }
     }
 
-    idx_t chosenPoint = maxPoints[0];
+    idx_t chosenPoint = maxPoints[mainBranchPoint];
     // cerr << "LOG: Assign car " << chosenCar << " to " << chosenPoint << endl;
     
     // Assign the point to the nearest car
@@ -391,7 +403,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
 
 void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   vector<TOP_Output> partial_solutions;
-  int partialCounter = 0;
+  int solvedSolutions = 0;
 
   partial_solutions.clear(); // Start solving
   partial_solutions.push_back(out);
@@ -401,8 +413,8 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double w
     auto lastSol = partial_solutions.back(); // To next partial solution
     partial_solutions.pop_back();
     
-    SolverGreedy(partial_solutions, in, lastSol, rng, partialCounter, wProfit, wTime, maxDeviationAdmitted, wNonCost); // Solve
-    ++partialCounter; 
+    SolverGreedy(partial_solutions, in, lastSol, rng, solvedSolutions, wProfit, wTime, maxDeviationAdmitted, wNonCost); // Solve
+    ++solvedSolutions; 
 
     if(lastSol.PointProfit() > out.PointProfit()) { // Update the best solution found
       out = lastSol;
@@ -415,5 +427,5 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double w
       // }
     }
   }
-  // cerr << "LOG: Currently solved the instance " << partialCounter << " times" << endl;
+  // cerr << "LOG: Currently solved the instance " << solvedSolutions << " times" << endl;
 }

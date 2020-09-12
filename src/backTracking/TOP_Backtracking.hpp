@@ -10,47 +10,8 @@ typedef int cost_t;
  * Declaration *
  ***************/ 
 
-/**
- * Function that allow to estimate the possible amount of profit that can be done
- * from the insertion of one point. It takes all the point into the ellipse which 
- * area is drawn by the remaining travel time of all the cars. The sum of those 
- * profits allow to understand the "Non improuving branch" condition
- * 
- * @param none
- * @return the sum of the points profit in the ellipse
- */
 cost_t GetMinCost();
 
-/**
- * Walker function that allow to go down to the child of one branch. In particular
- * takes the current state of the problem and insert the next point to its car. The 
- * sequence in which the couple is choosen is determinated by the rating of the point
- * 
- * @param none
- * @return true if there is one child to go to, false otherwise
- */
-bool GoToChild (double wProfit, double wTime, double maxDeviation, double wNonCost);
-
-/**
- * Walker function that allow to go the sibiling on at one level. In particular takes 
- * the current state of the problem and swap the current inserted node with the next 
- * point to its car. The sequence in which the couple is choosen is determinated by the 
- * rating of the point.
- * 
- * @param none
- * @return true if there is one sibiling to go to, false otherwise and rollback to start the car
- */
-bool GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost);
-
-/**
- * Walker function that allow to go the parent level of one selected car. In particular takes 
- * the current state of the problem and remove the last point insertert into the last car that 
- * insert it. 
- * 
- * @param none
- * @return true if there is one parent to go to, false otherwise
- */
-bool GoToParent();
 
 /******************
  * Implementation *
@@ -97,6 +58,15 @@ class TOP_Node : public Node<cost_t, TOP_NodeOutput>, public TOP_Output {
     
     bool IsFeasible() const { return Feasible(); }; // Return if the output is feasible
     cost_t GetCost() const { return -PointProfit(); }; // Return the actual Profit of the output
+
+    /**
+     * Function that allow to estimate the possible amount of profit that can be done
+     * from the insertion of one point. It takes all the point into the ellipse which 
+     * area is drawn by the remaining travel time of all the cars. The sum of those 
+     * profits allow to understand the "Non improuving branch" condition
+     * 
+     * @return the sum of the points profit in the ellipse
+     */
     cost_t GetMinCost() const;
 };
 
@@ -106,9 +76,9 @@ class TOP_Node : public Node<cost_t, TOP_NodeOutput>, public TOP_Output {
  * that allow to walk from one state to the other, included the empty solution
  */
 class TOP_Walker : public TreeWalker<TOP_Node> {
-  
   public:
-    TOP_Walker(const TOP_Input& in) : TreeWalker(TOP_Node(in)), in(in) {} // Constructor
+    TOP_Walker(const TOP_Input& in, double wProfit, double wTime, double maxDeviation, double wNonCost)
+      : TreeWalker(TOP_Node(in)), in(in), wProfit(wProfit), wTime(wTime), maxDeviation(maxDeviation), wNonCost(wNonCost) {} // Constructor
 
     void GoToRoot() { // Empty solution  and Clear solution 
       current = TOP_Node(in); 
@@ -116,13 +86,42 @@ class TOP_Walker : public TreeWalker<TOP_Node> {
     }
 
     // Walker functions
-    bool GoToChild(double wProfit, double wTime, double maxDeviation, double wNonCost);
-    bool GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost);
+
+    /**
+     * Walker function that allow to go down to the child of one branch. In particular
+     * takes the current state of the problem and insert the next point to its car. The 
+     * sequence in which the couple is choosen is determinated by the rating of the point
+     * 
+     * @return true if there is one child to go to, false otherwise
+     */
+    bool GoToChild();
+
+    /**
+     * Walker function that allow to go the sibiling on at one level. In particular takes 
+     * the current state of the problem and swap the current inserted node with the next 
+     * point to its car. The sequence in which the couple is choosen is determinated by the 
+     * rating of the point.
+     * 
+     * @return true if there is one sibiling to go to, false otherwise and rollback to start the car
+     */
+    bool GoToSibiling();
+
+    /**
+     * Walker function that allow to go the parent level of one selected car. In particular takes 
+     * the current state of the problem and remove the last point insertert into the last car that 
+     * insert it. 
+     * 
+     * @return true if there is one parent to go to, false otherwise
+     */
     bool GoToParent();
 
   private:
     const TOP_Input& in;
     std::vector<idx_t> carAssignmentOrder;
+    double wProfit;
+    double wTime;
+    double maxDeviation;
+    double wNonCost;
 };
 
 /**
