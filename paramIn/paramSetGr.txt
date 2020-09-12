@@ -1,5 +1,5 @@
 Usage: [from] [to] [++]
-wProfit : 1.0 1.5 1.0
-wTime :  1.0 1.5 1.0
-maxDeviation :  1.0 1.5 1.0
-wNonCost :  1.0 1.5 2.0
+wProfit : 1.1 1.5 1.0
+wTime : 0.7 1.5 1.5
+maxDeviation : 1.5 1.8 1.0
+wNonCost : 0.0 1.5 2.0

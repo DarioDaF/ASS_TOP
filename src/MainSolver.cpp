@@ -125,26 +125,26 @@ int main(int argc, char *argv[]) {
   }
 
   // Print the parameters readed into the solutions file
-  solutionsStream << "Param:" << ";" << "[from]" << ";" << "[to]" << ";" << "[plus]" << endl;
-  solutionsStream << "wProfit" << ";" <<
-                     "#" + to_string(from_wProfit) << ";" <<
-                     "#" + to_string(to_wProfit) << ";" <<
-                     "#" + to_string(up_wProfit) << endl;
+  solutionsStream << "# Param:" << "," << "[from]" << "," << "[to]" << "," << "[plus]" << endl;
+  solutionsStream << "# wProfit" << "," <<
+                     from_wProfit << "," <<
+                     to_wProfit << "," <<
+                     up_wProfit << endl;
 
-  solutionsStream << "wTime" << ";" << 
-                     "#" + to_string(from_wTime) << ";" << 
-                     "#" + to_string(to_wTime) << ";" << 
-                     "#" + to_string(up_wTime) << endl;
+  solutionsStream << "# wTime" << "," << 
+                     from_wTime << "," << 
+                     to_wTime << "," << 
+                     up_wTime << endl;
 
-  solutionsStream << "maxDeviation" << ";" << 
-                     "#" + to_string(from_maxDeviation) << ";" << 
-                     "#" + to_string(to_maxDeviation) << ";" << 
-                     "#" + to_string(up_maxDeviation) << endl;
+  solutionsStream << "# maxDeviation" << "," << 
+                     from_maxDeviation << "," << 
+                     to_maxDeviation << "," << 
+                     up_maxDeviation << endl;
 
-  solutionsStream << "wNonProfit" << ";" << 
-                     "#" + to_string(from_wNonCost) << ";" <<
-                     "#" + to_string(to_wNonCost) << ";" << 
-                     "#" + to_string(up_wNonCost) << endl;
+  solutionsStream << "# wNonProfit" << "," << 
+                     from_wNonCost << "," <<
+                     to_wNonCost << "," << 
+                     up_wNonCost << endl;
 
   //Open and read the file of Chao's results
   ifstream optStream("./paramIn/chaoResults.txt"); 
@@ -289,15 +289,18 @@ int main(int argc, char *argv[]) {
     // Print a ".csv" file with all the scores
     if(chaoRes[cnt_istances].file == file.path().filename()) { // Compare with Chao
       if(chaoRes[cnt_istances].chaoOptimum == best) {
-        solutionsStream << file.path().filename() << ";" << chaoRes[cnt_istances].chaoOptimum << ";" << best << ";" << 1.0 << endl;
+        solutionsStream << file.path().filename() << "," << chaoRes[cnt_istances].chaoOptimum << "," << best << "," << 1.0 << endl;
         ++cnt_istances;
         continue;
       }
-      solutionsStream << file.path().filename() << ";" << chaoRes[cnt_istances].chaoOptimum << ";" << best << ";0," << static_cast<int>(best / chaoRes[cnt_istances].chaoOptimum *10000) << endl;
+      solutionsStream << file.path().filename() << "," << 
+                         chaoRes[cnt_istances].chaoOptimum << "," << 
+                         best << "," << 
+                         best / chaoRes[cnt_istances].chaoOptimum << endl;
       ++cnt_istances;
     }
     else { // New map found
-      solutionsStream << file.path().filename() << ";" << best << ";" << "(new map)" << endl;
+      solutionsStream << file.path().filename() << "," << best << "," << "(new map)" << endl;
     } 
   }
   solutionsStream.close();

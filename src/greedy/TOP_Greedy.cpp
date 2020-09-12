@@ -352,7 +352,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
           // To solve this sould use random to select next partial solution, but this can reduce tree traversal
           // Because initial splits will be randomized
           // For semplicity an ordered evaluation is preferred and 50% rejection or random substitution is applied
-          if(uniform_int_distribution<int>(0, 1)(rng)) {
+          if(uniform_int_distribution<int>(0, 1)(rng) && partial_solutions.size() > 0) {
             idx_t subedPartial = uniform_int_distribution<idx_t>(0, partial_solutions.size()-1)(rng);
             partial_solutions[subedPartial] = out;
           }
