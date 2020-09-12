@@ -19,7 +19,7 @@ struct chaoResults {
 };
 
 /**
- * MainBT.cpp is a main that takes all the instances and solve them with the backtracking algorithm. Bacause
+ * MainBackT.cpp is a main that takes all the instances and solve them with the backtracking algorithm. Bacause
  * of the long time that takes the backtracking, it is possible to set a maxTime limit that it takes to resolve 
  * each instance (default value 3 minutes). The main perform a metaheuristic backtracking because it use the greedy 
  * algorithm (with its parameter maxDeviation) plus some other solutions built to solve the TOP problem.  
@@ -50,7 +50,13 @@ struct chaoResults {
  *    "outputs/routeHops/backtarcking" files : for all the instances it is saved the solution obtained if hops form to read and use
  *                                             it in the resolution of other algortims (i.e. Local Search).
  *                                             The files are located in "outputs/hops/greedy" directory.
- *    
+ * 
+ * Usage:
+ *    ./MainBackT.exe [version of algorithm]
+ *    - version : 
+ *                1 : if with default parameters
+ *                2 : if with parameters readed by Greedy output files
+ * 
  * @param argc number of items in the command line
  * @param argv items in the command line
  * @return resolve all the instances and print outputs and parameters in files
@@ -151,7 +157,7 @@ int main(int argc, char* argv[]) {
       
       //Open the file conteining the params
       // If found param, set it, otherwise use default value
-      ifstream paramStream("./outputs/greedy/paramGreedy/" + in.name + ".out"); 
+      ifstream paramStream("./outputs/greedy/paramGreedy/#2/" + in.name + ".out"); 
       if (!paramStream) {
         throw runtime_error("ERROR: Cannot find Greedy parameter file: run Greedy algorithm or use default parameters");
       }
@@ -232,17 +238,17 @@ int main(int argc, char* argv[]) {
       if(chaoRes[cnt_istances].chaoOptimum == -ck.GetBestCost()) {
         solutionsStream << file.path().filename() << "," << 
                            chaoRes[cnt_istances].chaoOptimum << "," << 
-                           -ck.GetBestCost() << "," << 1.0 << "," << endl;
+                           -ck.GetBestCost() << "," << 1.0 << endl;
         ++cnt_istances;
         continue;
       }
       solutionsStream << file.path().filename() << "," << 
                          chaoRes[cnt_istances].chaoOptimum << ";" << -ck.GetBestCost() << 
-                         -ck.GetBestCost() / chaoRes[cnt_istances].chaoOptimum << "," << endl;
+                         -ck.GetBestCost() / chaoRes[cnt_istances].chaoOptimum << endl;
       ++cnt_istances;
     }
     else { // New map found
-      solutionsStream << file.path().filename() << "," << -ck.GetBestCost() << "," << "(new map)" << "," << endl;
+      solutionsStream << file.path().filename() << "," << -ck.GetBestCost() << "," << "(new map)" << endl;
     } 
   }
   solutionsStream.close();

@@ -16,7 +16,7 @@ LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
-ALL_EXE=MainWeb.exe MainTest.exe MainSolver.exe MainMapper.exe MainBT.exe MainLocal.exe
+ALL_EXE=MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackT.exe MainLocal.exe
 
 all: $(ALL_EXE)
 
@@ -31,17 +31,19 @@ MainLocal.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 # WebViewer #
 MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
-# Parameter Tester #
-MainTest.exe: src/MainTest.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+# Parameter Analysis #
+MainParamGr.exe: src/MainParamGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+
+# Map Analysis #
+MainMapGr.exe: src/MainMapGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
 # Greedy Solver #
-MainSolver.exe: src/MainSolver.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+MainGreedy.exe: src/MainGreedy.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
-# maxdeviation Scaler #
-MainMapper.exe: src/MainMapper.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+# Backtracking Solver #
+MainBackT.exe: src/MainBackT.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
 
-MainBT.exe: src/MainBT.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
-
+# Loacl Search Solver #
 MainLocal.exe: src/MainLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 
 %.o: %.cpp

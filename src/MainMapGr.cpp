@@ -33,7 +33,7 @@ struct chaoResults {
 };
 
 /**
- * MainSolver.cpp is a main that takes all the instances and aim to found one value of paramter "C", the max deviation
+ * MainmapGr.cpp is a main that takes all the instances and aim to found one value of paramter "C", the max deviation
  * admitted, scaled for all the maps. But our empirical research found out that there are no evidence of possibilty
  * to scale the parameter.
  * 

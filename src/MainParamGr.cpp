@@ -36,7 +36,7 @@ struct paramGraphs { // Using a struct for manage the data in input
 };
 
 /**
- * MainPlotter.cpp is a main that takes all the instances and solve them with a fixed set of params. The aim of
+ * MainParamGr.cpp is a main that takes all the instances and solve them with a fixed set of params. The aim of
  * the algorithm is to find the behavior of the one variable parameter from fixing the other parameters. Are removed
  * from the analysis easy and unfeasible instances. From the command line it is mandatory to specify the map on which 
  * it is wanted to perform the analysis (type "0" for all), the start, end and plus for the parameter to analyze and 

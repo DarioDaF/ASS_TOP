@@ -3,7 +3,6 @@
 ## PREPARATION ##
 # make clean
 make 
-# MainTest.exe
 
 ## PARAMETER TESTER ##
 # Solve son istance and allow the user to set the parameters
@@ -99,9 +98,13 @@ python3 ./plotter/plotParams.py 0 wNonCost
 
 ## PARAMETER MAXDEVIATION SCALER ## 
 
-# ./MainMapper.exe
+./MainMapper.exe
 
 ## EXECUTE ALL ISTANCES ## 
 # Solve all istances and with the specified parameters and print the results
 
-# ./MainSolver.exe
+# Version 1 : with default parameters #
+./MainSolver.exe 1
+
+#Version 2 : with readed parameters range #
+./MainSolver.exe 2

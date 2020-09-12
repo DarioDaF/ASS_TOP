@@ -23,7 +23,7 @@ struct chaoResults {
 };
 
 /**
- * MainSolver.cpp is a main that takes all the instances and solve them with a set of params. The results
+ * MainGreedy.cpp is a main that takes all the instances and solve them with a set of params. The results
  * are compared with Chao's ones to evaluate the performance and the resoluts of the greedy algorithm. All
  * the outputs are saved in different files to sum up the information and the outputs from which it is obtained 
  * the best optimum. It is also provided a seed number generator to reverse the algorithm starting from the output.
@@ -54,7 +54,13 @@ struct chaoResults {
  *    "outputs/routeHops/greedy" files : for all the instances it is saved the solution obtained if hops form to read and use it in 
  *                                       the resolution of other algortims (i.e. Local Search).
  *                                       The files are located in "outputs/hops/greedy" directory.
- *    
+ *  
+ * Usage:
+ *    ./MainGreedy.exe [version of algorithm]
+ *    - version : 
+ *                1 : if with default parameters
+ *                2 : if with range of parameters readed by files
+ * 
  * @param argc number of items in the command line
  * @param argv items in the command line
  * @return resolve all the instances and print outputs and parameters in files
@@ -75,50 +81,59 @@ int main(int argc, char *argv[]) {
   string line;
   vector<chaoResults> chaoRes;
 
-  double from_wProfit = 1, from_wTime = 1, from_maxDeviation = 1, from_wNonCost = 1; // Default Parameters
-  double to_wProfit = 1, to_wTime = 1, to_maxDeviation = 1, to_wNonCost = 1;
-  double up_wProfit = 0.1, up_wTime = 0.1, up_maxDeviation = 0.1, up_wNonCost = 0.1;
-        
+  double from_wProfit = 1.1, from_wTime = 0.7, from_maxDeviation = 1.5, from_wNonCost = 0.0; // Default Parameters
+  double to_wProfit = 1.5, to_wTime = 1.5, to_maxDeviation = 1.7, to_wNonCost = 0.5;
+  double up_wProfit = 1.0, up_wTime = 1.0, up_maxDeviation = 1.0, up_wNonCost = 1.0;
+  
+  if (argc < 1) {
+    cerr << argc <<  "  ERROR: insert Greedy algorithm's version [#1 or #2]" << endl;
+    return 1;
+  }
   //Open and write the file of results for each instance
   fs::create_directories("solutions");
-  ofstream solutionsStream("solutions/SolGreedy.csv");
+  string titleFile = "solutions/SolGreedy#";
+  titleFile.push_back(*argv[1]);
+  ofstream solutionsStream(titleFile + ".csv");
+
   if(!solutionsStream) {
     throw runtime_error("  ERROR: Unable to open Solutions file");
   }
 
-  //Open the file conteining the params
-  ifstream paramStream("./paramIn/paramSetGr.txt"); 
-  if (!paramStream) {
-    throw runtime_error("  ERROR: Unable to open Parameters file");
-  }
+  if(*argv[1] == '2') { // Second version without default parameters, otherwise with default parameters
+    //Open the file conteining the params
+    ifstream paramStream("./paramIn/paramSetGr.txt"); 
+    if (!paramStream) {
+      throw runtime_error("  ERROR: Unable to open Parameters file");
+    }
 
-  while(getline(paramStream, line)) {
-    std::istringstream iss(line); //Split the input string
-    std::vector<string> results(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
+    while(getline(paramStream, line)) {
+      std::istringstream iss(line); //Split the input string
+      std::vector<string> results(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
 
-    if(results[0] == "wProfit") {
-      from_wProfit = stod(results[2]);
-      to_wProfit = stod(results[3]);
-      up_wProfit = stod(results[4]);
+      if(results[0] == "wProfit") {
+        from_wProfit = stod(results[2]);
+        to_wProfit = stod(results[3]);
+        up_wProfit = stod(results[4]);
+      }
+      if(results[0] == "wTime") {
+        from_wTime = stod(results[2]);
+        to_wTime = stod(results[3]);
+        up_wTime = stod(results[4]);
+      }
+      if(results[0] == "maxDeviation") {
+        from_maxDeviation = stod(results[2]);
+        to_maxDeviation = stod(results[3]);
+        up_maxDeviation = stod(results[4]);
+      }
+      if(results[0] == "wNonCost") {
+        from_wNonCost = stod(results[2]);
+        to_wNonCost = stod(results[3]);
+        up_wNonCost = stod(results[4]);
+        break;
+      }
     }
-    if(results[0] == "wTime") {
-      from_wTime = stod(results[2]);
-      to_wTime = stod(results[3]);
-      up_wTime = stod(results[4]);
-    }
-    if(results[0] == "maxDeviation") {
-      from_maxDeviation = stod(results[2]);
-      to_maxDeviation = stod(results[3]);
-      up_maxDeviation = stod(results[4]);
-    }
-    if(results[0] == "wNonCost") {
-      from_wNonCost = stod(results[2]);
-      to_wNonCost = stod(results[3]);
-      up_wNonCost = stod(results[4]);
-      break;
-    }
+    paramStream.close();
   }
-  paramStream.close();
 
   if (up_wProfit == 0.0 || up_wTime == 0.0 || up_maxDeviation == 0.0 || up_wNonCost == 0.0) {
     throw runtime_error("  ERROR: Cannot increment by 0 the parameters: Loop");
@@ -206,8 +221,11 @@ int main(int argc, char *argv[]) {
               }
 
               { // Print the outputs on file
-                fs::create_directories("outputs/greedy/outGreedy");
-                ofstream os("outputs/greedy/outGreedy" / file.path().filename().replace_extension(".out"));
+
+                string titleDir = "outputs/greedy/outGreedy/#";
+                titleDir.push_back(*argv[1]);
+                fs::create_directories(titleDir);
+                ofstream os(titleDir / file.path().filename().replace_extension(".out"));
                 if (!os) {
                   ++errors;
                   cerr << "  ERROR: Unable to open output file" << endl;
@@ -217,8 +235,10 @@ int main(int argc, char *argv[]) {
               }
 
               { // Print the Hops as outputs on file
-                fs::create_directories("outputs/routeHops/greedy");
-                ofstream os("outputs/routeHops/greedy" / file.path().filename().replace_extension(".out"));
+                string titleDir = "outputs/routeHops/greedy/#";
+                titleDir.push_back(*argv[1]);
+                fs::create_directories(titleDir);
+                ofstream os(titleDir / file.path().filename().replace_extension(".out"));
                 if (!os) {
                   ++errors;
                   cerr << "  ERROR: Unable to open output file" << endl;
@@ -228,8 +248,10 @@ int main(int argc, char *argv[]) {
               }
   
               { // Print the parameters of optimum on file
-                fs::create_directories("outputs/greedy/paramGreedy");
-                ofstream os("outputs/greedy/paramGreedy" / file.path().filename().replace_extension(".out"));
+                string titleDir = "outputs/greedy/paramGreedy/#";
+                titleDir.push_back(*argv[1]);
+                fs::create_directories(titleDir);
+                ofstream os(titleDir / file.path().filename().replace_extension(".out"));
                 if (!os) {
                   ++errors;
                   cerr << "  ERROR: Unable to open output file" << endl;
@@ -249,8 +271,10 @@ int main(int argc, char *argv[]) {
         
     if(out.PointProfit() == 0) { // No solution found, the problem is unfeasible
       { // Print the outputs on file
-        fs::create_directories("outputs/greedy/outGreedy");
-        ofstream os("outputs/greedy/outGreedy" / file.path().filename().replace_extension(".out"));
+        string titleDir = "outputs/greedy/outGreedy/#";
+        titleDir.push_back(*argv[1]);
+        fs::create_directories(titleDir);
+        ofstream os(titleDir / file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
           cerr << "  ERROR: Unable to open output file" << endl;
@@ -260,8 +284,10 @@ int main(int argc, char *argv[]) {
       }
 
       {
-        fs::create_directories("outputs/greedy/paramGreedy");
-        ofstream os("outputs/greedy/paramGreedy" / file.path().filename().replace_extension(".out"));
+        string titleDir = "outputs/greedy/paramGreedy/#";
+        titleDir.push_back(*argv[1]);
+        fs::create_directories(titleDir);
+        ofstream os(titleDir / file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
           cerr << "  ERROR: Unable to open output file" << endl;
@@ -275,8 +301,10 @@ int main(int argc, char *argv[]) {
       } 
       
       {
-        fs::create_directories("outputs/routeHops/greedy");
-        ofstream os("outputs/routeHops/greedy" / file.path().filename().replace_extension(".out"));
+        string titleDir = "outputs/routeHops/greedy/#";
+        titleDir.push_back(*argv[1]);
+        fs::create_directories(titleDir);
+        ofstream os(titleDir/ file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
           cerr << "  ERROR: Unable to open output file" << endl;
