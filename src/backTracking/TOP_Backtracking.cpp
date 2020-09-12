@@ -347,7 +347,7 @@ std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit
   return ratingPoints; 
 }
 
-bool TOP_Walker::GoToChild(double wProfit, double wTime, double maxDeviation, double wNonCost) {
+bool TOP_Walker::GoToChild() {
   NumberRange<idx_t> carIdxs(current.in.Cars()); 
   NumberRange<idx_t> pointIdxs(current.in.Points() - 1);
   
@@ -380,7 +380,7 @@ bool TOP_Walker::GoToChild(double wProfit, double wTime, double maxDeviation, do
   return false; // Not possible to insert any point (finish that branch)
 }
 
-bool TOP_Walker::GoToSibiling(double wProfit, double wTime, double maxDeviation, double wNonCost) {
+bool TOP_Walker::GoToSibiling() {
   NumberRange<idx_t> carIdxs(current.in.Cars()); 
   NumberRange<idx_t> pointIdxs(current.in.Points()-1);
   std::vector<idx_t> carSorted = carIdxs.Vector();
