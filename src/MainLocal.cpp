@@ -20,15 +20,15 @@ int main(int argc, const char* argv[])
   // 4th parameter: true = silent
   CommandLineParameters::Parse(argc, argv, false, true);  
 
-  if (!instance.IsSet())
-    {
-      cout << "Error: --main::instance filename option must always be set" << endl;
-      return 1;
-    }
+  if(!instance.IsSet()) {
+    cout << "Error: --main::instance filename option must always be set" << endl;
+    return 1;
+  }
   TOP_Input in(instance);
 
-  if (seed.IsSet())
+  if(seed.IsSet()) {
     Random::SetSeed(seed);
+  }
   
   TOP_StateManager TOP_sm(in);
   
@@ -49,48 +49,39 @@ int main(int argc, const char* argv[])
   MoveTester<TOP_Input, TOP_Output, TOP_State, TOP_MoveSwap> swap_move_test(in,TOP_sm,TOP_om,TOP_nhe, "TOP_Move move", tester); 
 
   SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP solver");
-  if (!CommandLineParameters::Parse(argc, argv, true, false))
+  if(!CommandLineParameters::Parse(argc, argv, true, false)) {
     return 1;
+  }
 
-  if (!method.IsSet())
-    { // If no search method is set -> enter in the tester
-      if (init_state.IsSet())
+  if(!method.IsSet()) { // If no search method is set -> enter in the tester
+    if(init_state.IsSet()) {
 	    tester.RunMainMenu(init_state);
-      else
+    } else {
 	    tester.RunMainMenu();
     }
-  else
-    {
-
-      if (method == string("SA"))
-        {
-          TOP_solver.SetRunner(TOP_sa);
-        }
-      else if (method == string("HC"))
-        {
-          TOP_solver.SetRunner(TOP_hc);
-        }
-      else // if (method.GetValue() == string("SD"))
-        {
-          TOP_solver.SetRunner(TOP_sd);
-        }
-      auto result = TOP_solver.Solve();
+  } else {
+    if(method == string("SA")) {
+      TOP_solver.SetRunner(TOP_sa);
+    } else if(method == string("HC")) {
+      TOP_solver.SetRunner(TOP_hc);
+    } else { // if (method.GetValue() == string("SD"))
+      TOP_solver.SetRunner(TOP_sd);
+    }
+    
+    auto result = TOP_solver.Solve();
 	  // result is a tuple: 0: solutio, 1: number of violations, 2: total cost, 3: computing time
-      TOP_Output out = result.output;
-      if (output_file.IsSet())
-        { // write the output on the file passed in the command line
-          ofstream os(static_cast<string>(output_file).c_str());
-          os << out << endl;
-          os << "Cost: " << result.cost.total << endl;
-					os << "Time: " << result.running_time << "s " << endl;
-          os.close();
-        }
-      else
-        { // write the solution in the standard output
-          cout << out << endl;
-          cout << "Cost: " << result.cost.total << endl;
-					cout << "Time: " << result.running_time << "s " << endl;					
-        }
-   }
+    TOP_Output out = result.output;
+    if(output_file.IsSet()) { // write the output on the file passed in the command line
+      ofstream os(static_cast<string>(output_file).c_str());
+      os << out << endl;
+      os << "Cost: " << result.cost.total << endl;
+			os << "Time: " << result.running_time << "s " << endl;
+      os.close();
+    } else { // write the solution in the standard output
+      cout << out << endl;
+      cout << "Cost: " << result.cost.total << endl;
+			cout << "Time: " << result.running_time << "s " << endl;					
+    }
+  }
   return 0;
 }
