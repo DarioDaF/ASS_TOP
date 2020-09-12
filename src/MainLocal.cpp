@@ -42,11 +42,12 @@ int main(int argc, const char* argv[])
   // runners
   HillClimbing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_hc(in, TOP_sm, TOP_nhe, "TOP_MoveHillClimbing");
   SteepestDescent<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sd(in, TOP_sm, TOP_nhe, "TOP_MoveSteepestDescent");
+  TabuSearch<TOP_Input, TOP_State, TOP_MoveSwap> TOP_ts(in, TOP_sm, TOP_nhe, "TOP_MoveTabuSearch");
   SimulatedAnnealing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sa(in, TOP_sm, TOP_nhe, "TOP_MoveSimulatedAnnealing");
 
   // tester
-  Tester<TOP_Input, TOP_Output, TOP_State> tester(in,TOP_sm,TOP_om);
-  MoveTester<TOP_Input, TOP_Output, TOP_State, TOP_MoveSwap> swap_move_test(in,TOP_sm,TOP_om,TOP_nhe, "TOP_Move move", tester); 
+  Tester<TOP_Input, TOP_Output, TOP_State> tester(in, TOP_sm, TOP_om);
+  MoveTester<TOP_Input, TOP_Output, TOP_State, TOP_MoveSwap> swap_move_test(in, TOP_sm, TOP_om, TOP_nhe, "TOP_Move move", tester);
 
   SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP solver");
   if(!CommandLineParameters::Parse(argc, argv, true, false)) {
@@ -64,6 +65,8 @@ int main(int argc, const char* argv[])
       TOP_solver.SetRunner(TOP_sa);
     } else if(method == string("HC")) {
       TOP_solver.SetRunner(TOP_hc);
+    } else if(method == string("TS")) {
+      TOP_solver.SetRunner(TOP_ts);
     } else { // if (method.GetValue() == string("SD"))
       TOP_solver.SetRunner(TOP_sd);
     }
