@@ -243,7 +243,7 @@ int main(int argc, char* argv[]) {
         continue;
       }
       solutionsStream << file.path().filename() << "," << 
-                         chaoRes[cnt_istances].chaoOptimum << ";" << -ck.GetBestCost() << 
+                         chaoRes[cnt_istances].chaoOptimum << "," << -ck.GetBestCost() << 
                          -ck.GetBestCost() / chaoRes[cnt_istances].chaoOptimum << endl;
       ++cnt_istances;
     }

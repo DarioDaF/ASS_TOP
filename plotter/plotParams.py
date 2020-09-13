@@ -1,5 +1,5 @@
 '''
-  The function plots for ach parametere, some information about it. The plot is made for all the maps (typing 0 
+  The function plots for each parameter, some information about it. The plot is made for all the maps (typing 0 
   in the command line) or to one specified map (typing its number).
   The informations plotted are:
     - Profit : mean profit of all instances (percentage on Chao's best);
