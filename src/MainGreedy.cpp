@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   string line;
   vector<chaoResults> chaoRes;
 
-  double from_wProfit = 1.1, from_wTime = 0.7, from_maxDeviation = 1.5, from_wNonCost = 0.0; // Default Parameters
+  double from_wProfit = 1.0, from_wTime = 0.7, from_maxDeviation = 1.5, from_wNonCost = 0.0; // Default Parameters
   double to_wProfit = 1.5, to_wTime = 1.5, to_maxDeviation = 1.7, to_wNonCost = 0.5;
   double up_wProfit = 1.0, up_wTime = 1.0, up_maxDeviation = 1.0, up_wNonCost = 1.0;
   
@@ -179,10 +179,19 @@ int main(int argc, char *argv[]) {
     double best = 0;
     if (file.path().extension() != ".txt")
       continue;
+    
+    if(file.path().filename().replace_extension("").string()[1] != '5') { /*To select only few instances selected by map*/
+      continue;
+    }
 
-    // if(file.path().filename().replace_extension("").string()[1] < '5') { /*To select only few instances selected by map*/
-    //   continue;
-    // }
+    if(file.path().filename().replace_extension("").string()[3] != '4') { /*To select only few instances selected by map*/
+      continue;
+    }
+
+    if(file.path().filename().replace_extension("").string()[5] != 'q') { /*To select only few instances selected by map*/
+      continue;
+    }
+
 
     cerr << "Processing: " << file.path().filename() << endl; 
     {
@@ -204,7 +213,10 @@ int main(int argc, char *argv[]) {
         for(double maxDeviation = from_maxDeviation; maxDeviation <= to_maxDeviation; maxDeviation += up_maxDeviation) {
           for(double wNonCost = from_wNonCost; wNonCost <= to_wNonCost; wNonCost += up_wNonCost) {
             
-            // cerr << "LOG: Solving with parmeters <A: " << a << ", B: " << b << ", C: " << c << ", D: " << d << ">" << endl;
+            cerr << "LOG: Solving with parmeters <wProfit: " << wProfit <<
+                    ", wProfit: " << wTime << 
+                    ", maxDeviation: " << maxDeviation << 
+                    ", wNonCost: " << wNonCost << ">" << endl;
 
             out.Clear();
             SolverAll(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
