@@ -5,6 +5,9 @@ include LibMakefile
 CPPFLAGS_JSON=-I$(NLOHMANNJSON)/include
 LDFLAGS_JSON=
 
+CPPFLAGS_CTPL=-I$(CTPL)/include
+LDFLAGS_CTPL=-pthread
+
 CPPFLAGS_HTTP=-I$(LIBHTTPSERVER)/include
 LDFLAGS_HTTP=-L$(LIBHTTPSERVER)/lib -lhttpserver
 
@@ -28,23 +31,23 @@ MainWeb.exe: LDFLAGS+=$(LDFLAGS_HTTP) $(LDFLAGS_JSON)
 MainLocal.exe: CPPFLAGS+=$(CPPFLAGS_EASYLOCAL)
 MainLocal.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 
+MainCGreedyTest.exe: CPPFLAGS+=$(CPPFLAGS_CTPL)
+MainCGreedyTest.exe: LDFLAGS+=$(LDFLAGS_CTPL)
+
 # WebViewer #
 MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
-
 # Parameter Analysis #
 MainParamGr.exe: src/MainParamGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
-
 # Map Analysis #
 MainMapGr.exe: src/MainMapGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
-
 # Greedy Solver #
 MainGreedy.exe: src/MainGreedy.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
-
 # Backtracking Solver #
 MainBackT.exe: src/MainBackT.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
-
 # Loacl Search Solver #
 MainLocal.exe: src/MainLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
+# Test C param in Greedy #
+MainCGreedyTest.exe: src/MainCGreedyTest.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 
 %.o: %.cpp
 	g++ $(CPPFLAGS) -c -o $@ $< -MD
