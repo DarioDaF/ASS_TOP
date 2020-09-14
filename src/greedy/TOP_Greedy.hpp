@@ -36,11 +36,16 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double w
  * @return [void]
  */
 void SolveGreedy(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) {
-  // Exctract the parameters from the json file. Default value: 1
-  double wProfit = json_get_or_default<float>(options["wProfit"], 1.1);
-  double wTime = json_get_or_default<float>(options["wTime"], 0.7);
-  double maxDeviation = json_get_or_default<float>(options["maxDeviation"], 1.5);
-  double wNonCost = json_get_or_default<float>(options["wNonCost"], 0.0);
+  // Exctract the parameters from the json file. Default values are provided
+  // double wProfit = json_get_or_default<float>(options["wProfit"], 1.1);
+  // double wTime = json_get_or_default<float>(options["wTime"], 0.7);
+  // double maxDeviation = json_get_or_default<float>(options["maxDeviation"], 1.5);
+  // double wNonCost = json_get_or_default<float>(options["wNonCost"], 0.0);
+
+  double wProfit = json_get_or_default<float>(options["a"], 1.1);
+  double wTime = json_get_or_default<float>(options["b"], 0.7);
+  double maxDeviation = json_get_or_default<float>(options["c"], 1.5);
+  double wNonCost = json_get_or_default<float>(options["d"], 0.0);
   SolverAll(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
 }
 
