@@ -156,7 +156,7 @@ void SolveBacktrack(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlo
   double wProfit = json_get_or_default<float>(options["a"], 1.1);
   double wTime = json_get_or_default<float>(options["b"], 0.7);
   double maxDeviation = json_get_or_default<float>(options["c"], 1.5);
-  double wNonCost = json_get_or_default<float>(options["e"], 0.0);
+  double wNonCost = json_get_or_default<float>(options["d"], 0.0);
   double maxTime = json_get_or_default<float>(options["e"], 5.0);
   
   TOP_Walker tw(in, wProfit, wTime, maxDeviation, wNonCost);
