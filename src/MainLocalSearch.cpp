@@ -201,7 +201,7 @@ int main(int argc, const char* argv[])
     TOP_Output out = result.output;
     
     // Print the output into the shell
-    cout << "Cost: " << result.cost.total << "[From:" << out_prec.PointProfit() << " -> " << out.PointProfit() << "]" << endl;
+    cout << "Cost: " << -result.cost.total << " [From:" << out_prec.PointProfit() << " -> " << out.PointProfit() << "]" << endl;
     cout << "Time: " << result.running_time << "s " << endl;					
     
     // Print the outputs on file in different format
