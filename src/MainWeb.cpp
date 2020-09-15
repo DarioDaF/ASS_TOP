@@ -48,7 +48,10 @@ const std::map<std::string, std::string> mimes = {
 const std::vector<SolverEntry_s> solvers = {
   { .fn = SolveGreedy, .name = "Greedy" },
   { .fn = SolveBacktrack, .name = "BackTracking" },
-  { .fn = SolveGreedy, .name = "LocalSearch" }
+  // { .fn = SolveLocalSA, .name = "LocalSearchSA" },
+  // { .fn = SolveLocalHC, .name = "LocalSearchHC" },
+  // { .fn = SolveLocalTS, .name = "LocalSearchTS" },
+  // { .fn = SolveLocalSD, .name = "LocalSearchSD" }
 };
 #define DEF_SOLVER 0
 

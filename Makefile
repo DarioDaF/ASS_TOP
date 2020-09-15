@@ -19,7 +19,7 @@ LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
-ALL_EXE=MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackT.exe MainLocal.exe MainLocalSearch.exe
+ALL_EXE=MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe
 
 all: $(ALL_EXE)
 
@@ -46,7 +46,7 @@ MainMapGr.exe: src/MainMapGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 # Greedy Solver #
 MainGreedy.exe: src/MainGreedy.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 # Backtracking Solver #
-MainBackT.exe: src/MainBackT.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
+MainBackTracking.exe: src/MainBackTracking.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
 # Loacl Search Single Solver #
 MainLocal.exe: src/MainLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 # Loacl Search Multi Solver #

@@ -19,7 +19,7 @@ struct chaoResults {
 };
 
 /**
- * MainBackT.cpp is a main that takes all the instances and solve them with the backtracking algorithm. Bacause
+ * MainBackTracking.cpp is a main that takes all the instances and solve them with the backtracking algorithm. Bacause
  * of the long time that takes the backtracking, it is possible to set a maxTime limit that it takes to resolve 
  * each instance (default value 3 minutes). The main perform a metaheuristic backtracking because it use the greedy 
  * algorithm (with its parameter maxDeviation) plus some other solutions built to solve the TOP problem.  
@@ -43,13 +43,13 @@ struct chaoResults {
  *    SolBacktracking.csv : file in which it is saved for each instance the algorithm results and the comparison whith chao's one.
  *                          The file is located in "solutions" directory.
  *    
- *    "outputs/backtracking" files : for all the instances, it is saved a file which contain the input and the output in standard 
- *                                   form. Some useful information as the path, the hop and the score obtained are provided.
- *                                   The file are located in "outputs/backtracking" directory.
+ *    "outputs/backtracking/[#]" files : for all the instances, it is saved a file which contain the input and the output in standard 
+ *                                       form. Some useful information as the path, the hop and the score obtained are provided.
+ *                                       The file are located in "outputs/backtracking/[#]" directory.
  * 
- *    "outputs/routeHops/backtarcking" files : for all the instances it is saved the solution obtained if hops form to read and use
- *                                             it in the resolution of other algortims (i.e. Local Search).
- *                                             The files are located in "outputs/hops/greedy" directory.
+ *    "outputs/routeHops/backtarcking/[#]" files : for all the instances it is saved the solution obtained if hops form to read and use
+ *                                                 it in the resolution of other algortims (i.e. Local Search).
+ *                                                 The files are located in "outputs/routeHops/backtracking/[#]" directory.
  * 
  * Usage:
  *    ./MainBackT.exe [version of algorithm]

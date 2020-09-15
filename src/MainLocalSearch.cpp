@@ -22,36 +22,60 @@ struct chaoResults {
   double chaoOptimum;
 };
 
+/**
+ * MainLocalSearch.cpp is a main that takes all the instances and solve them with the LocalSearch's algorithms.
+ * From command line, it takes the name of the algorithm that run on all the instances. The parametrs for all the 
+ * algorithms are set by deafualt inside the main. To emiliorate the results receive from the greedy and the backtraking, 
+ * this main run the choosen algorithm on all the best routeHops received from the two previous algorithms.
+ * All the outputs are saved in different files to sum up the information and the outputs from which it is obtained 
+ * the best optimum.
+ * 
+ * Input file:
+ * 
+ *    chaoResults.txt : file in which are contained Chao's results, used to compare greedy scores whith Chao's ones.
+ *                      The file is located in "parametes_in" directory.
+ * 
+ *    "instances" files : files that contain the instances to solve.
+ *                        The files are located in "instances" directory. 
+ *  
+ *    "outputs/routeHops/bestRoutes" files : files that contains the best route given by the greedy and backtracking algorthms.
+ * 
+ * Output files:
+ *    SolLocalSearch[alg].csv : file in which it is saved for each instance the algorithm results and the comparison whith chao's one.
+ *                              The file is located in "solutions" directory.
+ *    
+ *    "outputs/localsearch/[alg]" files : for all the instances, it is saved a file which contain the input and the output in standard 
+ *                                        form. Some useful information as the path, the hop and the score obtained are provided.
+ *                                        The file are located in "outputs/localsearch/[alg]" directory.
+ * 
+ *    "outputs/routeHops/localsearch/[alg]" files : for all the instances it is saved the solution obtained if hops form to read and use
+ *                                                  it in the resolution of other algortims (i.e. Local Search).
+ *                                                  The files are located in "outputs/routeHops/localsearch/[alg]" directory.
+ * 
+ * Usage:
+ *    ./MainLocalSearch.exe [algorithm]
+ *    - algorithms : 
+ *                SA : MoveSimulatedAnnealing
+ *                HC : MoveHillClimbing
+ *                TS : MoveTabuSearch
+ *                SD : MoveSteepestDescent
+ * 
+ * @param argc number of items in the command line
+ * @param argv items in the command line
+ * @return resolve all the instances and print outputs and parameters in files
+ */
 int main(int argc, const char* argv[])
 {
   // variables
   int errors = 0, cnt_istances =  0;
-  string met, line;
+  string met, line, method;
   TOP_Input in;
   vector<chaoResults> chaoRes;
 
-  ParameterBox main_parameters("main", "Main Program options");
-
-  // The set of arguments added are the following:
-  
-  // Parameter<string> instance("instance", "Input instance", main_parameters); 
-  Parameter<int> seed("seed", "Random seed", main_parameters);
-  Parameter<string> method("method", "Solution method (empty for tester)", main_parameters);   
-  Parameter<string> init_state("init_state", "Initial state (to be read from file)", main_parameters);
-  Parameter<string> output_file("output_file", "Write the output to a file (filename required)", main_parameters);
- 
-  // 3rd parameter: false = do not check unregistered parameters
-  // 4th parameter: true = silent
-  CommandLineParameters::Parse(argc, argv, false, true);  
-
-  // if(!instance.IsSet()) {
-  //   cout << "Error: --main::instance filename option must always be set" << endl;
-  //   return 1;
-  // }
-
-  if(seed.IsSet()) {
-    Random::SetSeed(seed);
+  if(argc < 2) {
+    throw runtime_error("  ERROR: missing Algorithm [SA, HC, TS, SD]");
   }
+  method = argv[1];
 
   //Open and read the file of Chao's results
   ifstream optStream("./paramIn/chaoResults.txt"); 
@@ -84,7 +108,6 @@ int main(int argc, const char* argv[])
   }
   
   for (const auto &file : fs::directory_iterator("./instances")) { //For each instance
-    double best = 0;
     if (file.path().extension() != ".txt")
       continue;
 
@@ -99,8 +122,8 @@ int main(int argc, const char* argv[])
       is >> in;
       in.name = file.path().filename().replace_extension("").string();
     }
+    
     TOP_Output out_prec(in);
-
     {
       ifstream is("./outputs/routeHops/bestRoutes/" + in.name + ".out");
       if (!is) {
@@ -112,12 +135,9 @@ int main(int argc, const char* argv[])
     }
 
     TOP_StateManager TOP_sm(in);
-    
     TOP_CostContainer cc(in); // Create costs
     cc.AddCostComponents(TOP_sm); // Add all cost components
-
     TOP_MoveSwapNeighborhoodExplorer TOP_nhe(in, TOP_sm, cc); // Create and add delta costs
-
     TOP_OutputManager TOP_om(in);
     
     // runners
@@ -126,14 +146,7 @@ int main(int argc, const char* argv[])
     TabuSearch<TOP_Input, TOP_State, TOP_MoveSwap> TOP_ts(in, TOP_sm, TOP_nhe, "TOP_MoveTabuSearch");
     SimulatedAnnealing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sa(in, TOP_sm, TOP_nhe, "TOP_MoveSimulatedAnnealing");
 
-    // tester
-    Tester<TOP_Input, TOP_Output, TOP_State> tester(in, TOP_sm, TOP_om);
-    MoveTester<TOP_Input, TOP_Output, TOP_State, TOP_MoveSwap> swap_move_test(in, TOP_sm, TOP_om, TOP_nhe, "TOP_Move move", tester);
-
     SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP solver");
-    if(!CommandLineParameters::Parse(argc, argv, true, false)) {
-      return 1;
-    }
 
     if(method == string("SA")) {
       TOP_solver.SetRunner(TOP_sa);
@@ -144,33 +157,65 @@ int main(int argc, const char* argv[])
     } else { // if (method.GetValue() == string("SD"))
       TOP_solver.SetRunner(TOP_sd);
     }
-      
-    auto result = TOP_solver.Solve();
-    // result is a tuple: 0: solutio, 1: number of violations, 2: total cost, 3: computing time
-    TOP_Output out = result.output;
-    if(output_file.IsSet()) { // write the output on the file passed in the command line
-      ofstream os(static_cast<string>(output_file).c_str());
-      // os << out << endl;
-      os << "Cost: " << result.cost.total << endl;
-      os << "Time: " << result.running_time << "s " << endl;
-      os.close();
-    } else { // write the solution in the standard output
-      // cout << out << endl;
-      cout << "Cost: " << result.cost.total << endl;
-      cout << "Time: " << result.running_time << "s " << endl;					
+
+    // TOP_ts.RegisterParameters();
+    // std::cout << TOP_ts.ParametersToJSON() << endl; 
+
+    // TOP_sa.RegisterParameters();
+    // std::cout << TOP_sa.ParametersToJSON() << endl;
+
+    // TOP_hc.RegisterParameters();
+    // std::cout << TOP_hc.ParametersToJSON() << endl;
+
+    // TOP_sd.RegisterParameters();
+    // std::cout << TOP_sd.ParametersToJSON() << endl;
+
+    if(method == string("SA")) {
+      TOP_sa.RegisterParameters();
+      TOP_sa.SetParameter("compute_start_temperature", (bool)false);
+      TOP_sa.SetParameter("cooling_rate", (double)0.0001);
+      TOP_sa.SetParameter("max_evaluations", (unsigned long int)10000);
+      TOP_sa.SetParameter("min_temperature", (double)0.001);
+      TOP_sa.SetParameter("neighbors_accepted", (unsigned int)1000);
+      TOP_sa.SetParameter("neighbors_sampled", (unsigned int)1000);
+      TOP_sa.SetParameter("start_temperature", (double)0.0001);
+    } 
+    else if(method == string("HC")) {
+      TOP_hc.RegisterParameters();
+      TOP_hc.SetParameter("max_evaluations", (unsigned long int)10000);
+      TOP_hc.SetParameter("max_idle_iterations", (unsigned long int)100);
+    } 
+    else if(method == string("TS")) {
+      TOP_ts.RegisterParameters();
+      TOP_ts.SetParameter("max_evaluations", (unsigned long int)10000);
+      TOP_ts.SetParameter("max_idle_iterations", (unsigned long int)100);
+      TOP_ts.SetParameter("max_tenure", (unsigned int)20);
+      TOP_ts.SetParameter("min_tenure", (unsigned int)10);
+    } 
+    else { // if (method.GetValue() == string("SD"))
+      TOP_sd.RegisterParameters();
+      TOP_sd.SetParameter("max_evaluations", (unsigned long int)10000);
     }
 
+    auto result = TOP_solver.Resolve(out_prec);
+    TOP_Output out = result.output;
+    
+    // Print the output into the shell
+    cout << "Cost: " << result.cost.total << "[From:" << out_prec.PointProfit() << " -> " << out.PointProfit() << "]" << endl;
+    cout << "Time: " << result.running_time << "s " << endl;					
+    
+    // Print the outputs on file in different format
     string titleDir = "outputs/localsearch/" + met;
     fs::create_directories(titleDir);
     if(out.PointProfit() == 0) { // No solution found, the problem is unfeasible
-      { // Print the outputs on file
+      {
         
         ofstream os(titleDir / file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
           cerr << "  ERROR: Unable to open output file" << endl;
           continue;
-          }
+        }
         os << in << "h 0";
       }
       {
@@ -209,19 +254,19 @@ int main(int argc, const char* argv[])
 
     // Print a ".csv" file with all the scores
     if(chaoRes[cnt_istances].file == file.path().filename()) { // Compare with Chao
-      if(chaoRes[cnt_istances].chaoOptimum == best) {
-        solutionsStream << file.path().filename() << "," << chaoRes[cnt_istances].chaoOptimum << "," << best << "," << 1.0 << endl;
+      if(chaoRes[cnt_istances].chaoOptimum == out.PointProfit()) {
+        solutionsStream << file.path().filename() << "," << chaoRes[cnt_istances].chaoOptimum << "," << out.PointProfit() << "," << 1.0 << endl;
         ++cnt_istances;
         continue;
       }
       solutionsStream << file.path().filename() << "," << 
                          chaoRes[cnt_istances].chaoOptimum << "," << 
-                         best << "," << 
-                         best / chaoRes[cnt_istances].chaoOptimum << endl;
+                         out.PointProfit() << "," << 
+                         out.PointProfit() / chaoRes[cnt_istances].chaoOptimum << endl;
       ++cnt_istances;
     }
     else { // New map found
-      solutionsStream << file.path().filename() << "," << best << "," << "(new map)" << endl;
+      solutionsStream << file.path().filename() << "," << out.PointProfit() << "," << "(new map)" << endl;
     } 
   }
   solutionsStream.close();
