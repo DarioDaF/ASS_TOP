@@ -8,7 +8,9 @@ int TOP_CostProfit_Swap::ComputeCost(const TOP_State& st) const {
 }
 
 void TOP_CostProfit_Swap::PrintViolations(const TOP_State& st, ostream& os) const {
-  throw std::logic_error("TOP_CostTest::PrintViolations not implemented");
+  if(st.PointProfit() > 0) {
+    os << "The current state has negative profit (" << -st.PointProfit() << ") [should be at least zero or positive]";
+  }
 }
 
 int TOP_CostCar_Swap::ComputeCost(const TOP_State& st) const {

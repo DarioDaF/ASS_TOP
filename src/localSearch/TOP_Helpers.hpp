@@ -14,8 +14,24 @@ using namespace EasyLocal::Core;
 class TOP_StateManager : public StateManager<TOP_Input,TOP_State> 
 {
 public:
+  // Constructor 
   TOP_StateManager(const TOP_Input &);
+
+  /**
+   * Initial state builder (random assignation of point to cars)
+   *
+   * @param st state of the current output 
+   * @return [void]
+   */
   void RandomState(TOP_State&);   
+
+  /**
+   * Verify if one state in consistent. It need to satisfy two conditions: the max travel time of 
+   * each car should be less than the max time admitted and each poit should be visited at least one time.
+   *
+   * @param st state of the current output 
+   * @return true if consistent, false otherwise
+   */
   bool CheckConsistency(const TOP_State& st) const;
 protected:
 }; 

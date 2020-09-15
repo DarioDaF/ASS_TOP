@@ -66,17 +66,29 @@ class TOP_Input {
   
   public:
     std::string name;
-    TOP_Input(const std::string& filename); // THIS ??
+    TOP_Input(const std::string& filename); // Input 
     TOP_Input() { Clear(); }
     void Clear();
 
     // Functions
-    int Cars() const { return cars; } // Number of cars
-    int Points() const { return points.size(); } // Number of points
-    double MaxTime() const { return max_time; } // Max travel time admitted
-    const TOP_Point& Point(idx_t pos) const { return points[pos]; } // index point
-    idx_t StartPoint() const { return 0; } // Start point
-    idx_t EndPoint() const { return points.size() - 1; } // End point (conventionally the last from instances file)
+
+    // Number of cars
+    int Cars() const { return cars; } 
+
+    // Number of points
+    int Points() const { return points.size(); } 
+
+    // Max travel time admitted
+    double MaxTime() const { return max_time; } 
+
+    // index point
+    const TOP_Point& Point(idx_t pos) const { return points[pos]; }
+
+    // Start point 
+    idx_t StartPoint() const { return 0; }
+    
+    // End point (conventionally the last from instances file)
+    idx_t EndPoint() const { return points.size() - 1; } 
 
     const double Distance(idx_t p1, idx_t p2) const { return Point(p1).Distance(Point(p2)); }
 
@@ -121,7 +133,8 @@ class TOP_Output {
       point_profit(out.point_profit),
       time_violations(out.time_violations) {}
 
-    TOP_Output& operator=(const TOP_Output& out) { // operator= compare two outputs
+    // operator= overwrite two outputs
+    TOP_Output& operator=(const TOP_Output& out) { 
       const_cast<TOP_Input&>(this->in) = out.in;
       this->car_hops = out.car_hops;
       this->visited = out.visited;
@@ -132,17 +145,32 @@ class TOP_Output {
     }
 
     // Basic functions
-    double TravelTime(idx_t car) const { return travel_time[car]; } // return the travel time of one specified car
-    bool Visited(idx_t point) const { return visited[point] > 0; } // Verify if one point is already visited
-    bool Feasible() const { return time_violations == 0; } // Verify feasibility
-    int PointProfit() const { return point_profit; } // Return the profit already gained
-    int Hops(idx_t car) const { return car_hops[car].size() + 1; } // Return the hops made by one car
+
+    // return the travel time of one specified car
+    double TravelTime(idx_t car) const { return travel_time[car]; }
+
+    // Verify if one point is already visited 
+    bool Visited(idx_t point) const { return visited[point] > 0; }
+
+     // Verify if one point is already visited by two cars at the same time
+    bool DoubleVisited(idx_t point) const { return visited[point] > 1; }  
+
+    // Verify feasibility
+    bool Feasible() const { return time_violations == 0; } 
+
+     // Return the profit already gained
+    int PointProfit() const { return point_profit; }
+
+    // Return the hops made by one car
+    int Hops(idx_t car) const { return car_hops[car].size() + 1; } 
     
-    idx_t CarPoint(idx_t car) const { // Return the last point inserted from a specified car
+    // Return the last point inserted from a specified car
+    idx_t CarPoint(idx_t car) const { 
       return car_hops[car].empty() ? in.StartPoint() : car_hops[car].back(); 
     } 
 
-    idx_t Hop(idx_t car, idx_t hop) const { // Return the point index reached by the car in its one specific hop
+    // Return the point index reached by the car in its one specific hop
+    idx_t Hop(idx_t car, idx_t hop) const { 
       if(hop <= 0) return in.StartPoint();
       if(hop > car_hops[car].size()) return in.EndPoint();
       return car_hops[car][hop - 1];
