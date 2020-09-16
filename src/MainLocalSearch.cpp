@@ -133,6 +133,7 @@ int main(int argc, const char* argv[])
       }
       is >> out_prec;
     }
+    double precProfit = out_prec.PointProfit();
 
     TOP_StateManager TOP_sm(in);
     TOP_CostContainer cc(in); // Create costs
@@ -201,7 +202,10 @@ int main(int argc, const char* argv[])
     TOP_Output out = result.output;
     
     // Print the output into the shell
-    cout << "Cost: " << -result.cost.total << " [From:" << out_prec.PointProfit() << " -> " << out.PointProfit() << "]" << endl;
+    cout << "Cost: " << -result.cost.total 
+                     << " [From:" << out_prec.PointProfit() 
+                     << ", deltaProfit: " 
+                     << (((100 * out.PointProfit()) / precProfit) - 100)  << "]" << endl;
     cout << "Time: " << result.running_time << "s " << endl;					
     
     // Print the outputs on file in different format
@@ -255,7 +259,10 @@ int main(int argc, const char* argv[])
     // Print a ".csv" file with all the scores
     if(chaoRes[cnt_istances].file == file.path().filename()) { // Compare with Chao
       if(chaoRes[cnt_istances].chaoOptimum == out.PointProfit()) {
-        solutionsStream << file.path().filename() << "," << chaoRes[cnt_istances].chaoOptimum << "," << out.PointProfit() << "," << 1.0 << endl;
+        solutionsStream << file.path().filename() 
+                        << "," << chaoRes[cnt_istances].chaoOptimum 
+                        << "," << out.PointProfit() 
+                        << "," << 1.0 << endl;
         ++cnt_istances;
         continue;
       }

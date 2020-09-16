@@ -111,7 +111,7 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
  * @param wNonCost weight that multiplies the third (no choosing cost or losses) factor of the rating equation
  * @return [void]
  */
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int solvedSolutions, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost);
+void PointToCarAssignment(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int solvedSolutions, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost);
 
 /******************
  * Implementation *
@@ -300,7 +300,7 @@ int InsertPoint(const TOP_Input &in, TOP_Output& out, idx_t car, double maxDevia
   }
 }
 
-void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int solvedSolutions, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
+void PointToCarAssignment(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TOP_Output& out, std::mt19937& rng, int solvedSolutions, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   NumberRange<idx_t> carIdxs(in.Cars());
   NumberRange<idx_t> pointIdxs(in.Points());
   vector<bool> markedCars(in.Cars());
@@ -401,7 +401,7 @@ void SolverGreedy(vector<TOP_Output>& partial_solutions, const TOP_Input& in, TO
   // cerr << "LOG: counter of partial solution inserted " << partialCounter << endl;
 }
 
-void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
+void GreedySolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviationAdmitted, double wNonCost) {
   vector<TOP_Output> partial_solutions;
   int solvedSolutions = 0;
 
@@ -413,7 +413,7 @@ void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double w
     auto lastSol = partial_solutions.back(); // To next partial solution
     partial_solutions.pop_back();
     
-    SolverGreedy(partial_solutions, in, lastSol, rng, solvedSolutions, wProfit, wTime, maxDeviationAdmitted, wNonCost); // Solve
+    PointToCarAssignment(partial_solutions, in, lastSol, rng, solvedSolutions, wProfit, wTime, maxDeviationAdmitted, wNonCost); // Solve
     ++solvedSolutions; 
 
     if(lastSol.PointProfit() > out.PointProfit()) { // Update the best solution found

@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
             //         ", wNonCost: " << wNonCost << ">" << endl;
             
             out.Clear();
-            SolverAll(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
+            GreedySolver(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
 
             if (out.PointProfit() > best) {
               best = out.PointProfit();

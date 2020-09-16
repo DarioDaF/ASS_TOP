@@ -29,7 +29,7 @@ void runThread(int id, TOP_Output& out, double maxDeviation) {
     (mt19937::result_type)millis;
   mt19937 rng(seed);
 
-  SolverAll(out.in, out, rng, 1.1, 0.7, maxDeviation, 0.0);
+  GreedySolver(out.in, out, rng, 1.1, 0.7, maxDeviation, 0.0);
   //cerr << "END Thread: " << id << " @ " << maxDeviation << " -> " << out.PointProfit() << endl;
 }
 
