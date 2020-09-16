@@ -4,7 +4,7 @@
   other useful informations.
 
   Usage:
-    python3 ./plotter/bestTaker.py [bestVersion]
+    python3 ./scriptHelpers/bestTaker.py [bestVersion]
 
     bestVersion: 
         - GB : Greedy and Backtracking
@@ -31,7 +31,11 @@ def printAlg(n, idx, res, maxRes):
   else: 
     return 1 - float(res[n][idx][2]) / float(maxRes[idx][2])
 
-if(sys.argv[1] == 'GB'): 
+ver = sys.argv[1]
+ver = ver.strip()
+print("Processing version " , ver)
+
+if(ver == 'GB'): 
   solFile = ["./solutions/SolGreedy#1.csv", \
              "./solutions/SolGreedy#2.csv", \
              "./solutions/SolBacktracking#1.csv", \
@@ -65,7 +69,7 @@ for idx in range(len(res[1])):
   temp = [res[0][idx][2], res[1][idx][2], res[2][idx][2] , res[3][idx][2]]
   maxN = max(temp)
   index = temp.index(max(temp))
-  if(sys.argv[1] == 'LS'): 
+  if(ver == 'LS'): 
     if(index == 0):
       alg = "SA"
     elif(index == 1):
@@ -85,12 +89,12 @@ for idx in range(len(res[1])):
       alg = "BT#1"
   maxRes.append([res[1][idx][0], res[1][idx][1], maxN, res[index][idx][3], alg])
 
-path = './solutions/bestSolutions/'
+path = "./solutions/bestSolutions/"
 if(not os.path.isdir(path)):
   os.mkdir(path)
-with open(path + 'bestSol' + sys.argv[1] + '.csv', mode='w') as csv_file:
+with open(path + "bestSol" + ver + ".csv", mode='w') as csv_file:
   
-  if(sys.argv[1] == 'GB'):
+  if(ver == "GB"):
     fieldnames = ['instance', 'chaoOpt', 'result', "percOnOpt", 'bestAlgorithm',"dtGR#1", "dtGR#2", "dtBT#1", "dtBT#2", "dtMedium"]
   else:
     fieldnames = ['instance', 'chaoOpt', 'result', "percOnOpt", 'bestAlgorithm', "dtSA", "dtHC", "dtSD", "dtTS", "dtMedium"]
@@ -101,7 +105,7 @@ with open(path + 'bestSol' + sys.argv[1] + '.csv', mode='w') as csv_file:
   for idx in range(len(maxRes)):
     name = maxRes[idx][0].split('"')
     
-    if(sys.argv[1] == "GB"):
+    if(ver == "GB"):
       writer.writerow({'instance' : name[1], 
                        'chaoOpt' : maxRes[idx][1],
                        'result' : maxRes[idx][2],
@@ -125,7 +129,7 @@ with open(path + 'bestSol' + sys.argv[1] + '.csv', mode='w') as csv_file:
                        'dtMedium' : (printAlg(0, idx, res, maxRes) + printAlg(1, idx, res, maxRes) + printAlg(2, idx, res, maxRes) + printAlg(3, idx, res, maxRes)) / 4})
 
 
-if(sys.argv[1] == 'GB'): 
+if(ver == 'GB'): 
   solPath = "./outputs/routeHops/bestRoutes/"
   if(not os.path.isdir(solPath)):
     os.mkdir("./outputs/routeHops/bestRoutes/")

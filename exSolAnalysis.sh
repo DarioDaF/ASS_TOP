@@ -1,8 +1,8 @@
-#!/bin/sh
-
-# To take the best solution on which run the Local Search
-./plotter/bestTaker.py
-
-# To plot some analysis about the performance of the algorithms
-./plotter/solAnalysis.py
-
+#!/bin/bash
+# To take the best solution on which run the Local Search #
+python3 ./scriptHelpers/bestTaker.py GB
+# To take the best solution about the Local Search algorithms #
+python3 ./scriptHelpers/bestTaker.py LS
+# To plot some analysis about the performance of the algorithms #
+python3 ./scriptHelpers/solAnalysis.py GB
+python3 ./scriptHelpers/solAnalysis.py LS

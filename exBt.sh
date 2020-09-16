@@ -8,7 +8,7 @@ make
 # Solve all istances and with the specified parameters and print the results
 
 # Version 1 : with default parameters #
-./MainBT.exe 1
+./MainBackTracking.exe 1
 
-#Version 2 : with readed Greedy parameters #
-./MainBT.exe 2
+# Version 2 : with readed Greedy parameters #
+./MainBackTracking.exe 2

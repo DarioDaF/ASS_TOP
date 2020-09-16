@@ -34,13 +34,13 @@ void SolveLocalSA(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
   TOP_solver.SetRunner(TOP_sa);
 
   TOP_sa.RegisterParameters();
-  TOP_sa.SetParameter("compute_start_temperature", json_get_or_default<bool>(options["g"], false));
-  TOP_sa.SetParameter("cooling_rate", json_get_or_default<double>(options["g"], (double)0.0001));
-  TOP_sa.SetParameter("max_evaluations", json_get_or_default<unsigned long int>(options["h"], (unsigned long int)10000));
-  TOP_sa.SetParameter("min_temperature", json_get_or_default<double>(options["i"], (double)0.001));
-  TOP_sa.SetParameter("neighbors_accepted", json_get_or_default<unsigned int>(options["i"], (unsigned int)1000));
-  TOP_sa.SetParameter("neighbors_sampled", json_get_or_default<unsigned int>(options["i"], (unsigned int)1000));
-  TOP_sa.SetParameter("start_temperature", json_get_or_default<double>(options["i"], (double)0.0001));
+  TOP_sa.SetParameter("compute_start_temperature", json_get_or_default<bool>(options["m"], false));
+  TOP_sa.SetParameter("cooling_rate", json_get_or_default<double>(options["n"], (double)0.0001));
+  TOP_sa.SetParameter("max_evaluations", json_get_or_default<unsigned long int>(options["o"], (unsigned long int)10000));
+  TOP_sa.SetParameter("min_temperature", json_get_or_default<double>(options["p"], (double)0.001));
+  TOP_sa.SetParameter("neighbors_accepted", json_get_or_default<unsigned int>(options["q"], (unsigned int)1000));
+  TOP_sa.SetParameter("neighbors_sampled", json_get_or_default<unsigned int>(options["r"], (unsigned int)1000));
+  TOP_sa.SetParameter("start_temperature", json_get_or_default<double>(options["s"], (double)0.0001));
 
   TOP_Output out_prec(in);
   {
@@ -49,7 +49,7 @@ void SolveLocalSA(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
       cerr << "  ERROR: Unable to open bestRoutes Instance file" << endl;
       return;
     }
-      is >> out_prec;
+    is >> out_prec;
   }
   auto result = TOP_solver.Resolve(out_prec);
   out = result.output;
@@ -91,7 +91,7 @@ void SolveLocalHC(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
       cerr << "  ERROR: Unable to open bestRoutes Instance file" << endl;
       return;
     }
-      is >> out_prec;
+    is >> out_prec;
   }
   auto result = TOP_solver.Resolve(out_prec);
   out = result.output;
@@ -135,7 +135,7 @@ void SolveLocalTS(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
       cerr << "  ERROR: Unable to open bestRoutes Instance file" << endl;
       return;
     }
-      is >> out_prec;
+    is >> out_prec;
   }
   auto result = TOP_solver.Resolve(out_prec);
   out = result.output;
@@ -169,7 +169,16 @@ void SolveLocalSD(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
   TOP_sd.RegisterParameters();
   TOP_sd.SetParameter("max_evaluations", json_get_or_default<unsigned long int>(options["z"], (unsigned long int)10000));
 
-  auto result = TOP_solver.Resolve(out);
+  TOP_Output out_prec(in);
+  {
+    ifstream is("../../outputs/routeHops/bestRoutes/" + in.name + ".out");
+    if (!is) {
+      cerr << "  ERROR: Unable to open bestRoutes Instance file" << endl;
+      return;
+    }
+    is >> out_prec;
+  }
+  auto result = TOP_solver.Resolve(out_prec);
   out = result.output;
   // Print the output into the shell
   std::cout << "Time: " << result.running_time << "s " << endl;
