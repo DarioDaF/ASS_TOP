@@ -19,7 +19,7 @@ LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
-ALL_EXE=MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackT.exe MainLocal.exe
+ALL_EXE=MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe
 
 all: $(ALL_EXE)
 
@@ -31,11 +31,14 @@ MainWeb.exe: LDFLAGS+=$(LDFLAGS_HTTP) $(LDFLAGS_JSON)
 MainLocal.exe: CPPFLAGS+=$(CPPFLAGS_EASYLOCAL)
 MainLocal.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 
+MainLocalSearch.exe: CPPFLAGS+=$(CPPFLAGS_EASYLOCAL)
+MainLocalSearch.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
+
 MainCGreedyTest.exe: CPPFLAGS+=$(CPPFLAGS_CTPL)
 MainCGreedyTest.exe: LDFLAGS+=$(LDFLAGS_CTPL)
 
 # WebViewer #
-MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
 # Parameter Analysis #
 MainParamGr.exe: src/MainParamGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 # Map Analysis #
@@ -43,9 +46,11 @@ MainMapGr.exe: src/MainMapGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 # Greedy Solver #
 MainGreedy.exe: src/MainGreedy.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 # Backtracking Solver #
-MainBackT.exe: src/MainBackT.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
-# Loacl Search Solver #
+MainBackTracking.exe: src/MainBackTracking.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
+# Loacl Search Single Solver #
 MainLocal.exe: src/MainLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
+# Loacl Search Multi Solver #
+MainLocalSearch.exe: src/MainLocalSearch.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 # Test C param in Greedy #
 MainCGreedyTest.exe: src/MainCGreedyTest.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 

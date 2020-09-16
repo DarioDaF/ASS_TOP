@@ -43,17 +43,17 @@ struct chaoResults {
  *    SolGreedy.csv : file in which it is saved the range of parameted and for each instance the algorithm results 
  *                    and the comparison whith chao's one. The file is located in "solutions" directory.
  *    
- *    "outputs/greedy" files : for all the instances, it is saved a file which contain the input and the output in standard 
- *                             form. Some useful information as the path, the hop and the score obtained are provided.
- *                              The file are located in "outputs/greedy" directory.
+ *    "outputs/greedy/[#]" files : for all the instances, it is saved a file which contain the input and the output in standard 
+ *                                 form. Some useful information as the path, the hop and the score obtained are provided.
+ *                                 The file are located in "outputs/greedy/[#]" directory.
  *    
- *    "outputs/greedy/paramGreedy" files : for all the instances it is saved the set of parameters from which is obtained
- *                                         the best score. Those parameters are used in the metaheuristic backtracking.
- *                                         The files are located in "outputs/greedy/paramGreedy" directory.
+ *    "outputs/greedy/paramGreedy/[#]" files : for all the instances it is saved the set of parameters from which is obtained
+ *                                             the best score. Those parameters are used in the metaheuristic backtracking.
+ *                                             The files are located in "outputs/greedy/paramGreedy/[#]" directory.
  *    
- *    "outputs/routeHops/greedy" files : for all the instances it is saved the solution obtained if hops form to read and use it in 
- *                                       the resolution of other algortims (i.e. Local Search).
- *                                       The files are located in "outputs/hops/greedy" directory.
+ *    "outputs/routeHops/greedy/[#]" files : for all the instances it is saved the solution obtained if hops form to read and use it in 
+ *                                           the resolution of other algortims (i.e. Local Search).
+ *                                           The files are located in "outputs/hops/greedy/[#]" directory.
  *  
  * Usage:
  *    ./MainGreedy.exe [version of algorithm]
@@ -180,18 +180,9 @@ int main(int argc, char *argv[]) {
     if (file.path().extension() != ".txt")
       continue;
     
-    if(file.path().filename().replace_extension("").string()[1] != '5') { /*To select only few instances selected by map*/
-      continue;
-    }
-
-    if(file.path().filename().replace_extension("").string()[3] != '4') { /*To select only few instances selected by map*/
-      continue;
-    }
-
-    if(file.path().filename().replace_extension("").string()[5] != 'q') { /*To select only few instances selected by map*/
-      continue;
-    }
-
+    // if(file.path().filename().replace_extension("").string()[1] != '5') { /*To select only few instances selected by map*/
+    //   continue;
+    // }
 
     cerr << "Processing: " << file.path().filename() << endl; 
     {
@@ -213,11 +204,11 @@ int main(int argc, char *argv[]) {
         for(double maxDeviation = from_maxDeviation; maxDeviation <= to_maxDeviation; maxDeviation += up_maxDeviation) {
           for(double wNonCost = from_wNonCost; wNonCost <= to_wNonCost; wNonCost += up_wNonCost) {
             
-            cerr << "LOG: Solving with parmeters <wProfit: " << wProfit <<
-                    ", wProfit: " << wTime << 
-                    ", maxDeviation: " << maxDeviation << 
-                    ", wNonCost: " << wNonCost << ">" << endl;
-
+            // cerr << "LOG: Solving with parmeters <wProfit: " << wProfit <<
+            //         ", wProfit: " << wTime << 
+            //         ", maxDeviation: " << maxDeviation << 
+            //         ", wNonCost: " << wNonCost << ">" << endl;
+            
             out.Clear();
             SolverAll(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
 

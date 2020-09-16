@@ -11,18 +11,56 @@ using namespace EasyLocal::Core;
 class TOP_CostProfit_Swap
  : public CostComponent<TOP_Input, TOP_State, int> {
   public:
+
+    /**
+     * Constructor
+     */
     TOP_CostProfit_Swap(const TOP_Input& in, int w, bool hard)
      : CostComponent<TOP_Input, TOP_State, int>(in, w, hard, "TOP_CostProfit_Swap") {}
+
+    /**
+     * Calculate the current profit
+     *
+     * @param st state of the current output 
+     * @return current profit
+     */
     int ComputeCost(const TOP_State& st) const; // @TODO: Implement in cpp
+
+    /**
+     * Print the violations originated bythe profit: in particular if it's negative there is a loss.
+     *
+     * @param st state of the current output 
+     * @param os ostream variable
+     * @return [void]
+     */
     void PrintViolations(const TOP_State& st, ostream& os = cout) const; // @TODO: Implement in cpp
 };
 
 class TOP_CostCar_Swap
  : public CostComponent<TOP_Input, TOP_State, int> {
   public:
+
+    /**
+     * Constructor
+     */
     TOP_CostCar_Swap(const TOP_Input& in, int w, bool hard)
      : CostComponent<TOP_Input, TOP_State, int>(in, w, hard, "TOP_CostCar_Swap") {}
+
+     /**
+     * Calculate the violations originated by the cars which exceed the max travel time admitted.
+     *
+     * @param st state of the current output 
+     * @return the number of violations
+     */
     int ComputeCost(const TOP_State& st) const; // @TODO: Implement in cpp
+
+    /**
+     * Print the violations originated by the cars.
+     *
+     * @param st state of the current output 
+     * @param os ostream variable
+     * @return [void]
+     */
     void PrintViolations(const TOP_State& st, ostream& os = cout) const; // @TODO: Implement in cpp
 };
 

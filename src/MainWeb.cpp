@@ -43,9 +43,16 @@ const std::map<std::string, std::string> mimes = {
 
 #include "greedy/Solver.hpp"
 #include "greedy/TOP_Greedy.hpp"
+#include "backTracking/TOP_Backtracking.hpp"
+#include "localSearch/TOP_Local.hpp"
 
 const std::vector<SolverEntry_s> solvers = {
   { .fn = SolveGreedy, .name = "Greedy" },
+  { .fn = SolveBacktrack, .name = "BackTracking" },
+  { .fn = SolveLocalSA, .name = "LocalSearchSA" },
+  { .fn = SolveLocalHC, .name = "LocalSearchHC" },
+  { .fn = SolveLocalTS, .name = "LocalSearchTS" },
+  { .fn = SolveLocalSD, .name = "LocalSearchSD" }
 };
 #define DEF_SOLVER 0
 
