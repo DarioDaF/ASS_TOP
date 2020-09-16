@@ -8,7 +8,7 @@
     - devStd : standard deviation of all the instances. It is used to print Profit +/- devStd;
 
   Usage:
-    python3 ./plotter/plotParams.py [map] [parameter]
+    python3 ./scriptHelpers/plotParams.py [map] [parameter]
 
   Input files:
     - solPar[param].csv : file ".csv" that contain the value to plot. The program parse all the files.

@@ -212,16 +212,16 @@ int main(int argc, char *argv[]) {
       out.Clear();
 
       if((string)argv[2] == "wProfit") {
-        SolverAll(in, out, rng, paramChose, param1, param2, param3);
+        GreedySolver(in, out, rng, paramChose, param1, param2, param3);
       }
       else if ((string)argv[2] == "wTime") {
-        SolverAll(in, out, rng, param1, paramChose, param2, param3);
+        GreedySolver(in, out, rng, param1, paramChose, param2, param3);
       }
       else if((string)argv[2] == "maxDeviation") {
-        SolverAll(in, out, rng, param1, param2, paramChose, param3);
+        GreedySolver(in, out, rng, param1, param2, paramChose, param3);
       }
       else if((string)argv[2] == "wNonCost") {
-        SolverAll(in, out, rng, param1, param2, param3, paramChose);
+       GreedySolver(in, out, rng, param1, param2, param3, paramChose);
       }
 
       res.push_back(out.PointProfit() / chao[idx].chaoOptimum * 100); //Normalized the solution found

@@ -20,14 +20,14 @@
  * @param wNonCost weight that multiplies the third (no choosing cost or losses) factor of the rating equation
  * @return [void]
  */
-void SolverAll(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviation, double wNonCost);
+void GreedySolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviation, double wNonCost);
 
 #ifdef WITH_JSON_OPTIONS
 
 #include <nlohmann/json.hpp>
 
 /**
- * Solve the problem with the greedy algorithm SolverGreedy, it's used in the Web Viewer. 
+ * Solve the problem with the greedy algorithm GreedySolver, it's used in the Web Viewer. 
  *
  * @param in constant input
  * @param out constant output
@@ -46,7 +46,7 @@ void SolveGreedy(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohma
   double wTime = json_get_or_default<float>(options["b"], 0.7);
   double maxDeviation = json_get_or_default<float>(options["c"], 1.5);
   double wNonCost = json_get_or_default<float>(options["d"], 0.0);
-  SolverAll(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
+  GreedySolver(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
 }
 
 #endif

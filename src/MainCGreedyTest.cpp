@@ -33,7 +33,7 @@ void runThread(int id, TOP_Output& out, double wTime, double maxDeviation) {
     (mt19937::result_type)millis;
   mt19937 rng(seed);
 
-  SolverAll(out.in, out, rng, 1.0, wTime, maxDeviation, 0);
+  GreedySolver(out.in, out, rng, 1.0, wTime, maxDeviation, 0);
   //cerr << "END Thread: " << id << " @ " << maxDeviation << " -> " << out.PointProfit() << endl;
 }
 
@@ -163,7 +163,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
   {
     mt19937 rng(seed);
     TOP_Output out(in);
-    SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+    GreedySolver(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
     oProfit = out.PointProfit();
   }
 
@@ -186,7 +186,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(top.wTimeIdx), maxDevFromIdx(top.maxDevIdx), 0);
+      GreedySolver(in, out, rng, 1.0, wTimeFromIdx(top.wTimeIdx), maxDevFromIdx(top.maxDevIdx), 0);
       dots[0][0] = out.PointProfit();
     }
     profits.insert(top, dots[0][0]);
@@ -198,7 +198,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(left.wTimeIdx), maxDevFromIdx(left.maxDevIdx), 0);
+      GreedySolver(in, out, rng, 1.0, wTimeFromIdx(left.wTimeIdx), maxDevFromIdx(left.maxDevIdx), 0);
       dots[0][1] = out.PointProfit();
     }
     profits.insert(left, dots[0][1]);
@@ -210,7 +210,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(right.wTimeIdx), maxDevFromIdx(right.maxDevIdx), 0);
+      GreedySolver(in, out, rng, 1.0, wTimeFromIdx(right.wTimeIdx), maxDevFromIdx(right.maxDevIdx), 0);
       dots[1][0] = out.PointProfit();
     }
     profits.insert(right, dots[1][0]);
@@ -222,7 +222,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(bottom.wTimeIdx), maxDevFromIdx(bottom.maxDevIdx), 0);
+      GreedySolver(in, out, rng, 1.0, wTimeFromIdx(bottom.wTimeIdx), maxDevFromIdx(bottom.maxDevIdx), 0);
       dots[1][1] = out.PointProfit();
     }
     profits.insert(bottom, dots[1][1]);
@@ -301,25 +301,25 @@ int main() {
   {
     mt19937 rng(seed);
     TOP_Output out(in);
-    SolverAll(in, out, rng, 1.0, WT_MIN, MDEV_MIN, 0);
+    GreedySolver(in, out, rng, 1.0, WT_MIN, MDEV_MIN, 0);
     sq_vals[0][0] = out.PointProfit();
   }
   {
     mt19937 rng(seed);
     TOP_Output out(in);
-    SolverAll(in, out, rng, 1.0, WT_MIN, MDEV_MAX, 0);
+    GreedySolver(in, out, rng, 1.0, WT_MIN, MDEV_MAX, 0);
     sq_vals[0][1] = out.PointProfit();
   }
   {
     mt19937 rng(seed);
     TOP_Output out(in);
-    SolverAll(in, out, rng, 1.0, WT_MAX, MDEV_MIN, 0);
+    GreedySolver(in, out, rng, 1.0, WT_MAX, MDEV_MIN, 0);
     sq_vals[1][0] = out.PointProfit();
   }
   {
     mt19937 rng(seed);
     TOP_Output out(in);
-    SolverAll(in, out, rng, 1.0, WT_MAX, MDEV_MAX, 0);
+    GreedySolver(in, out, rng, 1.0, WT_MAX, MDEV_MAX, 0);
     sq_vals[1][1] = out.PointProfit();
   }
 

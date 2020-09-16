@@ -4,7 +4,7 @@
   solutions found (who found the optimal solutions for an instance).
 
   Usage:
-    python3 ./plotter/solAnalysis.py [version]
+    python3 ./scriptHelpers/solAnalysis.py [version]
     
     version: 
         - GB : Greedy and Backtracking
@@ -24,7 +24,11 @@ import csv
 import sys
 import os
 
-if(sys.argv[1] == 'GB'): 
+ver = sys.argv[1]
+ver = ver.strip()
+print("Processing version " , ver)
+
+if(ver == 'GB'): 
   solFile = ["./solutions/SolGreedy#1.csv", \
              "./solutions/SolGreedy#2.csv", \
              "./solutions/SolBacktracking#1.csv", \
@@ -71,6 +75,7 @@ for idx in range(len(res[1])):
 
 for idx in range(len(res[1])):
   resBt1.append(float(res[2][idx][3]) * 100)
+
 for idx in range(len(res[1])):
   resBt2.append(float(res[3][idx][3]) * 100)
 
@@ -87,7 +92,7 @@ plt.plot(instancesF, resBt2)
 
 plt.xticks(rotation=90)
 # Add titles and legend
-if(sys.argv[1] == 'GB'): 
+if(ver == 'GB'): 
   plt.legend(["Gr#1", "Gr#2", "Bt#1", "Bt#2"])
 else:
   plt.legend(["SA", "HC", "SD", "TS"])
@@ -100,7 +105,7 @@ for idx in range(len(res[1])):
   temp = [res[0][idx][2], res[1][idx][2], res[2][idx][2] , res[3][idx][2]]
   maxN = max(temp)
   index = temp.index(max(temp))
-  if(sys.argv[1] == 'LS'): 
+  if(ver == 'LS'): 
     if(index == 0):
       alg = "SA"
     elif(index == 1):
@@ -124,14 +129,14 @@ for idx in range(len(res[1])):
 namefile = "./solutions/resultAnalysis/"
 if(not os.path.isdir(namefile)):
   os.mkdir(namefile)
-plt.savefig(namefile + "solPlot" + sys.argv[1] + ".png")
+plt.savefig(namefile + "solPlot" + ver + ".png")
 
 # Print the output scaled, with all the informations
 plt.style.use('seaborn-darkgrid')
 my_dpi=96
 plt.figure(figsize=(496/my_dpi, 496/my_dpi), dpi=my_dpi)
 
-if(sys.argv[1] == 'GB'): 
+if(ver == 'GB'): 
   x = ['GR#1', 'GR#2', 'BT#1', 'BT#2']
 else:
   x = ["SA", "HC", "SD", "TS"]
@@ -141,7 +146,7 @@ cntGr2 = 0
 cntBt1 = 0
 cntBt2 = 0
 for i in range(len(maxRes)):
-  if(sys.argv[1] == 'GB'): 
+  if(ver == 'GB'): 
     if(maxRes[i][4] == "GR#1"):
       cntGr1 += 1
     elif(maxRes[i][4] == "GR#2"):
@@ -160,7 +165,6 @@ for i in range(len(maxRes)):
     elif(maxRes[i][4] == "TS"):
       cntBt2 += 1
 
-
 y = [cntGr1, cntGr2, cntBt1, cntBt2]
 
 # Create barplot
@@ -173,4 +177,4 @@ plt.title('Count of best solution for each algoritm', loc='left', fontsize=12, f
 namefile = "./solutions/resultAnalysis/"
 if(not os.path.isdir(namefile)):
   os.mkdir(namefile)
-plt.savefig(namefile + "solPlotCount" + sys.argv[1] + ".png")
+plt.savefig(namefile + "solPlotCount" + ver + ".png")

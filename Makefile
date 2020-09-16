@@ -19,14 +19,14 @@ LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
-ALL_EXE=MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe
+ALL_EXE = MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe
 
 all: $(ALL_EXE)
 
 ### Set the dependences ###
 
-MainWeb.exe: CPPFLAGS+=$(CPPFLAGS_HTTP) $(CPPFLAGS_JSON)
-MainWeb.exe: LDFLAGS+=$(LDFLAGS_HTTP) $(LDFLAGS_JSON)
+MainWeb.exe: CPPFLAGS+=$(CPPFLAGS_HTTP) $(CPPFLAGS_JSON) $(CPPFLAGS_EASYLOCAL)
+MainWeb.exe: LDFLAGS+=$(LDFLAGS_HTTP) $(LDFLAGS_JSON) $(LDFLAGS_EASYLOCAL)
 
 MainLocal.exe: CPPFLAGS+=$(CPPFLAGS_EASYLOCAL)
 MainLocal.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
@@ -38,7 +38,7 @@ MainCGreedyTest.exe: CPPFLAGS+=$(CPPFLAGS_CTPL)
 MainCGreedyTest.exe: LDFLAGS+=$(LDFLAGS_CTPL)
 
 # WebViewer #
-MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
+MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o src/backTracking/TOP_Backtracking.o src/localSearch/TOP_Helpers.o src/localSearch/TOP_Costs.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 # Parameter Analysis #
 MainParamGr.exe: src/MainParamGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 # Map Analysis #
