@@ -140,8 +140,8 @@ bool operator<(const pos_t& a, const pos_t& b) {
   );
 }
 
-#define MIN_DEPTH 6
-#define MAX_DEPTH 10
+#define MIN_DEPTH 5
+#define MAX_DEPTH 8
 
 // Se depth 1 (primo thread, depth 0 calcola gli angoli) allora gli sq hanno indici sono in 0 e 2^MAX_DEPTH e pos risulta 2^(MAX_DEPTH-1)
 // Se N allora partendo da 0 ottengo 2^(MAX_DEPTH-N+1) come spigoli e pos di 2^(MAX_DEPTH-N)
@@ -186,7 +186,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(top.wTimeIdx), maxDevFromIdx(top.maxDevIdx), 0);
       dots[0][0] = out.PointProfit();
     }
     profits.insert(top, dots[0][0]);
@@ -198,7 +198,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(left.wTimeIdx), maxDevFromIdx(left.maxDevIdx), 0);
       dots[0][1] = out.PointProfit();
     }
     profits.insert(left, dots[0][1]);
@@ -210,7 +210,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(right.wTimeIdx), maxDevFromIdx(right.maxDevIdx), 0);
       dots[1][0] = out.PointProfit();
     }
     profits.insert(right, dots[1][0]);
@@ -222,7 +222,7 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
     {
       mt19937 rng(seed);
       TOP_Output out(in);
-      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(bottom.wTimeIdx), maxDevFromIdx(bottom.maxDevIdx), 0);
       dots[1][1] = out.PointProfit();
     }
     profits.insert(bottom, dots[1][1]);
@@ -276,7 +276,10 @@ int main() {
   TOP_Input in;
   {
     //ifstream ifs("instances/p5.4.q.txt");
-    ifstream ifs("instances/p7.4.t.txt");
+    //ifstream ifs("instances/p7.4.t.txt");
+    //ifstream ifs("instances/p4.3.d.txt");
+    //ifstream ifs("instances/p5.2.f.txt");
+    ifstream ifs("instances/p5.4.z.txt");
     if(!ifs) {
       throw new runtime_error("Unable to open file");
     }
@@ -327,6 +330,12 @@ int main() {
   );
 
   cout << "Waiting on pool" << endl;
+  //this_thread::sleep_for(chrono::seconds(1));
+  do {
+    this_thread::sleep_for(chrono::seconds(1));
+    cerr << ".";
+  } while(pool.n_idle() < pool.size());
+  cerr << endl;
   pool.stop(true); // Wait for solution
 
   cout << "Computations: " << profits._map.size() << endl;
