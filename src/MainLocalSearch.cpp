@@ -205,7 +205,7 @@ int main(int argc, const char* argv[])
     cout << "Cost: " << -result.cost.total 
                      << " [From:" << out_prec.PointProfit() 
                      << ", deltaProfit: " 
-                     << (((100 * out.PointProfit()) / precProfit) - 100)  << "]" << endl;
+                     << (((100 * out.PointProfit()) / precProfit) - 100)  << "%]" << endl;
     cout << "Time: " << result.running_time << "s " << endl;					
     
     // Print the outputs on file in different format
