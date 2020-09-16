@@ -2,9 +2,11 @@
 #include <fstream>
 
 #include <vector>
-#include <algorithm>
+#include <map>
+#include <set>
 
 #include <thread>
+#include <shared_mutex>
 #include <ctpl_stl.h>
 
 #include "common/TOP_Data.hpp"
@@ -12,14 +14,16 @@
 
 using namespace std;
 
-//#define N_ITERS 10000
-//#define N_ITERS (600*600)
-#define N_ITERS 10000
+#define N_WT 50
+#define N_MDEV 50
+
+#define WT_MIN 0.01
+#define WT_MAX 1.5
 
 #define MDEV_MIN 0.0
-#define MDEV_MAX 6.0
+#define MDEV_MAX 4.0
 
-void runThread(int id, TOP_Output& out, double maxDeviation) {
+void runThread(int id, TOP_Output& out, double wTime, double maxDeviation) {
   //cerr << "START Thread: " << id << " @ " << maxDeviation << endl;
 
   random_device rd; // Can be not random...
@@ -29,8 +33,235 @@ void runThread(int id, TOP_Output& out, double maxDeviation) {
     (mt19937::result_type)millis;
   mt19937 rng(seed);
 
-  SolverAll(out.in, out, rng, 1.1, 0.7, maxDeviation, 0.0);
+  SolverAll(out.in, out, rng, 1.0, wTime, maxDeviation, 0);
   //cerr << "END Thread: " << id << " @ " << maxDeviation << " -> " << out.PointProfit() << endl;
+}
+
+template<typename K, typename V>
+class safe_map {
+  public:
+    safe_map() : _map(), _mutex() {}
+    bool find(const K& key, V& value) {
+      // _map.end() is not safe!
+      shared_lock<shared_mutex> _lock(_mutex);
+      auto valIter = _map.find(key);
+      if(valIter == _map.end()) {
+        return false;
+      }
+      value = valIter->second;
+      return true;
+    }
+    bool insert(const K& key, const V& value) {
+      unique_lock<shared_mutex> _lock(_mutex);
+      return _map.insert(pair(key, value)).second;
+    }
+    map<K, V> _map; // Can access unsafe map when multithread finished
+  private:
+    shared_mutex _mutex;
+};
+
+/*
+
+Se parto da una mesh poco fitta e cerco quanti spazi devo approfondire
+posso trovare quali sono vedendo quelli con profitti diversi in un intervallo
+lungo uno dei due assi qualsiasi (quadrato) e puntare in mezzo: passo di
+raffinamento lungo un asse solo e in una colonna sola.
+
+Meglio raffinare lungo C o B prima? prima quello che taglia di più che con 1 test
+solo sembra essere MDEV più fitto, quindi taglia lungo wTime prima.
+
+In alternativa parti con una matrice vuota e propaga i livelli?
+Riempi in modo forzato lungo gli assi se X ...-1... X avviene
+prima lungo un asse e poi l'altro, dovrebbe fillare i quadrati!
+
+
+Dato un quadrato del tipo:
+
+X  .  X
+
+.  O  .
+
+X  .  X
+
+Con X già trovati E NON TUTTI E 4 UGUALI allora provo O.
+Se O appare uguale a uno delle X marco i . ai lati in comune
+con il valore di O, tutti i punti che non sono fillati vengono calcolati
+e poi il processo continua su ciasucno dei quadrati nuovi non autofillati
+da questa procedura.
+
+Il processo si interrompe quando la distanza fra le X e le O è inferiore al
+valore prefissato, è importante che il rapporto fra gli assi sia lo stesso
+fra la griglia più fissa e quella più grezza poiché viene sempre zoommato
+con lo stesso ratio (1/2 progressivo).
+
+Posso usare la pool per determinare il livello di profondità e auto aggiungere gli
+elementi nuovi da calcolare di passo in passo (attenzione, i 2 quadrati si toccano per
+punti in comune!, quindi alcuni . potrebbero essere già presenti a priori).
+Oppure aggiungo un check se già presente?
+Il risultato dovrebbe essere sempre uguale però quindi è ok.
+Occhio alla lettura però, usare atomic<>?
+
+Per lo store è importante se usato un map avere int come chiavi, evita
+float/double comparison, quindi scala già di base sulla risoluzione massima.
+
+Posso già accodare i valori delle X che conosco nel singolo thread in modo da
+evitare il più possibile accessi al map.
+
+Quindi un thread dovrebbe dato un quadrato di quel tipo:
+- Calcolare O
+- Determinare se può inferire i valori di . e assegnarli al map tenendone una copia locale
+- Calcolare i . che non può inferire (dopo aver controllato che non sono nel map, dovrebbe controllare anche che nessuno li sta valutando?, nah è veloce)
+(siccome è veloce non è che è sempre meglio ricalcolare i .? tanto il miglioramento avviene sulla risoluzione/grana?)
+- Se non ha raggiunto le condizioni di stop accodare da 0 a 4 funzioni extra per i 4 quadranti
+
+Il main dunque calcola le X degli estremi del quadrato, poi passa ai threaed il primo pool,
+infine attente stop(true) visto che il pool viene aggiornato prima di morire il thread
+
+La risoluzione è fissata quindi si può determinare la profondità, a quel punto le divisioni diventano (2^depth + 1)
+
+Per essere precisi questo metodo non conta la possibilità di avere zone come:
+X Y X negli intervalli, quindi sarebbe meglio non partire da una griglia estremamente grezza
+
+In alterantiva si può porre che fino a una certa depth viene sempre eseguito il calcolo senza controlli
+
+*/
+
+typedef int sq_vals_t[2][2]; // Profitto degli angoli (check semplice, potrebbe essere accompagnato da checksum soluzione, non assicura confronto corretto)
+// A B     A
+//     -> B C
+// C D     D
+struct pos_t {
+  int wTimeIdx;
+  int maxDevIdx;
+};
+bool operator<(const pos_t& a, const pos_t& b) {
+  return a.wTimeIdx < b.wTimeIdx || (a.wTimeIdx == b.wTimeIdx &&
+    a.maxDevIdx < b.maxDevIdx
+  );
+}
+
+#define MIN_DEPTH 6
+#define MAX_DEPTH 10
+
+// Se depth 1 (primo thread, depth 0 calcola gli angoli) allora gli sq hanno indici sono in 0 e 2^MAX_DEPTH e pos risulta 2^(MAX_DEPTH-1)
+// Se N allora partendo da 0 ottengo 2^(MAX_DEPTH-N+1) come spigoli e pos di 2^(MAX_DEPTH-N)
+// Quindi il raggio è tale da avere al passo successivo POS +- 2^(MAX_DEPTH-N-1)
+// Ovviamente 2^X = 1 << X
+// Fissa il seed per avere una soluzione stabile a blocchi
+
+double wTimeFromIdx(int wTimeIdx) {
+  return WT_MIN + wTimeIdx * (WT_MAX - WT_MIN) / (1 << MAX_DEPTH);
+}
+
+double maxDevFromIdx(int maxDevIdx) {
+  return MDEV_MIN + maxDevIdx * (MDEV_MAX - MDEV_MIN) / (1 << MAX_DEPTH);
+}
+
+void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::result_type seed, safe_map<pos_t, int>& profits, sq_vals_t sq_vals, pos_t pos, int depth) {
+  // Calcola in O
+  int oProfit = -1;
+  {
+    mt19937 rng(seed);
+    TOP_Output out(in);
+    SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+    oProfit = out.PointProfit();
+  }
+
+  // Agguingi al map
+  profits.insert(pos, oProfit);
+
+  sq_vals_t dots = { {-1, -1}, {-1, -1} };
+
+  // Inferisci i ., prendili dal map o calcolali
+
+  pos_t top { .wTimeIdx = pos.wTimeIdx, .maxDevIdx = pos.maxDevIdx - (1 << (MAX_DEPTH - depth)) };
+  pos_t left { .wTimeIdx = pos.wTimeIdx - (1 << (MAX_DEPTH - depth)), .maxDevIdx = pos.maxDevIdx };
+  pos_t right { .wTimeIdx = pos.wTimeIdx + (1 << (MAX_DEPTH - depth)), .maxDevIdx = pos.maxDevIdx };
+  pos_t bottom { .wTimeIdx = pos.wTimeIdx, .maxDevIdx = pos.maxDevIdx + (1 << (MAX_DEPTH - depth)) };
+
+  if(sq_vals[0][0] == oProfit || sq_vals[0][1] == oProfit) {
+    dots[0][0] = oProfit;
+    profits.insert(top, dots[0][0]);
+  } else if(!profits.find(top, dots[0][0])) {
+    {
+      mt19937 rng(seed);
+      TOP_Output out(in);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      dots[0][0] = out.PointProfit();
+    }
+    profits.insert(top, dots[0][0]);
+  }
+  if(sq_vals[0][0] == oProfit || sq_vals[1][0] == oProfit) {
+    dots[0][1] = oProfit;
+    profits.insert(left, dots[0][1]);
+  } else if(!profits.find(left, dots[0][1])) {
+    {
+      mt19937 rng(seed);
+      TOP_Output out(in);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      dots[0][1] = out.PointProfit();
+    }
+    profits.insert(left, dots[0][1]);
+  }
+  if(sq_vals[0][1] == oProfit || sq_vals[1][1] == oProfit) {
+    dots[1][0] = oProfit;
+    profits.insert(right, dots[1][0]);
+  } else if(!profits.find(right, dots[1][0])) {
+    {
+      mt19937 rng(seed);
+      TOP_Output out(in);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      dots[1][0] = out.PointProfit();
+    }
+    profits.insert(right, dots[1][0]);
+  }
+  if(sq_vals[1][0] == oProfit || sq_vals[1][1] == oProfit) {
+    dots[1][1] = oProfit;
+    profits.insert(bottom, dots[1][1]);
+  } else if(!profits.find(bottom, dots[1][1])) {
+    {
+      mt19937 rng(seed);
+      TOP_Output out(in);
+      SolverAll(in, out, rng, 1.0, wTimeFromIdx(pos.wTimeIdx), maxDevFromIdx(pos.maxDevIdx), 0);
+      dots[1][1] = out.PointProfit();
+    }
+    profits.insert(bottom, dots[1][1]);
+  }
+
+  // Ora vedi quali quadranti calcolare in modo più fitto
+  if(depth >= MAX_DEPTH) {
+    return;
+  }
+
+  if(depth < MIN_DEPTH || sq_vals[0][0] != oProfit) {
+    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+      sq_vals_t { { sq_vals[0][0], dots[0][0] }, { dots[0][1], oProfit } },
+      pos_t { .wTimeIdx = pos.wTimeIdx - (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx - (1 << (MAX_DEPTH - depth - 1)) },
+      depth + 1
+    );
+  }
+  if(depth < MIN_DEPTH || sq_vals[0][1] != oProfit) {
+    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+      sq_vals_t { { dots[0][0], sq_vals[0][1] }, { oProfit, dots[1][0] } },
+      pos_t { .wTimeIdx = pos.wTimeIdx + (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx - (1 << (MAX_DEPTH - depth - 1)) },
+      depth + 1
+    );
+  }
+  if(depth < MIN_DEPTH || sq_vals[1][0] != oProfit) {
+    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+      sq_vals_t { { dots[0][1], oProfit }, { sq_vals[1][0], dots[1][1] } },
+      pos_t { .wTimeIdx = pos.wTimeIdx - (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx + (1 << (MAX_DEPTH - depth - 1)) },
+      depth + 1
+    );
+  }
+  if(depth < MIN_DEPTH || sq_vals[1][1] != oProfit) {
+    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+      sq_vals_t { { oProfit, dots[1][0] }, { dots[1][1], sq_vals[1][1] } },
+      pos_t { .wTimeIdx = pos.wTimeIdx + (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx + (1 << (MAX_DEPTH - depth - 1)) },
+      depth + 1
+    );
+  }
+
 }
 
 int main() {
@@ -44,7 +275,97 @@ int main() {
   cout << "Reading input" << endl;
   TOP_Input in;
   {
-    ifstream ifs("instances/p5.4.q.txt");
+    //ifstream ifs("instances/p5.4.q.txt");
+    ifstream ifs("instances/p7.4.t.txt");
+    if(!ifs) {
+      throw new runtime_error("Unable to open file");
+    }
+    ifs >> in;
+  }
+
+  random_device rd; // Can be not random...
+  auto millis = chrono::time_point_cast<chrono::milliseconds>(chrono::system_clock::now()).time_since_epoch().count();
+  mt19937::result_type seed =
+    (mt19937::result_type)rd() ^
+    (mt19937::result_type)millis;
+
+  safe_map<pos_t, int> profits;
+
+  sq_vals_t sq_vals = { {-1, -1}, {-1, -1} };
+
+  // Calcola bordi
+  cout << "Computing corner values" << endl;
+  {
+    mt19937 rng(seed);
+    TOP_Output out(in);
+    SolverAll(in, out, rng, 1.0, WT_MIN, MDEV_MIN, 0);
+    sq_vals[0][0] = out.PointProfit();
+  }
+  {
+    mt19937 rng(seed);
+    TOP_Output out(in);
+    SolverAll(in, out, rng, 1.0, WT_MIN, MDEV_MAX, 0);
+    sq_vals[0][1] = out.PointProfit();
+  }
+  {
+    mt19937 rng(seed);
+    TOP_Output out(in);
+    SolverAll(in, out, rng, 1.0, WT_MAX, MDEV_MIN, 0);
+    sq_vals[1][0] = out.PointProfit();
+  }
+  {
+    mt19937 rng(seed);
+    TOP_Output out(in);
+    SolverAll(in, out, rng, 1.0, WT_MAX, MDEV_MAX, 0);
+    sq_vals[1][1] = out.PointProfit();
+  }
+
+  cout << "Starting pool" << endl;
+  pool.push(runThread2, ref(pool), ref(in), seed, ref(profits), sq_vals,
+    pos_t { .wTimeIdx = 1 << (MAX_DEPTH-1), .maxDevIdx = 1 << (MAX_DEPTH-1) },
+    1
+  );
+
+  cout << "Waiting on pool" << endl;
+  pool.stop(true); // Wait for solution
+
+  cout << "Computations: " << profits._map.size() << endl;
+
+  set<int> profits_distinct;
+  for(const auto& mapEntry : profits._map) {
+    profits_distinct.insert(mapEntry.second);
+  }
+
+  cout << "Distincts: " << profits_distinct.size() << endl;
+
+  cout << "Best: " << *profits_distinct.rbegin() << " | Worst: " << *profits_distinct.begin() << endl;
+
+  {
+    ofstream ofs("outputs/cross.tsv");
+    if(!ofs) {
+      throw new runtime_error("Unable to open file");
+    }
+    for(const auto& mapEntry : profits._map) {
+      ofs << wTimeFromIdx(mapEntry.first.wTimeIdx) << '\t' << maxDevFromIdx(mapEntry.first.maxDevIdx) << '\t' << mapEntry.second << endl;
+    }
+  }
+
+  return 0;
+}
+
+int main_old() {
+  auto nHWThreads = thread::hardware_concurrency();
+
+  cout << "HW Threads: " << nHWThreads << endl;
+  
+  cout << "Initializing thread pool" << endl;
+  ctpl::thread_pool pool(nHWThreads);
+
+  cout << "Reading input" << endl;
+  TOP_Input in;
+  {
+    //ifstream ifs("instances/p5.4.q.txt");
+    ifstream ifs("instances/p7.4.t.txt");
     if(!ifs) {
       throw new runtime_error("Unable to open file");
     }
@@ -52,36 +373,67 @@ int main() {
   }
   
   cout << "Preparing outputs" << endl;
-  //vector<TOP_Output> outs(N_ITERS);
-  //transform(outs.begin(), outs.end(), outs.begin(), [&in] () { return TOP_Output(in); });
-  vector<TOP_Output> outs;
-  for(int i = 0; i < N_ITERS; ++i) {
-    outs.emplace_back(in);
+  vector<vector<TOP_Output>> outs;
+  for(int i = 0; i < N_WT; ++i) {
+    outs.emplace_back();
+    for(int j = 0; j < N_MDEV; ++j) {
+      outs[i].emplace_back(in);
+    }
   }
 
-  double increment = (MDEV_MAX - MDEV_MIN) / (N_ITERS - 1);
-  double maxValue = MDEV_MIN + (N_ITERS - 1) * increment;
+  double inc_wTime = (WT_MAX - WT_MIN) / (N_WT - 1);
+  double inc_mDev = (MDEV_MAX - MDEV_MIN) / (N_MDEV - 1);
 
-  cout << "Min: " << MDEV_MIN << " | Inc: " << increment << " | Max: " << maxValue << endl;
+  cout << "Inc mDev: " << inc_mDev << " | Inc wTime: " << inc_wTime << endl;
 
   cout << "Starting pool" << endl;
-  for(int i = 0; i < N_ITERS; ++i) {
-    double maxDev = MDEV_MIN + i * increment;
-    pool.push(runThread, ref(outs[i]), maxDev);
+  for(int i = 0; i < N_WT; ++i) {
+    double wTime = WT_MIN + i * inc_wTime;
+    for(int j = 0; j < N_MDEV; ++j) {
+      double maxDev = MDEV_MIN + j * inc_mDev;
+      pool.push(runThread, ref(outs[i][j]), wTime, maxDev);
+    }
   }
 
   cout << "Waiting on pool" << endl;
   pool.stop(true); // Wait for solution
 
   cout << "Solutions:" << endl;
+
+  map<int, int> profit2colour;
+  int n_colours = 0;
+
+  for(int i = 0; i < N_WT; ++i) {
+    for(int j = 0; j < N_MDEV; ++j) {
+      int currProfit = outs[i][j].PointProfit();
+      //cout << currProfit << '\t';
+      auto colour = profit2colour.find(currProfit);
+      if(colour == profit2colour.end()) {
+        // New colour
+        int new_colour = n_colours++;
+        profit2colour[currProfit] = new_colour;
+        cout << new_colour << '\t';
+      } else {
+        cout << colour->second << '\t';
+      }
+    }
+    cout << endl;
+  }
+
+  cout << endl << "Total colours used: " << n_colours << endl;
+
+  /*
   int prevProfit = 0;
-  for(int i = 0; i < N_ITERS; ++i) {
-    int currProfit = outs[i].PointProfit();
-    double maxDev = MDEV_MIN + i * increment;
+  for(int i = 0; i < N_WT; ++i) {
+    int currProfit = outs[0][i].PointProfit();
+    double wTime = WT_MIN + i * inc_wTime;
     if(prevProfit != currProfit) {
       // Print
-      cout << maxDev << " -> " << currProfit << endl;
+      cout << wTime << " -> " << currProfit << endl;
       prevProfit = currProfit;
     }
   }
+  */
+
+  return 0;
 }
