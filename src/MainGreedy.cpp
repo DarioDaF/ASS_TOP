@@ -209,6 +209,23 @@ int main(int argc, char *argv[]) {
             //         ", maxDeviation: " << maxDeviation << 
             //         ", wNonCost: " << wNonCost << ">" << endl;
             
+            // Double range parameters
+            if(wProfit == 1.6) {
+              wProfit = 3.5;
+              to_wProfit = 3.7;
+              up_wProfit = 0.2;
+            }
+            if(wTime == 1.2) {
+              wTime = 2.9;
+              to_wTime = 3.7;
+              up_wTime = 0.5;
+            }
+            if(wNonCost == 1.2) {
+              wNonCost = 5.0;
+              to_wNonCost = 5.1;
+              up_wNonCost = 0.5;
+            }
+
             out.Clear();
             GreedySolver(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
 
