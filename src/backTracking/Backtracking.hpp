@@ -166,7 +166,7 @@ void Backtrack(TreeWalker<_Node>& walker, BoundChecker<_Node>& checker, double m
           firstSolFound = true; // Should be even if not best?
           auto finish = std::chrono::high_resolution_clock::now();
           std::cerr << "New best solution " /*<< checker.GetBest()*/
-                    << " (cost " << checker.GetBestCost() << ", iter " << count << " @" << duration_cast<duration<double>>(finish - start).count() << "s)" << std::endl;
+                    << " (cost " << -checker.GetBestCost() << ", iter " << count << " @" << duration_cast<duration<double>>(finish - start).count() << "s)" << std::endl;
         }
         backtrack = true; // Continue search
       }
