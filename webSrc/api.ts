@@ -1,7 +1,21 @@
 
+export type ApiParameter = {
+  name: string;
+  descr: string;
+  type: string;
+  default: number|boolean;
+  min?: number;
+  max?: number;
+};
+
+export type ApiSolver = {
+  name: string;
+  params: ApiParameter[];
+};
+
 export type ApiList = {
   instances: string[];
-  solvers: string[];
+  solvers: ApiSolver[];
 }
 
 export type ApiSolve = {

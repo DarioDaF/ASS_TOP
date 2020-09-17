@@ -15,25 +15,83 @@ const $bSolve = document.getElementById('bSolve');
 const $cbAutoUpdate = document.getElementById('cbAutoUpdate') as HTMLInputElement;
 const $divOptions = document.getElementById('divOptions');
 
-const optionSliders = ['a', 'b', 'c', 'd', 'e', 'f'];
+//const optionSliders = ['a', 'b', 'c', 'd', 'e', 'f'];
 let options = {};
+/*
 for(const sl of optionSliders) {
   const compoundSl = createCompoundSlider(sl, (value) => {
     options[sl] = value;
     if($cbAutoUpdate.checked) {
       $bSolve.click();
     }
-  }, 0, 100, 0.1);
+  }, 0, 100, 0.1, 0);
   $divOptions.append(compoundSl.$cont);
 }
+*/
 
 const fileList: Record<string, File> = {};
 const relMargin = 0.015;
 const relRadius = 0.01;
 const relWidth = 0.01;
 const carColours = [
-  "#75FF33", "#FF5733", "#33FFBD", "#DBFF33"
+  '#75FF33', '#FF5733', '#33FFBD', '#DBFF33'
 ];
+
+function changeSolverOptions(solver) {
+  options = {};
+  emptyElement($divOptions);
+  if(!(solver in list.solvers)) {
+    return;
+  }
+  for(const param of list.solvers[solver].params) {
+    options[param.name] = param.default;
+    switch(param.type) {
+      case 'bool': {
+        const $label = document.createElement('label');
+        $label.innerText = param.descr;
+        const $check = document.createElement('input');
+        $check.type = 'checkbox';
+        $check.checked = param.default as boolean;
+
+        const $div = document.createElement('div');
+        $div.append($label);
+        $div.append($check);
+
+        $check.addEventListener('change', (e) => {
+          options[param.name] = $check.checked;
+          if($cbAutoUpdate.checked) {
+            $bSolve.click();
+          }
+        });
+        $divOptions.append($div);
+
+        break;
+      }
+      case 'float': {
+        const compoundSl = createCompoundSlider(param.descr, (value) => {
+          options[param.name] = value;
+          if($cbAutoUpdate.checked) {
+            $bSolve.click();
+          }
+        }, param.min, param.max, 0.01, param.default as number);
+        $divOptions.append(compoundSl.$cont);
+        
+        break;
+      }
+      case 'int': {
+        const compoundSl = createCompoundSlider(param.descr, (value) => {
+          options[param.name] = value;
+          if($cbAutoUpdate.checked) {
+            $bSolve.click();
+          }
+        }, param.min, param.max, 1, param.default as number);
+        $divOptions.append(compoundSl.$cont);
+        
+        break;
+      }
+    }
+  }
+}
 
 function pointColor(relP: number) {
   const col0 = { r: 1, g: 0, b: 0 };
@@ -115,45 +173,6 @@ function drawMap(map: TOPMap) {
 
 let currentMap: TOPMap = undefined;
 
-/*
-async function itemClick(e: MouseEvent) {
-  const $this = e.target as HTMLElement;
-  e.preventDefault();
-
-  const { fileName } = $this.dataset;
-  $fileName.innerText = fileName;
-  const content = await fileList[fileName].text();
-  const map = parseTOPMap(content);
-  currentMap = map;
-  console.log(map);
-  const $svg = drawMap(map);
-  emptyElement($mapCanvasContainer);
-  $mapCanvasContainer.append($svg);
-}
-
-function updateFileList() {
-  emptyElement($fileList);
-  for(const [fileName, file] of Object.entries(fileList)) {
-    const $li = document.createElement('li');
-    const $a = document.createElement('a');
-    $a.innerText = fileName;
-    $a.dataset.fileName = fileName;
-    $a.href = "#";
-    $a.addEventListener('click', itemClick);
-    $li.append($a);
-    $fileList.append($li);
-  }
-}
-
-$fileLoader.addEventListener('change', (e) => {
-  const files = (event.target as HTMLInputElement).files;
-  for(const file of Array.from(files)) {
-    fileList[file.name] = file;
-  }
-  updateFileList();
-});
-*/
-
 let list: ApiList = {
   "instances": [],
   "solvers": []
@@ -170,15 +189,18 @@ let list: ApiList = {
   for(const solver in list.solvers) {
     const $opt = document.createElement('option');
     $opt.value = solver;
-    $opt.innerText = list.solvers[solver];
+    $opt.innerText = list.solvers[solver].name;
     $selSolver.append($opt);
   }
 })();
+$selSolver.addEventListener('change', () => {
+  changeSolverOptions($selSolver.value);
+});
 $bSolve.addEventListener('click', async() => {
   const solver = $selSolver.value;
   const inst = $selInstance.value;
 
-  const name = `${inst} (${solver === '' ? 'Input' : list.solvers[solver]})`
+  const name = `${inst} (${solver === '' ? 'Input' : list.solvers[solver].name})`
 
   emptyElement($mapCanvasContainer);
   $fileName.innerText = name + '...';

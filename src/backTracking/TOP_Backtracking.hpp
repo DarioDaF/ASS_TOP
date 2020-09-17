@@ -131,39 +131,3 @@ class TOP_Checker : public BoundChecker<TOP_Node> {
 };
 
 #endif
-
-#ifdef WITH_JSON_OPTIONS
-
-#include <nlohmann/json.hpp>
-
-/**
- * Solve the problem with the greedy algorithm SolverGreedy, it's used in the Web Viewer. 
- *
- * @param in constant input
- * @param out constant output
- * @param rng seed generator to save the solution and its informations
- * @param options the file json in which are written the parameters for the web viewer
- * @return [void]
- */
-void SolveBacktrack(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) {
-  // Exctract the parameters from the json file. Default values are provided
-  // double wProfit = json_get_or_default<float>(options["wProfit"], 1.1);
-  // double wTime = json_get_or_default<float>(options["wTime"], 0.7);
-  // double maxDeviation = json_get_or_default<float>(options["maxDeviation"], 1.5);
-  // double wNonCost = json_get_or_default<float>(options["wNonCost"], 0.0);
-  // double maxTime = json_get_or_default<float>(options["maxTime"], 5.0);
-
-  double wProfit = json_get_or_default<float>(options["a"], 1.1);
-  double wTime = json_get_or_default<float>(options["b"], 0.7);
-  double maxDeviation = json_get_or_default<float>(options["c"], 1.5);
-  double wNonCost = json_get_or_default<float>(options["d"], 0.0);
-  double maxTime = json_get_or_default<float>(options["e"], 5.0);
-  
-  TOP_Walker tw(in, wProfit, wTime, maxDeviation, wNonCost);
-  TOP_Checker ck;
-  Backtrack(tw, ck, maxTime);
-  out = ck.GetBest().Output();
-}
-
-#endif
-

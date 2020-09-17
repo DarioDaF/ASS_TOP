@@ -39,13 +39,16 @@ const std::map<std::string, std::string> mimes = {
 };
 #define DEF_MIME "text/plain"
 
-#define WITH_JSON_OPTIONS
+//#define WITH_JSON_OPTIONS
 
-#include "greedy/Solver.hpp"
-#include "greedy/TOP_Greedy.hpp"
+#include "web/Solver.hpp"
+#include "web/SolverGreedy.hpp"
+#include "web/SolverBacktracking.hpp"
+#include "web/SolverLocal.hpp"
 #include "backTracking/TOP_Backtracking.hpp"
 #include "localSearch/TOP_Local.hpp"
 
+/*
 const std::vector<SolverEntry_s> solvers = {
   { .fn = SolveGreedy, .name = "Greedy" },
   { .fn = SolveBacktrack, .name = "BackTracking" },
@@ -53,6 +56,12 @@ const std::vector<SolverEntry_s> solvers = {
   { .fn = SolveLocalHC, .name = "LocalSearchHC" },
   { .fn = SolveLocalTS, .name = "LocalSearchTS" },
   { .fn = SolveLocalSD, .name = "LocalSearchSD" }
+};
+*/
+const std::vector<AbstractWebSolver*> solvers = {
+  new WebSolverGreedy(),
+  new WebSolverBackTracking(),
+  new WebSolverLocalSA()
 };
 #define DEF_SOLVER 0
 
@@ -99,8 +108,11 @@ class HSR_List : public hs::http_resource {
         { "instances", {} },
         { "solvers", {} }
       };
-      for(const auto& solver : solvers) {
-        j["solvers"].push_back(solver.name);
+      for(const auto solver : solvers) {
+        j["solvers"].push_back({
+          { "name", solver->name() },
+          { "params", solver->GetParametersDescription() }
+        });
       }
       for(const auto& file : fs::directory_iterator(INST_PATH)) {
         if(file.path().extension() != INST_EXT) continue;
@@ -109,90 +121,6 @@ class HSR_List : public hs::http_resource {
       return http_resp_ptr(new hs::string_response(j.dump()));
     }
 };
-
-/*
-class HSR_Solver : public hs::http_resource {
-  public:
-    const http_resp_ptr render_GET(const hs::http_request& req) {
-      // If absent arg then empty string returned
-      int solver = DEF_SOLVER;
-      {
-        auto solverStr = req.get_arg("solver");
-        if(!solverStr.empty()) { // Use default solver if not defined
-          try {
-            solver = stoi(solverStr);
-          } catch(std::invalid_argument) {
-            return http_resp_ptr(new hs::string_response("Unable to parse solver", hs_utils::http_not_found));
-          }
-          if(solver < 0 || solver >= solvers.size()) {
-            return http_resp_ptr(new hs::string_response("Unimplemented solver", hs_utils::http_not_found));
-          }
-        }
-      }
-      
-      auto instStr = req.get_arg("inst");
-      auto inst = fs::path(INST_PATH) / instStr;
-      if(!fs::exists(inst)) {
-        return http_resp_ptr(new hs::string_response("Instance not found", hs_utils::http_not_found));
-      }
-
-      // Gen rng
-      std::mt19937::result_type seed = GenSeed<std::mt19937::result_type>();
-      std::mt19937 rng(seed);
-
-      // Solve
-      std::cerr << "LOG: Request to solve \"" << instStr << "\" with solver \"" << solvers[solver].name << "\" and seed " << seed << std::endl;
-
-      TOP_Input in;
-      {
-        std::ifstream is(inst);
-        if(!is) {
-          std::cerr << "ERROR: Unable to open instance" << std::endl;
-          return http_resp_ptr(new hs::string_response("Unable to open instance", hs_utils::http_internal_server_error));
-        }
-        is >> in;
-        in.name = inst.filename().replace_extension("").string();
-      }
-
-      TOP_Output out(in);
-      solvers[solver].fn(in, out, rng);
-
-      auto sol = std::to_string(solver) / inst.filename().replace_extension(SOL_EXT);
-      {
-        auto fullSol = SOL_PATH / sol;
-        fs::create_directories(fullSol.parent_path());
-        std::ofstream os(fullSol);
-        if(!os) {
-          std::cerr << "ERROR: Unable to save instance output" << std::endl;
-          sol = "";
-        }
-        os << in << out;
-      }
-
-      std::stringstream solutionText;
-      solutionText << in << out;
-      json j = {
-        { "name", in.name },
-        { "feasible", out.Feasible() },
-        { "profit", out.PointProfit() },
-        { "solution", solutionText.str() },
-        { "solver", solver },
-        { "solverName", solvers[solver].name },
-        { "solutionFile", sol.generic_string() } // Relative web path
-      };
-
-      std::cerr << "LOG: ";
-      if(out.Feasible()) {
-        std::cerr << "Solution found, profit " << out.PointProfit();
-      } else {
-        std::cerr << "Solution not found";
-      }
-      std::cerr << std::endl;
-
-      return http_resp_ptr(new hs::string_response(j.dump()));
-    }
-};
-*/
 
 class HSR_SolverPlus : public hs::http_resource {
   public:
@@ -227,7 +155,7 @@ class HSR_SolverPlus : public hs::http_resource {
       std::mt19937 rng(seed);
 
       // Solve
-      std::cerr << "LOG: Request to solve \"" << instStr << "\" with solver \"" << solvers[solver].name << "\" and seed " << seed << std::endl;
+      std::cerr << "LOG: Request to solve \"" << instStr << "\" with solver \"" << solvers[solver]->name() << "\" and seed " << seed << std::endl;
 
       TOP_Input in;
       {
@@ -241,7 +169,7 @@ class HSR_SolverPlus : public hs::http_resource {
       }
 
       TOP_Output out(in);
-      solvers[solver].fn(in, out, rng, jReq["options"]);
+      solvers[solver]->Solve(in, out, rng, jReq["options"]);
 
       auto sol = std::to_string(solver) / inst.filename().replace_extension(SOL_EXT);
       {
@@ -263,7 +191,7 @@ class HSR_SolverPlus : public hs::http_resource {
         { "profit", out.PointProfit() },
         { "solution", solutionText.str() },
         { "solver", solver },
-        { "solverName", solvers[solver].name },
+        { "solverName", solvers[solver]->name() },
         { "seed", seed },
         { "solutionFile", sol.generic_string() } // Relative web path
       };
@@ -293,26 +221,6 @@ class HSR_Redirect : public hs::http_resource {
 };
 
 int main(int argc, const char* argv[]) {
-  /*
-  {
-    TOP_Input in;
-    TOP_StateManager TOP_sm(in);
-    TOP_CostContainer cc(in);
-    TOP_MoveSwapNeighborhoodExplorer TOP_nhe(in, TOP_sm, cc);
-
-
-    SimulatedAnnealing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sa(in, TOP_sm, TOP_nhe, "TOP_MoveSimulatedAnnealing");
-    HillClimbing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_hc(in, TOP_sm, TOP_nhe, "TOP_MoveHillClimbing");
-    TabuSearch<TOP_Input, TOP_State, TOP_MoveSwap> TOP_ts(in, TOP_sm, TOP_nhe, "TOP_MoveTabuSearch");
-    SteepestDescent<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sd(in, TOP_sm, TOP_nhe, "TOP_MoveSteepestDescent");
-
-    //CommandLineParameters::Parametrized::RegisterParameters();
-    CommandLineParameters::Parse(argc, argv, true, false);
-  }
-  */
-
-  std::cerr << "Eseguiti Registers per local" << endl;
-
   std::random_device rd; // Can be not random...
   
   auto millis = std::chrono::time_point_cast<chrono::milliseconds>(chrono::system_clock::now()).time_since_epoch().count();

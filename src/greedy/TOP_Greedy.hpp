@@ -22,33 +22,4 @@
  */
 void GreedySolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviation, double wNonCost);
 
-#ifdef WITH_JSON_OPTIONS
-
-#include <nlohmann/json.hpp>
-
-/**
- * Solve the problem with the greedy algorithm GreedySolver, it's used in the Web Viewer. 
- *
- * @param in constant input
- * @param out constant output
- * @param rng seed generator to save the solution and its informations
- * @param options the file json in which are written the parameters for the web viewer
- * @return [void]
- */
-void SolveGreedy(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) {
-  // Exctract the parameters from the json file. Default values are provided
-  // double wProfit = json_get_or_default<float>(options["wProfit"], 1.1);
-  // double wTime = json_get_or_default<float>(options["wTime"], 0.7);
-  // double maxDeviation = json_get_or_default<float>(options["maxDeviation"], 1.5);
-  // double wNonCost = json_get_or_default<float>(options["wNonCost"], 0.0);
-
-  double wProfit = json_get_or_default<float>(options["a"], 1.1);
-  double wTime = json_get_or_default<float>(options["b"], 0.7);
-  double maxDeviation = json_get_or_default<float>(options["c"], 1.5);
-  double wNonCost = json_get_or_default<float>(options["d"], 0.0);
-  GreedySolver(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
-}
-
-#endif
-
 #endif
