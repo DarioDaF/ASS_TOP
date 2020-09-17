@@ -174,28 +174,28 @@ int main(int argc, const char* argv[])
     if(method == string("SA")) {
       TOP_sa.RegisterParameters();
       TOP_sa.SetParameter("compute_start_temperature", (bool)false);
-      TOP_sa.SetParameter("cooling_rate", (double)0.0001);
-      TOP_sa.SetParameter("max_evaluations", (unsigned long int)10000);
-      TOP_sa.SetParameter("min_temperature", (double)0.001);
-      TOP_sa.SetParameter("neighbors_accepted", (unsigned int)1000);
-      TOP_sa.SetParameter("neighbors_sampled", (unsigned int)1000);
-      TOP_sa.SetParameter("start_temperature", (double)0.0001);
+      TOP_sa.SetParameter("cooling_rate", (double)0.00000001);
+      TOP_sa.SetParameter("max_evaluations", (unsigned long int)100000000);
+      TOP_sa.SetParameter("min_temperature", (double)0.0000001);
+      TOP_sa.SetParameter("neighbors_accepted", (unsigned int)10000000);
+      TOP_sa.SetParameter("neighbors_sampled", (unsigned int)10000000);
+      TOP_sa.SetParameter("start_temperature", (double)0.00000001);
     } 
     else if(method == string("HC")) {
       TOP_hc.RegisterParameters();
-      TOP_hc.SetParameter("max_evaluations", (unsigned long int)10000);
-      TOP_hc.SetParameter("max_idle_iterations", (unsigned long int)100);
+      TOP_hc.SetParameter("max_evaluations", (unsigned long int)100000000);
+      TOP_hc.SetParameter("max_idle_iterations", (unsigned long int)1000000);
     } 
     else if(method == string("TS")) {
       TOP_ts.RegisterParameters();
-      TOP_ts.SetParameter("max_evaluations", (unsigned long int)10000);
-      TOP_ts.SetParameter("max_idle_iterations", (unsigned long int)100);
-      TOP_ts.SetParameter("max_tenure", (unsigned int)20);
-      TOP_ts.SetParameter("min_tenure", (unsigned int)10);
+      TOP_ts.SetParameter("max_evaluations", (unsigned long int)1000000);
+      TOP_ts.SetParameter("max_idle_iterations", (unsigned long int)10000);
+      TOP_ts.SetParameter("max_tenure", (unsigned int)200);
+      TOP_ts.SetParameter("min_tenure", (unsigned int)100);
     } 
     else { // if (method.GetValue() == string("SD"))
       TOP_sd.RegisterParameters();
-      TOP_sd.SetParameter("max_evaluations", (unsigned long int)10000);
+      TOP_sd.SetParameter("max_evaluations", (unsigned long int)100000000);
     }
 
     auto result = TOP_solver.Resolve(out_prec);
