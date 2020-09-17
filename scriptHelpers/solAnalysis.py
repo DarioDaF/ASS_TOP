@@ -26,7 +26,7 @@ import os
 
 ver = sys.argv[1]
 ver = ver.strip()
-print("Processing version " , ver)
+print("Plotting analsysis version " , ver)
 
 if(ver == 'GB'): 
   solFile = ["./solutions/SolGreedy#1.csv", \

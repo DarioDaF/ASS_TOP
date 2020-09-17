@@ -33,7 +33,7 @@ def printAlg(n, idx, res, maxRes):
 
 ver = sys.argv[1]
 ver = ver.strip()
-print("Processing version " , ver)
+print("Taking best version " , ver)
 
 if(ver == 'GB'): 
   solFile = ["./solutions/SolGreedy#1.csv", \

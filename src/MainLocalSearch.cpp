@@ -111,12 +111,12 @@ int main(int argc, const char* argv[])
     if (file.path().extension() != ".txt")
       continue;
 
-    cerr << "Processing: " << file.path().filename() << endl; 
+    std::cerr << "Processing: " << file.path().filename() << std::endl; 
     {
       ifstream is(file.path());
       if (!is) {
         ++errors;
-        cerr << "  ERROR: Unable to open Instance file" << endl;
+        std::cerr << "  ERROR: Unable to open Instance file" << std::endl;
         continue;
       }
       is >> in;
@@ -128,7 +128,7 @@ int main(int argc, const char* argv[])
       ifstream is("./outputs/routeHops/bestRoutes/" + in.name + ".out");
       if (!is) {
         ++errors;
-        cerr << "  ERROR: Unable to open bestRoutes Instance file" << endl;
+        std::cerr << "  ERROR: Unable to open bestRoutes Instance file" << std::endl;
         continue;
       }
       is >> out_prec;
@@ -202,22 +202,24 @@ int main(int argc, const char* argv[])
     TOP_Output out = result.output;
     
     // Print the output into the shell
-    cout << "Cost: " << -result.cost.total 
-                     << " [From:" << out_prec.PointProfit() 
-                     << ", deltaProfit: " 
-                     << (((100 * out.PointProfit()) / precProfit) - 100)  << "%]" << endl;
-    cout << "Time: " << result.running_time << "s " << endl;					
-    
+    if(result.cost.violations == 0) {
+      std::cout << "Cost: " << -result.cost.total 
+                            << " [From:" << out_prec.PointProfit() 
+                            << ", deltaProfit: " 
+                            << (((100 * out.PointProfit()) / precProfit) - 100)  << "%]" << std::endl;
+    }
+    std::cout << "Time: " << result.running_time << "s " << std::endl;	
+    				
     // Print the outputs on file in different format
     string titleDir = "outputs/localsearch/" + met;
     fs::create_directories(titleDir);
-    if(out.PointProfit() == 0) { // No solution found, the problem is unfeasible
+    if(result.cost.violations > 0) { // No solution found, the problem is unfeasible
       {
         
         ofstream os(titleDir / file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
-          cerr << "  ERROR: Unable to open output file" << endl;
+          std::cerr << "  ERROR: Unable to open output file" << std::endl;
           continue;
         }
         os << in << "h 0";
@@ -228,7 +230,7 @@ int main(int argc, const char* argv[])
         ofstream os(titleDir/ file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
-          cerr << "  ERROR: Unable to open output file" << endl;
+          std::cerr << "  ERROR: Unable to open output file" << std::endl;
           continue;
         }
         os << "h 0" << endl;
@@ -238,7 +240,7 @@ int main(int argc, const char* argv[])
         ofstream os(titleDir / file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
-          cerr << "  ERROR: Unable to open output file" << endl;
+          std::cerr << "  ERROR: Unable to open output file" << std::endl;
           continue;
         }
         os << in << out;
@@ -249,7 +251,7 @@ int main(int argc, const char* argv[])
         ofstream os(titleDir/ file.path().filename().replace_extension(".out"));
         if (!os) {
           ++errors;
-          cerr << "  ERROR: Unable to open output file" << endl;
+          std::cerr << "  ERROR: Unable to open output file" << std::endl;
           continue;
         }
         os << out << endl;
@@ -262,21 +264,32 @@ int main(int argc, const char* argv[])
         solutionsStream << file.path().filename() 
                         << "," << chaoRes[cnt_istances].chaoOptimum 
                         << "," << out.PointProfit() 
-                        << "," << 1.0 << endl;
+                        << "," << 1.0 << std::endl;
         ++cnt_istances;
         continue;
       }
-      solutionsStream << file.path().filename() << "," << 
-                         chaoRes[cnt_istances].chaoOptimum << "," << 
-                         out.PointProfit() << "," << 
-                         out.PointProfit() / chaoRes[cnt_istances].chaoOptimum << endl;
-      ++cnt_istances;
+      if(result.cost.violations > 0) {
+        solutionsStream << file.path().filename() << "," 
+                        << chaoRes[cnt_istances].chaoOptimum << "," 
+                        << out_prec.PointProfit() << "," 
+                        << out_prec.PointProfit() / chaoRes[cnt_istances].chaoOptimum << std::endl;
+        ++cnt_istances;
+        continue;
+      }
+      else {
+        solutionsStream << file.path().filename() << "," 
+                        << chaoRes[cnt_istances].chaoOptimum << "," 
+                        << out.PointProfit() << "," 
+                        << out.PointProfit() / chaoRes[cnt_istances].chaoOptimum << std::endl;
+        ++cnt_istances;
+        continue;
+      }  
     }
     else { // New map found
-      solutionsStream << file.path().filename() << "," << out.PointProfit() << "," << "(new map)" << endl;
+      solutionsStream << file.path().filename() << "," << out.PointProfit() << "," << "(new map)" << std::endl;
     } 
   }
   solutionsStream.close();
-  cerr << "Total errors: " << ((double)errors) / 2 << endl;
+  std::cerr << "Total errors: " << ((double)errors) / 2 << std::endl;
   return 0;
 }
