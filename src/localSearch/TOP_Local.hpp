@@ -30,9 +30,11 @@ void SolveLocalSA(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
   TOP_MoveSwapNeighborhoodExplorer TOP_nhe(in, TOP_sm, cc); // Create and add delta costs
   TOP_OutputManager TOP_om(in);
 
+  CommandLineParameters::Parametrized::OverallParametrized().clear(); // Fix to avoid double registration of destroyed objects notifiers?
+
   // runners
   SimulatedAnnealing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sa(in, TOP_sm, TOP_nhe, "TOP_MoveSimulatedAnnealing");
-  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP solver");
+  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP_SA");
   TOP_solver.SetRunner(TOP_sa);
 
   TOP_sa.RegisterParameters();
@@ -83,9 +85,11 @@ void SolveLocalHC(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
   TOP_MoveSwapNeighborhoodExplorer TOP_nhe(in, TOP_sm, cc); // Create and add delta costs
   TOP_OutputManager TOP_om(in);
   
+  CommandLineParameters::Parametrized::OverallParametrized().clear(); // Fix to avoid double registration of destroyed objects notifiers?
+
   // runners
   HillClimbing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_hc(in, TOP_sm, TOP_nhe, "TOP_MoveHillClimbing");
-  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP solver");
+  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP_HC");
   TOP_solver.SetRunner(TOP_hc);
 
   // params
@@ -132,9 +136,11 @@ void SolveLocalTS(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
   TOP_MoveSwapNeighborhoodExplorer TOP_nhe(in, TOP_sm, cc); // Create and add delta costs
   TOP_OutputManager TOP_om(in);
   
+  CommandLineParameters::Parametrized::OverallParametrized().clear(); // Fix to avoid double registration of destroyed objects notifiers?
+
   // runners
   TabuSearch<TOP_Input, TOP_State, TOP_MoveSwap> TOP_ts(in, TOP_sm, TOP_nhe, "TOP_MoveTabuSearch");
-  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP solver");
+  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP_TS");
   TOP_solver.SetRunner(TOP_ts);
 
   // params
@@ -182,12 +188,14 @@ void SolveLocalSD(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, nlohm
   cc.AddCostComponents(TOP_sm); // Add all cost components
   TOP_MoveSwapNeighborhoodExplorer TOP_nhe(in, TOP_sm, cc); // Create and add delta costs
   TOP_OutputManager TOP_om(in);
-    
+
+  CommandLineParameters::Parametrized::OverallParametrized().clear(); // Fix to avoid double registration of destroyed objects notifiers?
+
   // runners
   SteepestDescent<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sd(in, TOP_sm, TOP_nhe, "TOP_MoveSteepestDescent");
-  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP solver");
+  SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State> TOP_solver(in, TOP_sm, TOP_om, "TOP_SD");
   TOP_solver.SetRunner(TOP_sd);
-  
+
   // params
   TOP_sd.RegisterParameters();
   TOP_sd.SetParameter("max_evaluations", json_get_or_default<unsigned long int>(options["z"], (unsigned long int)10000));

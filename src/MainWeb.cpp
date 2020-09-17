@@ -292,7 +292,26 @@ class HSR_Redirect : public hs::http_resource {
     std::string target;
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
+  /*
+  {
+    TOP_Input in;
+    TOP_StateManager TOP_sm(in);
+    TOP_CostContainer cc(in);
+    TOP_MoveSwapNeighborhoodExplorer TOP_nhe(in, TOP_sm, cc);
+
+
+    SimulatedAnnealing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sa(in, TOP_sm, TOP_nhe, "TOP_MoveSimulatedAnnealing");
+    HillClimbing<TOP_Input, TOP_State, TOP_MoveSwap> TOP_hc(in, TOP_sm, TOP_nhe, "TOP_MoveHillClimbing");
+    TabuSearch<TOP_Input, TOP_State, TOP_MoveSwap> TOP_ts(in, TOP_sm, TOP_nhe, "TOP_MoveTabuSearch");
+    SteepestDescent<TOP_Input, TOP_State, TOP_MoveSwap> TOP_sd(in, TOP_sm, TOP_nhe, "TOP_MoveSteepestDescent");
+
+    //CommandLineParameters::Parametrized::RegisterParameters();
+    CommandLineParameters::Parse(argc, argv, true, false);
+  }
+  */
+
+  std::cerr << "Eseguiti Registers per local" << endl;
 
   std::random_device rd; // Can be not random...
   

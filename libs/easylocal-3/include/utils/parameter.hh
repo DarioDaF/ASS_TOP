@@ -563,6 +563,7 @@ namespace EasyLocal
           }
         }
         
+        public: // Temporary patch @DARIO
         static std::list<Parametrized*>& OverallParametrized()
         {
           static std::list<Parametrized*> overall_parametrized;

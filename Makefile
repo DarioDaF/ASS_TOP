@@ -16,10 +16,10 @@ LDFLAGS_EASYLOCAL=-lboost_program_options -pthread
 
 LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 
-CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
+CPPFLAGS=-std=c++17 -O3 -Wall -ggdb -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
-ALL_EXE = MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe
+ALL_EXE = MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe MainCGreedyTest.exe
 
 all: $(ALL_EXE)
 
@@ -73,6 +73,6 @@ buildWeb:
 buildWebWatch:
 	cd webSrc && yarn run tsc --watch
 
-.PHONY: clean runLinux buildWeb buildWebWatch
+.PHONY: clean runWebLinux buildWeb buildWebWatch
 
 include $(wildcard src/*.d)
