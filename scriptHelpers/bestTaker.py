@@ -33,7 +33,7 @@ def printAlg(n, idx, res, maxRes):
 
 ver = sys.argv[1]
 ver = ver.strip()
-print("Processing version " , ver)
+print("Taking best version " , ver)
 
 if(ver == 'GB'): 
   solFile = ["./solutions/SolGreedy#1.csv", \
@@ -103,10 +103,9 @@ with open(path + "bestSol" + ver + ".csv", mode='w') as csv_file:
   writer.writeheader()
   
   for idx in range(len(maxRes)):
-    name = maxRes[idx][0].split('"')
-    
+    name = maxRes[idx][0].split('.txt')
     if(ver == "GB"):
-      writer.writerow({'instance' : name[1], 
+      writer.writerow({'instance' : name[0] + '.txt', 
                        'chaoOpt' : maxRes[idx][1],
                        'result' : maxRes[idx][2],
                        'percOnOpt' : maxRes[idx][3],
@@ -117,7 +116,7 @@ with open(path + "bestSol" + ver + ".csv", mode='w') as csv_file:
                        'dtBT#2' : printAlg(3, idx, res, maxRes),
                        'dtMedium' : (printAlg(0, idx, res, maxRes) + printAlg(1, idx, res, maxRes) + printAlg(2, idx, res, maxRes) + printAlg(3, idx, res, maxRes)) / 4})
     else:
-      writer.writerow({'instance' : name[1], 
+      writer.writerow({'instance' : name[0] + '.txt', 
                        'chaoOpt' : maxRes[idx][1],
                        'result' : maxRes[idx][2],
                        'percOnOpt' : maxRes[idx][3],
@@ -136,14 +135,13 @@ if(ver == 'GB'):
 
   for idx in range(len(maxRes)):
     fileName1 = maxRes[idx][0].split(".txt")
-    fileName2 = fileName1[0].split('"')
     
     if(maxRes[idx][4] == "BT#1"):
-      pathFrom = "./outputs/routeHops/backtracking/#1/" +  fileName2[1] + ".out"
+      pathFrom = "./outputs/routeHops/backtracking/#1/" +  fileName1[0] + ".out"
     elif(maxRes[idx][4] == "BT#2"):
-      pathFrom = "./outputs/routeHops/backtracking/#2/" +  fileName2[1] + ".out"
+      pathFrom = "./outputs/routeHops/backtracking/#2/" + fileName1[0] + ".out"
     elif(maxRes[idx][4] == "GR#1"):
-      pathFrom = "./outputs/routeHops/greedy/#1/" +  fileName2[1] + ".out"
+      pathFrom = "./outputs/routeHops/greedy/#1/" +  fileName1[0] + ".out"
     elif(maxRes[idx][4] == "GR#2"):
-      pathFrom = "./outputs/routeHops/greedy/#2/" +  fileName2[1] + ".out"
+      pathFrom = "./outputs/routeHops/greedy/#2/" + fileName1[0] + ".out"
     shutil.copy(pathFrom, solPath)

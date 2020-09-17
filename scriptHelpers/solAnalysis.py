@@ -26,7 +26,7 @@ import os
 
 ver = sys.argv[1]
 ver = ver.strip()
-print("Processing version " , ver)
+print("Plotting analsysis version " , ver)
 
 if(ver == 'GB'): 
   solFile = ["./solutions/SolGreedy#1.csv", \
@@ -67,19 +67,18 @@ instancesF = []
 for idx in range(len(res[1])):
   instancesF.append(res[1][idx][0])
 
-for idx in range(len(res[1])):
-  resGr1.append(float(res[0][idx][3]) * 100)
+for idxG1 in range((len(res[0]))):
+  resGr1.append(float(res[0][idxG1][3]) * 100)
 
-for idx in range(len(res[1])):
-  resGr2.append(float(res[1][idx][3]) * 100) 
+for idxG2 in range((len(res[1]))):
+  resGr2.append(float(res[1][idxG2][3]) * 100) 
 
-for idx in range(len(res[1])):
-  resBt1.append(float(res[2][idx][3]) * 100)
+for idxB1 in range((len(res[2]))):
+  resBt1.append(float(res[2][idxB1][3]) * 100)
 
-for idx in range(len(res[1])):
-  resBt2.append(float(res[3][idx][3]) * 100)
+for idxB2 in range(len(res[3])):
+  resBt2.append(float(res[3][idxB2][3]) * 100)
 
-# Print the output scaled, with all the informations
 # Print the output scaled, with all the informations
 plt.style.use('seaborn-darkgrid')
 my_dpi=96
