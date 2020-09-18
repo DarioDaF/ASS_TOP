@@ -14,20 +14,10 @@ const $selSolver = document.getElementById('selSolver') as HTMLSelectElement;
 const $bSolve = document.getElementById('bSolve');
 const $cbAutoUpdate = document.getElementById('cbAutoUpdate') as HTMLInputElement;
 const $divOptions = document.getElementById('divOptions');
+const $log = document.getElementById('log');
+const $profit = document.getElementById('profit');
 
-//const optionSliders = ['a', 'b', 'c', 'd', 'e', 'f'];
 let options = {};
-/*
-for(const sl of optionSliders) {
-  const compoundSl = createCompoundSlider(sl, (value) => {
-    options[sl] = value;
-    if($cbAutoUpdate.checked) {
-      $bSolve.click();
-    }
-  }, 0, 100, 0.1, 0);
-  $divOptions.append(compoundSl.$cont);
-}
-*/
 
 const fileList: Record<string, File> = {};
 const relMargin = 0.015;
@@ -214,6 +204,8 @@ $bSolve.addEventListener('click', async() => {
     console.log(JSON.stringify(res));
     content = res.solution;
     console.log(`Solution found with profit: ${res.profit}`);
+    $profit.innerText = res.profit.toString();
+    $log.innerHTML = res.log.replace(/\n/g, '<br>');
   }
 
   const map = parseTOPMap(content);
@@ -227,128 +219,9 @@ $bSolve.addEventListener('click', async() => {
 
 // THUNDER solver
 
-type Point = {
-  x: number;
-  y: number;
-}
-type ThunderData = {
-  visited: boolean[],
-  carPartialPos: Point[],
-  carActPos: Point[],
-  carStallIterations: number[],
-  stallIterations: number
-}
+import { ThunderData, FirstThunder, NextThunder } from './thunder.js';
 
-function pDist(p1: Point, p2: Point) {
-  return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
-}
-function pDistSq(p1: Point, p2: Point) {
-  return (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2;
-}
-function pLen(p: Point) {
-  return Math.sqrt(p.x ** 2 + p.y ** 2);
-}
-function pLenSq(p: Point) {
-  return p.x ** 2 + p.y ** 2;
-}
-function pAdd(p1: Point, p2: Point) {
-  return { x: p1.x + p2.x, y: p1.y + p2.y };
-}
-function pSub(p1: Point, p2: Point) {
-  return { x: p1.x - p2.x, y: p1.y - p2.y };
-}
-function pMul(p: Point, m: number) {
-  return { x: p.x * m, y: p.y * m };
-}
-function pNorm(p: Point) {
-  return pMul(p, 1/pLen(p));
-}
-
-function FirstThunder(map: TOPMap): ThunderData {
-  // Prepare thunder
-  const thunder = {
-    carPartialPos: Array.from({ length: map.m }, e => ({ ...map.points[0] })),
-    carActPos: Array.from({ length: map.m }, e => ({ ...map.points[0] })), // new Array(map.m).fill(map.points[0]) this copies reference
-    carStallIterations: new Array(map.m).fill(0),
-    stallIterations: 0,
-    visited: new Array(map.n).fill(false),
-  }
-  thunder.visited[0] = true;
-  thunder.visited[map.n - 1] = true; // Avoid end
-  return thunder;
-}
-
-function NextThunder(map: TOPMap, thunder: ThunderData, K: number, dt: number, rangeSq: number, speedCap: number, useStall: boolean) {
-  ++thunder.stallIterations;
-  // Start all cars and move to the electric field
-  for(let c = 0; c < map.m; ++c) {
-    if(useStall && thunder.carStallIterations[c] > 0) {
-      --thunder.carStallIterations[c];
-      continue; // Skip car form future
-    }
-    let force = { x: 0, y: 0 };
-    for(let p = 0; p < map.n; ++p) {
-      if(thunder.visited[p]) {
-        continue;
-      }
-      const pDiff = pSub(map.points[p], thunder.carPartialPos[c]);
-      const forceScalar = K * map.points[p].profit / pLenSq(pDiff);
-      if(pLenSq(pDiff) <= rangeSq) {
-        console.warn(`Error: uncaptured point, might diverge: (${pDiff.x}, ${pDiff.y})`);
-      }
-      force = pAdd(force, pMul(pNorm(pDiff), forceScalar));
-    }
-    // Move the car by force, limit max travel?
-    let impulse = pMul(force, dt);
-    if(pLen(impulse) > speedCap) {
-      console.warn(`Velocity capped: (${force.x}, ${force.y})`);
-      impulse = pMul(impulse, speedCap / pLen(impulse));
-    }
-    thunder.carPartialPos[c] = pAdd(thunder.carPartialPos[c], impulse);
-    // Check if in points range
-    for(let p = 0; p < map.n; ++p) {
-      if(thunder.visited[p]) {
-        continue;
-      }
-      if(pDistSq(map.points[p], thunder.carPartialPos[c]) <= rangeSq) {
-        // Assign car and break
-        // Only if feasible
-        
-        let travelTime = 0;
-        {
-          let lastPoint = map.points[0];
-          for(const h of map.hops) {
-            if(h.car != c) continue;
-            const stepTime = pDist(lastPoint, map.points[h.point]);
-            travelTime += stepTime;
-            lastPoint = map.points[h.point];
-          }
-          {
-            const stepTime = pDist(lastPoint, map.points[p]);
-            travelTime += stepTime;
-            lastPoint = map.points[p];
-          }
-          {
-            const stepTime = pDist(lastPoint, map.points[map.n - 1]);
-            travelTime += stepTime;
-          }
-        }
-        if(travelTime <= map.tmax) {
-          map.hops.push({ car: c, point: p });
-          thunder.visited[p] = true;
-          thunder.carActPos[c] = map.points[p];
-          thunder.carStallIterations[c] += thunder.stallIterations;
-          thunder.stallIterations = 0;
-          console.log(thunder);
-          for(let c = 0; c < map.m; ++c) {
-            thunder.carPartialPos[c] = { ...thunder.carActPos[c] }; // Reset all cars (discharge!)
-          }
-          break;
-        }
-      }
-    }
-  }
-}
+let currentThunder: ThunderData = undefined;
 
 function drawMapWithThunder(map: TOPMap, thunder: ThunderData) {
   const $svg = drawMap(map);
@@ -375,8 +248,6 @@ function drawMapWithThunder(map: TOPMap, thunder: ThunderData) {
 
   return $svg;
 }
-
-let currentThunder: ThunderData = undefined;
 
 $bFirstThunder.addEventListener('click', () => {
   currentMap.hops = [];

@@ -45,23 +45,15 @@ const std::map<std::string, std::string> mimes = {
 #include "web/SolverGreedy.hpp"
 #include "web/SolverBacktracking.hpp"
 #include "web/SolverLocal.hpp"
-#include "backTracking/TOP_Backtracking.hpp"
-#include "localSearch/TOP_Local.hpp"
 
-/*
-const std::vector<SolverEntry_s> solvers = {
-  { .fn = SolveGreedy, .name = "Greedy" },
-  { .fn = SolveBacktrack, .name = "BackTracking" },
-  { .fn = SolveLocalSA, .name = "LocalSearchSA" },
-  { .fn = SolveLocalHC, .name = "LocalSearchHC" },
-  { .fn = SolveLocalTS, .name = "LocalSearchTS" },
-  { .fn = SolveLocalSD, .name = "LocalSearchSD" }
-};
-*/
 const std::vector<AbstractWebSolver*> solvers = {
   new WebSolverGreedy(),
+  new WebSolverGreedyRange(),
   new WebSolverBackTracking(),
-  new WebSolverLocalSA()
+  new WebSolverLocalSA(),
+  new WebSolverLocalHC(),
+  new WebSolverLocalTS(),
+  new WebSolverLocalSD()
 };
 #define DEF_SOLVER 0
 
@@ -169,7 +161,9 @@ class HSR_SolverPlus : public hs::http_resource {
       }
 
       TOP_Output out(in);
-      solvers[solver]->Solve(in, out, rng, jReq["options"]);
+      std::stringstream log;
+      teestream ts(log, std::cout); // Tee log data to output
+      solvers[solver]->Solve(in, out, rng, jReq["options"], ts);
 
       auto sol = std::to_string(solver) / inst.filename().replace_extension(SOL_EXT);
       {
@@ -193,7 +187,8 @@ class HSR_SolverPlus : public hs::http_resource {
         { "solver", solver },
         { "solverName", solvers[solver]->name() },
         { "seed", seed },
-        { "solutionFile", sol.generic_string() } // Relative web path
+        { "solutionFile", sol.generic_string() }, // Relative web path
+        { "log", log.str() }
       };
 
       std::cerr << "LOG: ";

@@ -109,14 +109,14 @@ class AbstractWebSolver {
 */
 
     nlohmann::json GetParametersDescription() {
-      nlohmann::json j {};
+      auto j = nlohmann::json::array();
       for(const auto param : GetParameters()) {
         j.push_back(param->toJsonDescr());
       }
       return j;
     }
 
-    virtual void Solve(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) = 0;
+    virtual void Solve(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options, std::ostream& log) = 0;
 };
 
 /*

@@ -26,6 +26,7 @@ export type ApiSolve = {
   solver: number;
   solverName: string;
   solutionFile: string;
+  log: string;
 }
 
 export async function apiGetList() {

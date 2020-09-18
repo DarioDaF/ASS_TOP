@@ -22,4 +22,14 @@
  */
 void GreedySolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, double wProfit, double wTime, double maxDeviation, double wNonCost);
 
+/**
+ * Solve for one instance, all the partial solution associated and update the best one using default parameter ranges.
+ *
+ * @param in constant input
+ * @param out constant output
+ * @param rng seed generator to save the solution and its informations
+ * @return [void]
+ */
+void GreedyRangeSolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, std::ostream& log = std::cout);
+
 #endif

@@ -20,7 +20,7 @@ class WebSolverBackTracking : public AbstractWebSolver {
   public:
     std::string name() override { return "Backtrack"; }
 
-    void Solve(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) override {
+    void Solve(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options, std::ostream& log) override {
       TOP_Walker tw(in, 1, wTime.get(options), maxDev.get(options), wNonCost.get(options));
       TOP_Checker ck;
       Backtrack(tw, ck, maxTime.get(options));

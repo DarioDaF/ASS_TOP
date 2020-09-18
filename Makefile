@@ -38,7 +38,7 @@ MainCGreedyTest.exe: CPPFLAGS+=$(CPPFLAGS_CTPL)
 MainCGreedyTest.exe: LDFLAGS+=$(LDFLAGS_CTPL)
 
 # WebViewer #
-MainWeb.exe: src/MainWeb.o src/greedy/TOP_Greedy.o src/backTracking/TOP_Backtracking.o src/localSearch/TOP_Helpers.o src/localSearch/TOP_Costs.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
+MainWeb.exe: src/MainWeb.o src/web/SolverLocal.o src/greedy/TOP_Greedy.o src/backTracking/TOP_Backtracking.o src/localSearch/TOP_Helpers.o src/localSearch/TOP_Costs.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 # Parameter Analysis #
 MainParamGr.exe: src/MainParamGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
 # Map Analysis #

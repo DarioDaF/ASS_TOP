@@ -19,8 +19,18 @@ class WebSolverGreedy : public AbstractWebSolver {
   public:
     std::string name() override { return "Greedy Single"; }
 
-    void Solve(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options) override {
+    void Solve(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options, std::ostream& log) override {
       GreedySolver(in, out, rng, 1, wTime.get(options), maxDev.get(options), wNonCost.get(options));
+    }
+
+};
+
+class WebSolverGreedyRange : public AbstractWebSolver {
+  public:
+    std::string name() override { return "Greedy Range"; }
+
+    void Solve(const TOP_Input &in, TOP_Output& out, std::mt19937& rng, nlohmann::json& options, std::ostream& log) override {
+      GreedyRangeSolver(in, out, rng, log);
     }
 
 };

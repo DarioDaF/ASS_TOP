@@ -102,3 +102,33 @@ export function createCompoundSlider(label: string, onChange: (value: number) =>
 
   return { $cont: $div, $input: $number };
 }
+
+export type Point = {
+  x: number;
+  y: number;
+}
+
+export function pDist(p1: Point, p2: Point) {
+  return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+}
+export function pDistSq(p1: Point, p2: Point) {
+  return (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2;
+}
+export function pLen(p: Point) {
+  return Math.sqrt(p.x ** 2 + p.y ** 2);
+}
+export function pLenSq(p: Point) {
+  return p.x ** 2 + p.y ** 2;
+}
+export function pAdd(p1: Point, p2: Point) {
+  return { x: p1.x + p2.x, y: p1.y + p2.y };
+}
+export function pSub(p1: Point, p2: Point) {
+  return { x: p1.x - p2.x, y: p1.y - p2.y };
+}
+export function pMul(p: Point, m: number) {
+  return { x: p.x * m, y: p.y * m };
+}
+export function pNorm(p: Point) {
+  return pMul(p, 1/pLen(p));
+}

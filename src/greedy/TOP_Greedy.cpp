@@ -429,3 +429,35 @@ void GreedySolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, doubl
   }
   // cerr << "LOG: Currently solved the instance " << solvedSolutions << " times" << endl;
 }
+
+void GreedyRangeSolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, std::ostream& log) {
+  TOP_Output curr_out(in);
+  int bestProfit = 0;
+  
+  double wTimeStep = 0.1;
+  double wNonCostStep = 0.5;
+
+  for(double wTime = 0.1; wTime <= 3.7; wTime += wTimeStep) {
+    if(wTime > 1.2 && wTime < 2.9) {
+      wTime = 2.9;
+      wTimeStep = 0.5;
+    }
+
+    for(double wNonCost = 0; wNonCost <= 5; wNonCost += wNonCostStep) {
+      if(wNonCost > 1 && wNonCost < 5) {
+        wNonCost = 5;
+        wNonCostStep = 0.5;
+      }
+
+      for(double maxDeviation = 0; maxDeviation <= 6; maxDeviation += 0.01) {
+        curr_out.Clear();
+        GreedySolver(in, curr_out, rng, 1, wTime, maxDeviation, wNonCost);
+        if(curr_out.PointProfit() > bestProfit) {
+          out = curr_out;
+          bestProfit = out.PointProfit();
+          log << "Found better solution: " << bestProfit << " with (" << wTime << ", " << maxDeviation << ", " << wNonCost << ")" << std::endl;
+        }
+      }
+    }
+  }
+}
