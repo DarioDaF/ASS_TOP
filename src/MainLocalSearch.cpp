@@ -53,12 +53,15 @@ struct chaoResults {
  *                                                  The files are located in "outputs/routeHops/localsearch/[alg]" directory.
  * 
  * Usage:
- *    ./MainLocalSearch.exe [algorithm]
+ *    ./MainLocalSearch.exe [algorithm] [route]
  *    - algorithms : 
  *                SA : MoveSimulatedAnnealing
  *                HC : MoveHillClimbing
  *                TS : MoveTabuSearch
  *                SD : MoveSteepestDescent
+ *    - route :
+ *                GB : greedy or backtracking
+ *                LS : localsearch
  * 
  * @param argc number of items in the command line
  * @param argv items in the command line
@@ -68,14 +71,15 @@ int main(int argc, const char* argv[])
 {
   // variables
   int errors = 0, cnt_istances =  0;
-  string met, line, method;
+  string met, line, method, routeB;
   TOP_Input in;
   vector<chaoResults> chaoRes;
 
   if(argc < 2) {
-    throw runtime_error("  ERROR: missing Algorithm [SA, HC, TS, SD]");
+    throw runtime_error("  ERROR: missing Algorithm [SA, HC, TS, SD] and Routes [GB, LS]");
   }
   method = argv[1];
+  routeB = argv[2];
 
   //Open and read the file of Chao's results
   ifstream optStream("./paramIn/chaoResults.txt"); 
@@ -101,7 +105,7 @@ int main(int argc, const char* argv[])
   } else { // if (method.GetValue() == string("SD"))
     met = string("SD");
   }
-  string titleFile = "solutions/SolLocalSearch#" + met + ".csv";
+  string titleFile = "solutions/SolLocalSearch" + routeB + "#" + met + ".csv";
   ofstream solutionsStream(titleFile);
   if(!solutionsStream) {
     throw runtime_error("  ERROR: Unable to open Solutions file");
@@ -125,7 +129,7 @@ int main(int argc, const char* argv[])
     
     TOP_Output out_prec(in);
     {
-      ifstream is("./outputs/routeHops/bestRoutes/" + in.name + ".out");
+      ifstream is("./outputs/routeHops/bestRoutes/" + routeB + "/" + in.name + ".out");
       if (!is) {
         ++errors;
         std::cerr << "  ERROR: Unable to open bestRoutes Instance file" << std::endl;
@@ -174,12 +178,12 @@ int main(int argc, const char* argv[])
     if(method == string("SA")) {
       TOP_sa.RegisterParameters();
       TOP_sa.SetParameter("compute_start_temperature", (bool)true);
-      TOP_sa.SetParameter("cooling_rate", (double) 1e-5);
+      TOP_sa.SetParameter("cooling_rate", (double) 1e-7);
       TOP_sa.SetParameter("max_evaluations", (unsigned long int)std::numeric_limits<unsigned long int>::max());
-      TOP_sa.SetParameter("min_temperature", (double)0.0001);
-      TOP_sa.SetParameter("neighbors_accepted", (unsigned int)1000);
-      TOP_sa.SetParameter("neighbors_sampled", (unsigned int)100000);
-      TOP_sa.SetParameter("start_temperature", (double)100);
+      TOP_sa.SetParameter("min_temperature", (double)0.000001);
+      TOP_sa.SetParameter("neighbors_accepted", (unsigned int)100000);
+      TOP_sa.SetParameter("neighbors_sampled", (unsigned int)10000000);
+      TOP_sa.SetParameter("start_temperature", (double)1000);
     } 
     else if(method == string("HC")) {
       TOP_hc.RegisterParameters();
@@ -189,7 +193,7 @@ int main(int argc, const char* argv[])
     else if(method == string("TS")) {
       TOP_ts.RegisterParameters();
       TOP_ts.SetParameter("max_evaluations", (unsigned long int)std::numeric_limits<unsigned long int>::max());
-      TOP_ts.SetParameter("max_idle_iterations", (unsigned long int)1000000);
+      TOP_ts.SetParameter("max_idle_iterations", (unsigned long int)10000);
       TOP_ts.SetParameter("max_tenure", (unsigned int)50);
       TOP_ts.SetParameter("min_tenure", (unsigned int)10);
     } 
@@ -203,15 +207,30 @@ int main(int argc, const char* argv[])
     
     // Print the output into the shell
     if(result.cost.violations == 0) {
-      std::cout << "Cost: " << -result.cost.total 
-                            << " [From:" << out_prec.PointProfit() 
-                            << ", deltaProfit: " 
-                            << (((100 * out.PointProfit()) / precProfit) - 100)  << "%]" << std::endl;
+      if(precProfit != 0) {
+        std::cout << "Cost: " << -result.cost.total 
+                              << " [From:" << out_prec.PointProfit() 
+                              << ", deltaProfit: " 
+                              << (((100 * out.PointProfit()) / precProfit) - 100)  << "%]" << std::endl;
+      }
+      else {
+        std::cout << "Cost: " << -result.cost.total 
+                              << " [From:" << out_prec.PointProfit() 
+                              << ", deltaProfit: " 
+                              << 0.0  << "%]" << std::endl;        
+      }
     }
+    else {
+      std::cout << "Cost: " << precProfit
+                            << " [From:" << precProfit
+                            << ", deltaProfit: " 
+                            << 0.0  << "%]" << std::endl;        
+    }
+    
     std::cout << "Time: " << result.running_time << "s " << std::endl;	
     				
     // Print the outputs on file in different format
-    string titleDir = "outputs/localsearch/" + met;
+    string titleDir = "outputs/localsearch/" + routeB + "/" + met;
     fs::create_directories(titleDir);
     if(result.cost.violations > 0) { // No solution found, the problem is unfeasible
       {
@@ -225,7 +244,7 @@ int main(int argc, const char* argv[])
         os << in << "h 0";
       }
       {
-        string titleDir = "outputs/routeHops/localsearch/" + met;
+        string titleDir = "outputs/routeHops/localsearch/"+  routeB + "/" + met;
         fs::create_directories(titleDir);
         ofstream os(titleDir/ file.path().filename().replace_extension(".out"));
         if (!os) {
@@ -246,7 +265,7 @@ int main(int argc, const char* argv[])
         os << in << out;
       }
       {
-        string titleDir = "outputs/routeHops/localsearch/" + met;
+        string titleDir = "outputs/routeHops/localsearch/" + routeB + "/" + met;
         fs::create_directories(titleDir);
         ofstream os(titleDir/ file.path().filename().replace_extension(".out"));
         if (!os) {
@@ -268,13 +287,23 @@ int main(int argc, const char* argv[])
         ++cnt_istances;
         continue;
       }
-      if(result.cost.violations > 0) {
-        solutionsStream << file.path().filename() << "," 
-                        << chaoRes[cnt_istances].chaoOptimum << "," 
-                        << out_prec.PointProfit() << "," 
-                        << out_prec.PointProfit() / chaoRes[cnt_istances].chaoOptimum << std::endl;
-        ++cnt_istances;
-        continue;
+      else if(result.cost.violations > 0) {
+        if(precProfit == 0) {
+          solutionsStream << file.path().filename() << "," 
+                          << chaoRes[cnt_istances].chaoOptimum << "," 
+                          << precProfit << "," 
+                          << 1 << std::endl;
+          ++cnt_istances;
+          continue;
+        }
+        else {
+          solutionsStream << file.path().filename() << "," 
+                          << chaoRes[cnt_istances].chaoOptimum << "," 
+                          << precProfit << "," 
+                          << precProfit / chaoRes[cnt_istances].chaoOptimum << std::endl;
+          ++cnt_istances;
+          continue;
+        }
       }
       else {
         solutionsStream << file.path().filename() << "," 
