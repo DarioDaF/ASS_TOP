@@ -8,7 +8,7 @@
     
     version: 
         - GB : Greedy and Backtracking
-        - LS1 : Local Search from GB
+        - LS : Local Search from GB
         - LS2 : Local Search from LS1
 
   Input files:
@@ -34,7 +34,7 @@ if(ver == 'GB'):
              "./solutions/SolGreedy#2.csv", \
              "./solutions/SolBacktracking#1.csv", \
              "./solutions/SolBacktracking#2.csv"]
-elif(ver == 'LS1'):
+elif(ver == 'LS'):
   solFile = ["./solutions/SolLocalSearchGB#SA.csv", \
              "./solutions/SolLocalSearchGB#HC.csv", \
              "./solutions/SolLocalSearchGB#SD.csv", \

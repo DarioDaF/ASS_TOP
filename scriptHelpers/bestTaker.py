@@ -9,7 +9,7 @@
     bestVersion: 
         - GB : Greedy and Backtracking
         - LS : Local Search from GB
-        - LS2 : Local Search from LS1
+        - LS1 : Local Search from LS1
 
   Input files:
     - Sol[algorithm]#[version].csv : file ".csv" that contain the solution of one version of one algorithm.
@@ -41,7 +41,7 @@ if(ver == 'GB'):
              "./solutions/SolGreedy#2.csv", \
              "./solutions/SolBacktracking#1.csv", \
              "./solutions/SolBacktracking#2.csv"]
-elif(ver == 'LS1'):
+elif(ver == 'LS'):
   solFile = ["./solutions/SolLocalSearchGB#SA.csv", \
              "./solutions/SolLocalSearchGB#HC.csv", \
              "./solutions/SolLocalSearchGB#SD.csv", \
@@ -154,7 +154,7 @@ if(ver == 'GB'):
     elif(maxRes[idx][4] == "GR#2"):
       pathFrom = "./outputs/routeHops/greedy/#2/" + fileName1[0] + ".out"
     shutil.copy(pathFrom, solPath)
-else:
+elif (ver == "LS"):
   solPath = "./outputs/routeHops/bestRoutes/LS/"
   if(not os.path.isdir(solPath)):
     os.mkdir("./outputs/routeHops/bestRoutes/LS/")
@@ -171,4 +171,22 @@ else:
       pathFrom = "./outputs/routeHops/localsearch/GB/SD/" +  fileName2[1] + ".out"
     elif(maxRes[idx][4] == "TS"):
       pathFrom = "./outputs/routeHops/localsearch/GB/TS/" + fileName2[1] + ".out"
+    shutil.copy(pathFrom, solPath)
+elif (ver == "LS1"):
+  solPath = "./outputs/routeHops/bestRoutes/LS1/"
+  if(not os.path.isdir(solPath)):
+    os.mkdir("./outputs/routeHops/bestRoutes/LS1/")
+
+  for idx in range(len(maxRes)):
+    fileName1 = maxRes[idx][0].split(".txt")
+    fileName2 = fileName1[0].split('"')
+    
+    if(maxRes[idx][4] == "SA"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/SA/" +  fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "HC"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/HC/" + fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "SD"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/SD/" +  fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "TS"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/TS/" + fileName2[1] + ".out"
     shutil.copy(pathFrom, solPath)
