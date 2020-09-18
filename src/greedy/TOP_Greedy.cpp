@@ -438,8 +438,8 @@ void GreedyRangeSolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, 
   double wNonCostStep = 0.5;
 
   for(double wTime = 0.1; wTime <= 3.7; wTime += wTimeStep) {
-    if(wTime > 1.2 && wTime < 2.9) {
-      wTime = 2.9;
+    if(wTime > 1.2 && wTime < 2) {
+      wTime = 2;
       wTimeStep = 0.5;
     }
 
