@@ -8,7 +8,8 @@
 
     bestVersion: 
         - GB : Greedy and Backtracking
-        - LS : Local Search
+        - LS : Local Search from GB
+        - LS1 : Local Search from LS1
 
   Input files:
     - Sol[algorithm]#[version].csv : file ".csv" that contain the solution of one version of one algorithm.
@@ -33,18 +34,23 @@ def printAlg(n, idx, res, maxRes):
 
 ver = sys.argv[1]
 ver = ver.strip()
-print("Taking best version " , ver)
+print("Taking best version ", ver)
 
 if(ver == 'GB'): 
   solFile = ["./solutions/SolGreedy#1.csv", \
              "./solutions/SolGreedy#2.csv", \
              "./solutions/SolBacktracking#1.csv", \
              "./solutions/SolBacktracking#2.csv"]
+elif(ver == 'LS'):
+  solFile = ["./solutions/SolLocalSearchGB#SA.csv", \
+             "./solutions/SolLocalSearchGB#HC.csv", \
+             "./solutions/SolLocalSearchGB#SD.csv", \
+             "./solutions/SolLocalSearchGB#TS.csv"]
 else:
-  solFile = ["./solutions/SolLocalSearch#SA.csv", \
-             "./solutions/SolLocalSearch#HC.csv", \
-             "./solutions/SolLocalSearch#SD.csv", \
-             "./solutions/SolLocalSearch#TS.csv"]
+  solFile = ["./solutions/SolLocalSearchLS#SA.csv", \
+             "./solutions/SolLocalSearchLS#HC.csv", \
+             "./solutions/SolLocalSearchLS#SD.csv", \
+             "./solutions/SolLocalSearchLS#TS.csv"]
 
 instancesNumber = 387
 fileNumber = 4
@@ -65,11 +71,21 @@ for idx in solFile:
       instance += 1
   cnt += 1
 
-for idx in range(len(res[1])):
-  temp = [res[0][idx][2], res[1][idx][2], res[2][idx][2] , res[3][idx][2]]
+for idx in range(len(res[0])):
+  temp = [int(res[0][idx][2]), int(res[1][idx][2]), int(res[2][idx][2]) , int(res[3][idx][2])]
   maxN = max(temp)
   index = temp.index(max(temp))
-  if(ver == 'LS'): 
+
+  if(ver == 'GB'): 
+    if(index == 0):
+      alg = "GR#1"
+    elif(index == 1):
+      alg = "GR#2"
+    elif(index == 2):
+      alg = "BT#1"
+    elif(index == 3):
+      alg = "BT#2"
+  else:
     if(index == 0):
       alg = "SA"
     elif(index == 1):
@@ -78,15 +94,9 @@ for idx in range(len(res[1])):
       alg = "SD"
     elif(index == 3):
       alg = "TS"
-  else:
-    if(index == 0):
-      alg = "GR#1"
-    elif(index == 1):
-      alg = "GR#2"
-    elif(index == 2):
-      alg = "BT#1"
-    elif(index == 3):
-      alg = "BT#1"
+    
+  # print(res[0][idx][0], ", ", temp, ", ", maxN, ", ", index, ", ", alg)
+  # print(res[1][idx][0], ", ", res[1][idx][1], ", ", maxN, ", ",res[index][idx][3], ", ", alg)
   maxRes.append([res[1][idx][0], res[1][idx][1], maxN, res[index][idx][3], alg])
 
 path = "./solutions/bestSolutions/"
@@ -127,11 +137,10 @@ with open(path + "bestSol" + ver + ".csv", mode='w') as csv_file:
                        'dtTS' : printAlg(3, idx, res, maxRes),
                        'dtMedium' : (printAlg(0, idx, res, maxRes) + printAlg(1, idx, res, maxRes) + printAlg(2, idx, res, maxRes) + printAlg(3, idx, res, maxRes)) / 4})
 
-
 if(ver == 'GB'): 
-  solPath = "./outputs/routeHops/bestRoutes/"
+  solPath = "./outputs/routeHops/bestRoutes/GB/"
   if(not os.path.isdir(solPath)):
-    os.mkdir("./outputs/routeHops/bestRoutes/")
+    os.mkdir("./outputs/routeHops/bestRoutes/GB/")
 
   for idx in range(len(maxRes)):
     fileName1 = maxRes[idx][0].split(".txt")
@@ -144,4 +153,40 @@ if(ver == 'GB'):
       pathFrom = "./outputs/routeHops/greedy/#1/" +  fileName1[0] + ".out"
     elif(maxRes[idx][4] == "GR#2"):
       pathFrom = "./outputs/routeHops/greedy/#2/" + fileName1[0] + ".out"
+    shutil.copy(pathFrom, solPath)
+elif (ver == "LS"):
+  solPath = "./outputs/routeHops/bestRoutes/LS/"
+  if(not os.path.isdir(solPath)):
+    os.mkdir("./outputs/routeHops/bestRoutes/LS/")
+
+  for idx in range(len(maxRes)):
+    fileName1 = maxRes[idx][0].split(".txt")
+    fileName2 = fileName1[0].split('"')
+    
+    if(maxRes[idx][4] == "SA"):
+      pathFrom = "./outputs/routeHops/localsearch/GB/SA/" +  fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "HC"):
+      pathFrom = "./outputs/routeHops/localsearch/GB/HC/" + fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "SD"):
+      pathFrom = "./outputs/routeHops/localsearch/GB/SD/" +  fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "TS"):
+      pathFrom = "./outputs/routeHops/localsearch/GB/TS/" + fileName2[1] + ".out"
+    shutil.copy(pathFrom, solPath)
+elif (ver == "LS1"):
+  solPath = "./outputs/routeHops/bestRoutes/LS1/"
+  if(not os.path.isdir(solPath)):
+    os.mkdir("./outputs/routeHops/bestRoutes/LS1/")
+
+  for idx in range(len(maxRes)):
+    fileName1 = maxRes[idx][0].split(".txt")
+    fileName2 = fileName1[0].split('"')
+    
+    if(maxRes[idx][4] == "SA"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/SA/" +  fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "HC"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/HC/" + fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "SD"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/SD/" +  fileName2[1] + ".out"
+    elif(maxRes[idx][4] == "TS"):
+      pathFrom = "./outputs/routeHops/localsearch/LS/TS/" + fileName2[1] + ".out"
     shutil.copy(pathFrom, solPath)

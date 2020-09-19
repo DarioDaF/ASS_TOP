@@ -8,15 +8,16 @@
     
     version: 
         - GB : Greedy and Backtracking
-        - LS : Local Search
+        - LS : Local Search from GB
+        - LS2 : Local Search from LS1
 
   Input files:
     - Sol[algorithm]#[version].csv : file ".csv" that contain the solution of one version of one algorithm.
                                      The file is located in "solutions/" directory.
 
   Output files:
-    - solPlot#version].png and solPlotCount[version] : image file with the plot. 
-                                                       The file is located in "solution/resAnalysis/".
+    - solPlot#[version].png and solPlotCount[version] : image file with the plot. 
+                                                        The file is located in "solution/resAnalysis/".
 '''
 
 import matplotlib.pyplot as plt
@@ -33,11 +34,16 @@ if(ver == 'GB'):
              "./solutions/SolGreedy#2.csv", \
              "./solutions/SolBacktracking#1.csv", \
              "./solutions/SolBacktracking#2.csv"]
+elif(ver == 'LS'):
+  solFile = ["./solutions/SolLocalSearchGB#SA.csv", \
+             "./solutions/SolLocalSearchGB#HC.csv", \
+             "./solutions/SolLocalSearchGB#SD.csv", \
+             "./solutions/SolLocalSearchGB#TS.csv"]
 else:
-  solFile = ["./solutions/SolLocalSearch#SA.csv", \
-             "./solutions/SolLocalSearch#HC.csv", \
-             "./solutions/SolLocalSearch#SD.csv", \
-             "./solutions/SolLocalSearch#TS.csv"]
+  solFile = ["./solutions/SolLocalSearchLS#SA.csv", \
+             "./solutions/SolLocalSearchLS#HC.csv", \
+             "./solutions/SolLocalSearchLS#SD.csv", \
+             "./solutions/SolLocalSearchLS#TS.csv"]
 
 instancesNumber = 387
 fileNumber = 4
@@ -66,23 +72,17 @@ instancesF = []
 
 for idx in range(len(res[1])):
   instancesF.append(res[1][idx][0])
-
-for idxG1 in range((len(res[0]))):
-  resGr1.append(float(res[0][idxG1][3]) * 100)
-
-for idxG2 in range((len(res[1]))):
-  resGr2.append(float(res[1][idxG2][3]) * 100) 
-
-for idxB1 in range((len(res[2]))):
-  resBt1.append(float(res[2][idxB1][3]) * 100)
-
-for idxB2 in range(len(res[3])):
-  resBt2.append(float(res[3][idxB2][3]) * 100)
+  resGr1.append(float(res[0][idx][3]) * 100)
+  resGr2.append(float(res[1][idx][3]) * 100) 
+  if(float(res[1][idx][3]) == 0.0):
+    print(res[1][idx][0])
+  resBt1.append(float(res[2][idx][3]) * 100)
+  resBt2.append(float(res[3][idx][3]) * 100)
 
 # Print the output scaled, with all the informations
 plt.style.use('seaborn-darkgrid')
-my_dpi=96
-plt.figure(figsize=(1080/my_dpi, 1080/my_dpi), dpi=my_dpi)
+my_dpi=200
+plt.figure(figsize=(6000/my_dpi, 2080/my_dpi), dpi=my_dpi)
 
 plt.plot(instancesF, resGr1)
 plt.plot(instancesF, resGr2)
@@ -101,19 +101,10 @@ plt.xlabel("instances")
 plt.ylabel("res/chaoOpt")
 
 for idx in range(len(res[1])):
-  temp = [res[0][idx][2], res[1][idx][2], res[2][idx][2] , res[3][idx][2]]
+  temp = [float(res[0][idx][2]), float(res[1][idx][2]), float(res[2][idx][2]) , float(res[3][idx][2])]
   maxN = max(temp)
   index = temp.index(max(temp))
-  if(ver == 'LS'): 
-    if(index == 0):
-      alg = "SA"
-    elif(index == 1):
-      alg = "HC"
-    elif(index == 2):
-      alg = "SD"
-    elif(index == 3):
-      alg = "TS"
-  else:
+  if(ver == 'GB'): 
     if(index == 0):
       alg = "GR#1"
     elif(index == 1):
@@ -121,8 +112,17 @@ for idx in range(len(res[1])):
     elif(index == 2):
       alg = "BT#1"
     elif(index == 3):
-      alg = "BT#1"
-  maxRes.append([res[1][idx][0], res[1][idx][1], maxN, res[index][idx][3], alg])
+      alg = "BT#2"
+  else:
+    if(index == 0):
+      alg = "SA"
+    elif(index == 1):
+      alg = "HC"
+    elif(index == 2):
+      alg = "SD"
+    elif(index == 3):
+      alg = "TS"  
+  maxRes.append([res[1][idx][0], float(res[1][idx][1]), float(maxN), float(res[index][idx][3]), alg])
 
 #Save file
 namefile = "./solutions/resultAnalysis/"

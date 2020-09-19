@@ -110,11 +110,11 @@ int main(int argc, char *argv[]) {
       std::istringstream iss(line); //Split the input string
       std::vector<string> results(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
 
-      if(results[0] == "wProfit") {
-        from_wProfit = stod(results[2]);
-        to_wProfit = stod(results[3]);
-        up_wProfit = stod(results[4]);
-      }
+      // if(results[0] == "wProfit") {
+      //   from_wProfit = stod(results[2]);
+      //   to_wProfit = stod(results[3]);
+      //   up_wProfit = stod(results[4]);
+      // }
       if(results[0] == "wTime") {
         from_wTime = stod(results[2]);
         to_wTime = stod(results[3]);
@@ -199,94 +199,92 @@ int main(int argc, char *argv[]) {
     TOP_Output out(in);
     
     // Solve all the instances with the set of parameters and print the outputs
-    for (double wProfit = from_wProfit; wProfit <= to_wProfit; wProfit += up_wProfit) {
-      for (double wTime = from_wTime; wTime <= to_wTime; wTime += up_wTime) {
-        for(double maxDeviation = from_maxDeviation; maxDeviation <= to_maxDeviation; maxDeviation += up_maxDeviation) {
-          for(double wNonCost = from_wNonCost; wNonCost <= to_wNonCost; wNonCost += up_wNonCost) {
-            
-            // cerr << "LOG: Solving with parmeters <wProfit: " << wProfit <<
-            //         ", wProfit: " << wTime << 
-            //         ", maxDeviation: " << maxDeviation << 
-            //         ", wNonCost: " << wNonCost << ">" << endl;
-            
-            // Double range parameters
-            // if(wProfit == 1.6) {
-            //   wProfit = 3.5;
-            //   to_wProfit = 3.7;
-            //   up_wProfit = 0.2;
-            // }
-            // if(wTime == 1.2) {
-            //   wTime = 2.9;
-            //   to_wTime = 3.7;
-            //   up_wTime = 0.5;
-            // }
-            // if(wNonCost == 1.2) {
-            //   wNonCost = 5.0;
-            //   to_wNonCost = 5.1;
-            //   up_wNonCost = 0.5;
-            // }
+    for (double wTime = from_wTime; wTime <= to_wTime; wTime += up_wTime) {
+      for(double maxDeviation = from_maxDeviation; maxDeviation <= to_maxDeviation; maxDeviation += up_maxDeviation) {
+        for(double wNonCost = from_wNonCost; wNonCost <= to_wNonCost; wNonCost += up_wNonCost) {
+           
+          // cerr << "LOG: Solving with parmeters <wProfit: " << wProfit <<
+          //         ", wProfit: " << wTime << 
+          //         ", maxDeviation: " << maxDeviation << 
+          //         ", wNonCost: " << wNonCost << ">" << endl;
+          
+          // Double range parameters
+          // if(wProfit == 1.6) {
+          //   wProfit = 3.5;
+          //   to_wProfit = 3.7;
+          //   up_wProfit = 0.2;
+          // }
+          // if(wTime == 1.2) {
+          //   wTime = 2.9;
+          //   to_wTime = 3.7;
+          //   up_wTime = 0.5;
+          // }
+          // if(wNonCost == 1.2) {
+          //   wNonCost = 5.0;
+          //   to_wNonCost = 5.1;
+          //   up_wNonCost = 0.5;
+          // }
 
-            out.Clear();
-            GreedySolver(in, out, rng, wProfit, wTime, maxDeviation, wNonCost);
+          out.Clear();
+          GreedySolver(in, out, rng, from_wProfit, wTime, maxDeviation, wNonCost);
 
-            if (out.PointProfit() > best) {
-              best = out.PointProfit();
-              if (!out.Feasible()) {
-                cerr << "  Invalid solution" << endl;
-                cout << file.path().filename() << ',' << -1 << endl;
-              }
-              else {
-                cerr << "  Solution found: " << out.PointProfit() << endl;
-                cout << file.path().filename() << ',' << out.PointProfit() << endl;
-              }
-
-              { // Print the outputs on file
-
-                string titleDir = "outputs/greedy/outGreedy/#";
-                titleDir.push_back(*argv[1]);
-                fs::create_directories(titleDir);
-                ofstream os(titleDir / file.path().filename().replace_extension(".out"));
-                if (!os) {
-                  ++errors;
-                  cerr << "  ERROR: Unable to open output file" << endl;
-                  continue;
-                }
-                os << in << out;
-              }
-
-              { // Print the Hops as outputs on file
-                string titleDir = "outputs/routeHops/greedy/#";
-                titleDir.push_back(*argv[1]);
-                fs::create_directories(titleDir);
-                ofstream os(titleDir / file.path().filename().replace_extension(".out"));
-                if (!os) {
-                  ++errors;
-                  cerr << "  ERROR: Unable to open output file" << endl;
-                  continue;
-                }
-                os << out;
-              }
-  
-              { // Print the parameters of optimum on file
-                string titleDir = "outputs/greedy/paramGreedy/#";
-                titleDir.push_back(*argv[1]);
-                fs::create_directories(titleDir);
-                ofstream os(titleDir / file.path().filename().replace_extension(".out"));
-                if (!os) {
-                  ++errors;
-                  cerr << "  ERROR: Unable to open output file" << endl;
-                  continue;
-                }
-                os << "Profit found: " << out.PointProfit() << endl;
-                os << "Param wProfit: " << wProfit << endl;
-                os << "Param wTime: " << wTime << endl;
-                os << "Param maxDeviation: " << maxDeviation << endl;
-                os << "Param wNonCost: " << wNonCost << endl;
-              } 
+          if (out.PointProfit() > best) {
+            best = out.PointProfit();
+            if (!out.Feasible()) {
+              cerr << "  Invalid solution" << endl;
+              cout << file.path().filename() << ',' << -1 << endl;
             }
+            else {
+              cerr << "  Solution found: " << out.PointProfit() << endl;
+              cout << file.path().filename() << ',' << out.PointProfit() << endl;
+            }
+
+            { // Print the outputs on file
+
+              string titleDir = "outputs/greedy/outGreedy/#";
+              titleDir.push_back(*argv[1]);
+              fs::create_directories(titleDir);
+              ofstream os(titleDir / file.path().filename().replace_extension(".out"));
+              if (!os) {
+                ++errors;
+                cerr << "  ERROR: Unable to open output file" << endl;
+                continue;
+              }
+              os << in << out;
+            }
+
+            { // Print the Hops as outputs on file
+              string titleDir = "outputs/routeHops/greedy/#";
+              titleDir.push_back(*argv[1]);
+              fs::create_directories(titleDir);
+              ofstream os(titleDir / file.path().filename().replace_extension(".out"));
+              if (!os) {
+                ++errors;
+                cerr << "  ERROR: Unable to open output file" << endl;
+                continue;
+              }
+              os << out;
+            }
+
+            { // Print the parameters of optimum on file
+              string titleDir = "outputs/greedy/paramGreedy/#";
+              titleDir.push_back(*argv[1]);
+              fs::create_directories(titleDir);
+              ofstream os(titleDir / file.path().filename().replace_extension(".out"));
+              if (!os) {
+                ++errors;
+                cerr << "  ERROR: Unable to open output file" << endl;
+                continue;
+              }
+              os << "Profit found: " << out.PointProfit() << endl;
+              os << "Param wProfit: " << wProfit << endl;
+              os << "Param wTime: " << wTime << endl;
+              os << "Param maxDeviation: " << maxDeviation << endl;
+              os << "Param wNonCost: " << wNonCost << endl;
+            } 
           }
-        }            
-      }
+        }
+      }            
     }
         
     if(out.PointProfit() == 0) { // No solution found, the problem is unfeasible
