@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <vector>
+#include <map>
 #include <streambuf>
 #include <mutex>
 #include <shared_mutex>
@@ -210,7 +211,7 @@ class safe_map {
     }
     bool insert(const K& key, const V& value) {
       std::unique_lock _lock(_mutex);
-      return _map.insert(pair(key, value)).second;
+      return _map.insert(std::pair(key, value)).second;
     }
     std::map<K, V> _map; // Can access unsafe map when multithread finished
   private:

@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
                 continue;
               }
               os << "Profit found: " << out.PointProfit() << endl;
-              os << "Param wProfit: " << wProfit << endl;
+              os << "Param wProfit: " << from_wProfit << endl;
               os << "Param wTime: " << wTime << endl;
               os << "Param maxDeviation: " << maxDeviation << endl;
               os << "Param wNonCost: " << wNonCost << endl;
