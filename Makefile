@@ -37,6 +37,9 @@ MainLocalSearch.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 MainCGreedyTest.exe: CPPFLAGS+=$(CPPFLAGS_CTPL)
 MainCGreedyTest.exe: LDFLAGS+=$(LDFLAGS_CTPL)
 
+ParallelLocal.exe: CPPFLAGS+=$(CPPFLAGS_CTPL) $(CPPFLAGS_EASYLOCAL) $(CPPFLAGS_JSON)
+ParallelLocal.exe: LDFLAGS+=$(LDFLAGS_CTPL) $(LDFLAGS_EASYLOCAL) $(LDFLAGS_JSON)
+
 # WebViewer #
 MainWeb.exe: src/MainWeb.o src/web/SolverLocal.o src/greedy/TOP_Greedy.o src/backTracking/TOP_Backtracking.o src/localSearch/TOP_Helpers.o src/localSearch/TOP_Costs.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 # Parameter Analysis #
@@ -53,6 +56,8 @@ MainLocal.exe: src/MainLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_H
 MainLocalSearch.exe: src/MainLocalSearch.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 # Test C param in Greedy #
 MainCGreedyTest.exe: src/MainCGreedyTest.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+# ??? #
+ParallelLocal.exe: src/ParallelLocal.o src/web/SolverLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
 
 %.o: %.cpp
 	g++ $(CPPFLAGS) -c -o $@ $< -MD

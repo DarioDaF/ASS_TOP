@@ -62,6 +62,10 @@ namespace ctpl {
                 std::unique_lock<std::mutex> lock(this->mutex);
                 return this->q.empty();
             }
+            int size() {
+                std::unique_lock<std::mutex> lock(this->mutex);
+                return static_cast<int>(this->q.size());
+            }
         private:
             std::queue<T> q;
             std::mutex mutex;
@@ -82,6 +86,9 @@ namespace ctpl {
 
         // get the number of running threads in the pool
         int size() { return static_cast<int>(this->threads.size()); }
+
+        // get the number of queued functions
+        int queued() { return this->q.size(); }
 
         // number of idle threads
         int n_idle() { return this->nWaiting; }

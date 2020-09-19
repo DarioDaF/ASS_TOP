@@ -9,6 +9,7 @@
 #include <shared_mutex>
 #include <ctpl_stl.h>
 
+#include "common/Utils.hpp"
 #include "common/TOP_Data.hpp"
 #include "greedy/TOP_Greedy.hpp"
 
@@ -36,29 +37,6 @@ void runThread(int id, TOP_Output& out, double wTime, double maxDeviation) {
   GreedySolver(out.in, out, rng, 1.0, wTime, maxDeviation, 0);
   //cerr << "END Thread: " << id << " @ " << maxDeviation << " -> " << out.PointProfit() << endl;
 }
-
-template<typename K, typename V>
-class safe_map {
-  public:
-    safe_map() : _map(), _mutex() {}
-    bool find(const K& key, V& value) {
-      // _map.end() is not safe!
-      shared_lock<shared_mutex> _lock(_mutex);
-      auto valIter = _map.find(key);
-      if(valIter == _map.end()) {
-        return false;
-      }
-      value = valIter->second;
-      return true;
-    }
-    bool insert(const K& key, const V& value) {
-      unique_lock<shared_mutex> _lock(_mutex);
-      return _map.insert(pair(key, value)).second;
-    }
-    map<K, V> _map; // Can access unsafe map when multithread finished
-  private:
-    shared_mutex _mutex;
-};
 
 /*
 

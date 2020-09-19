@@ -9,8 +9,19 @@ namespace fs = std::filesystem;
 #include "../localSearch/TOP_Costs.hpp"
 #include "../localSearch/Moves/Swap.hpp"
 
+#include <mutex>
+
 #define LOCAL_SETPARAM(param) lsh.SetParameter(#param, param.get(options))
 
+std::mutex _OverallParametrizedMutex; // Global lock for static OverallParametrized array
+
+/**
+ * Class to create a thread safe version of EasyLocal solver for TOP problem with runner T 
+ * To mantain thread safety use SetParameter only between the construction and Solve, for multiple 
+ * runs recreate the object (creation of T seems to be required AFTER parametrized clear!).
+ * 
+ * To avoid unnecessary lock time put only SetParameter instructions between creation and Solve.
+ */
 template<typename T>
 class LocalSolverHelper {
   private:
@@ -24,6 +35,8 @@ class LocalSolverHelper {
     T* runner;
     SimpleLocalSearch<TOP_Input, TOP_Output, TOP_State>* solver;
 
+    std::unique_lock<std::mutex> _lock { _OverallParametrizedMutex, std::defer_lock }; // Automatically released on destruction
+
   public:
 
     LocalSolverHelper(const TOP_Input& in, std::string name, std::string solverName) : in(in) {
@@ -33,6 +46,7 @@ class LocalSolverHelper {
       nhe = new TOP_MoveSwapNeighborhoodExplorer(in, *sm, *cc); // Create and add delta costs
       om = new TOP_OutputManager(in);
   
+      _lock.lock();
       CommandLineParameters::Parametrized::OverallParametrized().clear(); // Fix to avoid double registration of destroyed objects notifiers?
 
       // runners
@@ -58,6 +72,8 @@ class LocalSolverHelper {
     }
 
     void Solve(TOP_Output& out, std::ostream& log) {
+      _lock.unlock();
+
       TOP_Output out_prec(in);
       {
         ifstream is("outputs/routeHops/bestRoutes/" + in.name + ".out");

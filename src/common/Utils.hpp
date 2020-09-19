@@ -4,6 +4,9 @@
 #include <iterator>
 #include <vector>
 #include <streambuf>
+#include <mutex>
+#include <shared_mutex>
+#include <sstream>
 #include <iostream>
 
 typedef int idx_t;
@@ -122,6 +125,96 @@ class teestream : public std::ostream {
     teestream(std::ostream & o1, std::ostream & o2) : std::ostream(&tbuf), tbuf(o1.rdbuf(), o2.rdbuf()) {};
   private:
     teebuf tbuf;
+};
+
+/**
+ * Class to create a set of lockflush::streams 
+ * to protect an output stream, DO NOT USE results
+ * after this class destruction
+ */
+class lockflush {
+  protected:
+    std::ostream& os;
+    std::mutex _mutex;
+  public:
+    /**
+     * Class to write data in a locked format
+     * to send new data use flush()
+     */
+    class stream : public std::ostringstream {
+      protected:
+        std::ostream* os;
+        std::mutex* _mutex;
+        bool propagateFlush;
+      public:
+        stream(const stream&) = delete; // non construction-copyable
+        stream& operator=(const stream&) = delete; // non copyable
+
+        stream(stream&& other) {
+          os = std::exchange(other.os, nullptr);
+          _mutex = std::exchange(other._mutex, nullptr);
+        };
+        stream& operator=(stream&& other) {
+          os = std::exchange(other.os, nullptr);
+          _mutex = std::exchange(other._mutex, nullptr);
+          return *this;
+        }
+
+        stream(std::ostream& os, std::mutex& mutex, bool propagateFlush = true) : os(&os), _mutex(&mutex), propagateFlush(propagateFlush) {}
+
+        void flush() {
+          std::unique_lock<std::mutex> _lock(*_mutex);
+          *os << str();
+          if(propagateFlush)
+            os->flush();
+          clear(); // Clear state
+          str(""); // And content
+        }
+    };
+
+    lockflush(std::ostream& os) : os(os) {}
+    stream get() {
+      return stream { os, _mutex };
+    }
+};
+
+class nullbuff : public std::streambuf {
+  public:
+    int overflow(int c) { return c; }
+};
+
+class nullstream : public std::ostream {
+  protected:
+    nullbuff _null;
+  public:
+    nullstream() : std::ostream(&_null), _null() {};
+};
+
+/**
+ * STL Map that is thread safe in insertion and find
+ * access to underlining _map is not protected
+ */
+template<typename K, typename V>
+class safe_map {
+  public:
+    safe_map() : _map(), _mutex() {}
+    bool find(const K& key, V& value) {
+      // _map.end() is not safe!
+      std::shared_lock _lock(_mutex);
+      auto valIter = _map.find(key);
+      if(valIter == _map.end()) {
+        return false;
+      }
+      value = valIter->second;
+      return true;
+    }
+    bool insert(const K& key, const V& value) {
+      std::unique_lock _lock(_mutex);
+      return _map.insert(pair(key, value)).second;
+    }
+    std::map<K, V> _map; // Can access unsafe map when multithread finished
+  private:
+    std::shared_mutex _mutex;
 };
 
 enum strong_ordering {
