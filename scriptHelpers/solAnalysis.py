@@ -25,6 +25,13 @@ import csv
 import sys
 import os
 
+# def minAlgo(instRes):
+#   return min(instRes[0][3], instRes[1][3], instRes[2][3], instRes[3][3])
+#   return (instRes[0][3] + instRes[1][3] + instRes[2][3] + instRes[3][3])
+
+def minAlgo(instRes):
+  return instRes[3][3]
+
 ver = sys.argv[1]
 ver = ver.strip()
 print("Plotting analsysis version " , ver)
@@ -47,7 +54,7 @@ else:
 
 instancesNumber = 387
 fileNumber = 4
-res = [[ 0 for x in range(instancesNumber)] for y in range(fileNumber)]
+res = [[ 0 for x in range(fileNumber)] for y in range(instancesNumber)]
 maxRes = []
 cnt = 0
 
@@ -60,24 +67,24 @@ for idx in solFile:
       if row[0] == "#":
         continue 
       x = row[0].split(",")
-      res[cnt][instance] = x
+      res[instance][cnt] = x
       instance += 1
   cnt += 1
-
+  
 resGr1 = []
 resGr2 = []
 resBt1 = []
 resBt2 = []
 instancesF = []
 
-for idx in range(len(res[1])):
-  instancesF.append(res[1][idx][0])
-  resGr1.append(float(res[0][idx][3]) * 100)
-  resGr2.append(float(res[1][idx][3]) * 100) 
-  if(float(res[1][idx][3]) == 0.0):
-    print(res[1][idx][0])
-  resBt1.append(float(res[2][idx][3]) * 100)
-  resBt2.append(float(res[3][idx][3]) * 100)
+res.sort(reverse = True, key = minAlgo)
+
+for idx in range(len(res)):
+  instancesF.append(res[idx][1][0])
+  resGr1.append(float(res[idx][0][3]) * 100)
+  resGr2.append(float(res[idx][1][3]) * 100) 
+  resBt1.append(float(res[idx][2][3]) * 100)
+  resBt2.append(float(res[idx][3][3]) * 100)
 
 # Print the output scaled, with all the informations
 plt.style.use('seaborn-darkgrid')
@@ -100,8 +107,8 @@ plt.title("Algorithm's Results", loc='left', fontsize=12, fontweight=0, color='o
 plt.xlabel("instances")
 plt.ylabel("res/chaoOpt")
 
-for idx in range(len(res[1])):
-  temp = [float(res[0][idx][2]), float(res[1][idx][2]), float(res[2][idx][2]) , float(res[3][idx][2])]
+for idx in range(len(res)):
+  temp = [float(res[idx][0][2]), float(res[idx][1][2]), float(res[idx][2][2]) , float(res[idx][3][2])]
   maxN = max(temp)
   index = temp.index(max(temp))
   if(ver == 'GB'): 
@@ -122,7 +129,7 @@ for idx in range(len(res[1])):
       alg = "SD"
     elif(index == 3):
       alg = "TS"  
-  maxRes.append([res[1][idx][0], float(res[1][idx][1]), float(maxN), float(res[index][idx][3]), alg])
+  maxRes.append([res[idx][0][0], float(res[idx][1][1]), float(maxN), float(res[idx][index][3]), alg])
 
 #Save file
 namefile = "./solutions/resultAnalysis/"
