@@ -10,8 +10,8 @@
                                   The file is located in "solutions" directory.
 
   Output files:
-    - solPar[param].png : image file with the plot. 
-                          The file is located in "outputs/greedy/plots" directory or outputs/greedy/plots/Map[param].
+    - AutoGen[algorithm].csv : file with the information needed. 
+                               The file is located in "solutions" directory.
 '''
 
 import csv
