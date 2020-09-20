@@ -13,10 +13,10 @@ make
 #       - [map] -> 0 to select all the maps
 #       - if [paramToTest] is "maxDeviation" , then [otherparam1] is "wProfit", [otherParam2] is "wTime", [otherParam3] is "wNonCost" ... 
 
-./MainParamGr.exe 0 wProfit 0.5 2.0 0.5 1.0 1.0 1.0 
-./MainParamGr.exe 0 wTime 0.5 2.0 0.5 1.0 1.0 1.0
-./MainParamGr.exe 0 maxDeviation 4.0 10.0 1.0 1.0 1.0 0.0
-./MainParamGr.exe 0 wNonCost 0.5 2.0 0.5 1.0 1.0 1.0
+./MainParamGr.exe 0 wProfit 0.1 5.0 0.1 1.0 1.0 0.0 
+./MainParamGr.exe 0 wTime 0.1 5.0 0.1 1.0 1.5 0.0
+./MainParamGr.exe 0 maxDeviation 0.01 10.0 0.01 1.0 0.7 0.0
+./MainParamGr.exe 0 wNonCost 0.0 5.0 0.1 1.0 0.7 1.5
 
 # ./MainParamGr.exe 1 wProfit 0.5 2.0 0.5 1.0 1.0 1.0 
 # ./MainParamGr.exe 1 wTime 0.5 2.0 0.5 1.0 1.0 1.0
@@ -98,13 +98,13 @@ python3 ./scriptHelpers/plotParams.py 0 wNonCost
 
 ## PARAMETER MAXDEVIATION SCALER ## 
 
-./MainMapGr.exe
+# ./MainMapGr.exe
 
-## EXECUTE ALL ISTANCES ## 
-# Solve all istances and with the specified parameters and print the results
+# ## EXECUTE ALL ISTANCES ## 
+# # Solve all istances and with the specified parameters and print the results
 
-# Version 1 : with default parameters #
-./MainGreedy.exe 1
+# # Version 1 : with default parameters #
+# ./MainGreedy.exe 1
 
-# ersion 2 : with readed parameters range #
-./MainGreedy.exe 2
+# # ersion 2 : with readed parameters range #
+# ./MainGreedy.exe 2
