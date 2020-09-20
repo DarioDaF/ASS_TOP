@@ -1,10 +1,26 @@
+'''
+  TThe function takes the output from Parallel.cpp and reorder the solutions, compare it with chao's results and
+  made an ".csv" output file with all those informations.
+
+  Usage:
+    python3 ./scriptHelpers/restaker.py
+
+  Input files:
+    - solutions/[algoritm].csv : files ".csv" that contain the results of multi thread c++ executer.
+                                  The file is located in "solutions" directory.
+
+  Output files:
+    - solPar[param].png : image file with the plot. 
+                          The file is located in "outputs/greedy/plots" directory or outputs/greedy/plots/Map[param].
+'''
+
 import csv
 import sys
 import os
 
 def perGenerator(mySol, chaoOpt):
   if(chaoOpt == 0):
-    return 1
+    return 1.0
   return mySol/chaoOpt
 
 solToTake = ["./solutions/SolGreedy#1.csv", \
@@ -38,9 +54,9 @@ for idx in solToTake:
       x = row[0].split(",")
       inst = x[0].split('"')
       if(len(inst) == 1):
-        allSolutions[cnt][instance] = [inst[0], int(x[1])] 
+        allSolutions[cnt][instance] = [inst[0], int(x[3])] 
       else:
-        allSolutions[cnt][instance] = [inst[1], int(x[1])] 
+        allSolutions[cnt][instance] = [inst[1], int(x[3])] 
       instance += 1
   cnt += 1
 
@@ -62,23 +78,26 @@ if(not os.path.isdir(path)):
 for i in range(len(solToTake)):
   temp = solToTake[i].split("/")
   nameFileToPrint = temp[2]
-  print(nameFileToPrint)
+  #print(nameFileToPrint)
   with open(path + "AutoGen" + nameFileToPrint, mode='w') as csv_file:
     fieldnames = ['# instance', 'chaoOpt', 'result', "percOnOpt"]
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
     writer.writeheader()
     
-    for j in range(len(chaoResults)): 
-      for idx in range(len(allSolutions)):
-        # print(type(allSolutions[idx][i][0]), " ", type(chaoResults[j][0]))
-        if(allSolutions[idx][i][0] == chaoResults[j][0]):
-          print("ok")
-          mySol = allSolutions[idx][i][1]
-          instance = allSolutions[idx][i][0]
+    for j in range(len(chaoResults)):
+      for idx in range(len(allSolutions[1])):
+        #print( chaoResults[j][0], " ", allSolutions[i][idx][0])
+        if(chaoResults[j][0] == allSolutions[i][idx][0]):
+          instance = allSolutions[i][idx][0]
           chaoOpt = chaoResults[j][1]
+          mySol = allSolutions[i][idx][1]
+          #print(allSolutions[i][idx][0], " ", chaoResults[j][1], " ", allSolutions[i][idx][1])
+          writer.writerow({'# instance' : instance, 
+                           'chaoOpt' : chaoOpt,
+                           'result' : mySol,
+                           'percOnOpt' : perGenerator(mySol, chaoOpt)})
           break
-      writer.writerow({'# instance' : instance, 
-                        'chaoOpt' : chaoOpt,
-                        'result' : mySol,
-                        'percOnOpt' : perGenerator(mySol, chaoOpt)})
+      
+          
+          
       
