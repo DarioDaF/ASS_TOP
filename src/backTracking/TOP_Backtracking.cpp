@@ -89,10 +89,13 @@ idx_t InsertPoint(TOP_Node& current, idx_t point, idx_t car, double maxDeviation
  * appropriately modifed
  * 
  * @param current class that represent the current state of the problem 
+ * @param wTime weight of time cost component
  * @param maxDeviation max deviation admitted in the path for InsertPoint (metaheuristic mode)
+ * @param wNonCost weight of non-cost component
+ * @param nonGreedyDrop drop to apply to non-greedy points (normally >= 0)
  * @return the vector of the couple of points and cars ordered by their rating
  */
-std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit, double wTime, double maxDeviation, double wNonCost);
+std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit, double wTime, double maxDeviation, double wNonCost, double nonGreedyDrop);
 
 /******************
  * Implementation *
@@ -277,7 +280,7 @@ idx_t InsertPoint(TOP_Node& current, idx_t point, idx_t car, double maxDeviation
   }
 }
 
-std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit, double wTime, double maxDeviation, double wNonCost) {
+std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit, double wTime, double maxDeviation, double wNonCost, double nonGreedyDrop) {
   NumberRange<idx_t> carIdxs(current.in.Cars()); 
   NumberRange<idx_t> pointIdxs(current.in.Points() - 1);
   std::vector<idx_t> carSorted = carIdxs.Vector();
@@ -319,7 +322,7 @@ std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit
       // cerr << "LOG: select car " << c << endl;
       otherCarPoint.car = c;
       otherCarPoint.point = InsertPoint(current, p, c, maxDeviation); // VEDI IL C!!
-      otherCarPoint.rating = RatingChoice(current, p, c, true, wProfit, wTime, wNonCost);
+      otherCarPoint.rating = RatingChoice(current, p, c, true, wProfit, wTime, wNonCost) - nonGreedyDrop;
 
       alreadyInsert = false;
       for(idx_t idx = 0; idx < ratingPoints.size(); idx++) { // Do not want duplicates
@@ -352,7 +355,7 @@ bool TOP_Walker::GoToChild() {
   NumberRange<idx_t> pointIdxs(current.in.Points() - 1);
   
   std::vector<idx_t> carSorted = carIdxs.Vector();
-  std::vector<pointRating> ratingPoints = ratingVectorGenerator(current, wProfit, wTime, maxDeviation, wNonCost);
+  std::vector<pointRating> ratingPoints = ratingVectorGenerator(current, wProfit, wTime, maxDeviation, wNonCost, nonGreedyDrop);
 
   if(ratingPoints.empty()) { // If empty, can't go down to the branch
     //cerr << "LOG: empty (end of branch)" << endl;
@@ -394,7 +397,7 @@ bool TOP_Walker::GoToSibiling() {
   idx_t point = current.RollbackCar(car);
   // std::cerr << "LOG: remove from " << car <<  " -> " << point << endl;
 
-  std::vector<pointRating> ratingPoints = ratingVectorGenerator(current, wProfit, wTime, maxDeviation, wNonCost);
+  std::vector<pointRating> ratingPoints = ratingVectorGenerator(current, wProfit, wTime, maxDeviation, wNonCost, nonGreedyDrop);
 
   // cerr << "LOG: vector Sibiling (";
   // for(int p = 0; p < ratingPoints.size(); ++p) {

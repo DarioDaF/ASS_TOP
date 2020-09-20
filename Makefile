@@ -1,4 +1,7 @@
 COMMON_OBJ_FILES=src/common/TOP_Data.o
+GREEDY_OBJ_FILES=src/greedy/TOP_Greedy.o
+BT_OBJ_FILES=src/backTracking/TOP_Backtracking.o
+LS_OBJ_FILES=src/localSearch/TOP_Helpers.o src/localSearch/TOP_Costs.o src/localSearch/Moves/Swap.o
 
 include LibMakefile
 
@@ -16,10 +19,10 @@ LDFLAGS_EASYLOCAL=-lboost_program_options -pthread
 
 LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 
-CPPFLAGS=-std=c++17 -O3 -Wall -ggdb -Wno-unknown-pragmas -Wno-sign-compare
+CPPFLAGS=-std=c++17 -Og -Wall -ggdb -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
-ALL_EXE = MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe MainCGreedyTest.exe
+ALL_EXE = MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe ParamBisectionTest.exe Parallel.exe
 
 all: $(ALL_EXE)
 
@@ -34,30 +37,30 @@ MainLocal.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 MainLocalSearch.exe: CPPFLAGS+=$(CPPFLAGS_EASYLOCAL)
 MainLocalSearch.exe: LDFLAGS+=$(LDFLAGS_EASYLOCAL)
 
-MainCGreedyTest.exe: CPPFLAGS+=$(CPPFLAGS_CTPL)
-MainCGreedyTest.exe: LDFLAGS+=$(LDFLAGS_CTPL)
+ParamBisectionTest.exe: CPPFLAGS+=$(CPPFLAGS_CTPL)
+ParamBisectionTest.exe: LDFLAGS+=$(LDFLAGS_CTPL)
 
-ParallelLocal.exe: CPPFLAGS+=$(CPPFLAGS_CTPL) $(CPPFLAGS_EASYLOCAL) $(CPPFLAGS_JSON)
-ParallelLocal.exe: LDFLAGS+=$(LDFLAGS_CTPL) $(LDFLAGS_EASYLOCAL) $(LDFLAGS_JSON)
+Parallel.exe: CPPFLAGS+=$(CPPFLAGS_CTPL) $(CPPFLAGS_EASYLOCAL) $(CPPFLAGS_JSON)
+Parallel.exe: LDFLAGS+=$(LDFLAGS_CTPL) $(LDFLAGS_EASYLOCAL) $(LDFLAGS_JSON)
 
 # WebViewer #
-MainWeb.exe: src/MainWeb.o src/web/SolverLocal.o src/greedy/TOP_Greedy.o src/backTracking/TOP_Backtracking.o src/localSearch/TOP_Helpers.o src/localSearch/TOP_Costs.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
+MainWeb.exe: src/MainWeb.o src/web/SolverLocal.o $(GREEDY_OBJ_FILES) $(BT_OBJ_FILES) $(LS_OBJ_FILES) $(COMMON_OBJ_FILES)
 # Parameter Analysis #
-MainParamGr.exe: src/MainParamGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+MainParamGr.exe: src/MainParamGr.o $(GREEDY_OBJ_FILES) $(COMMON_OBJ_FILES)
 # Map Analysis #
-MainMapGr.exe: src/MainMapGr.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+MainMapGr.exe: src/MainMapGr.o $(GREEDY_OBJ_FILES) $(COMMON_OBJ_FILES)
 # Greedy Solver #
-MainGreedy.exe: src/MainGreedy.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+MainGreedy.exe: src/MainGreedy.o $(GREEDY_OBJ_FILES) $(COMMON_OBJ_FILES)
 # Backtracking Solver #
-MainBackTracking.exe: src/MainBackTracking.o src/backTracking/TOP_Backtracking.o $(COMMON_OBJ_FILES)
+MainBackTracking.exe: src/MainBackTracking.o $(BT_OBJ_FILES) $(COMMON_OBJ_FILES)
 # Loacl Search Single Solver #
-MainLocal.exe: src/MainLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
+MainLocal.exe: src/MainLocal.o $(LS_OBJ_FILES) $(COMMON_OBJ_FILES)
 # Loacl Search Multi Solver #
-MainLocalSearch.exe: src/MainLocalSearch.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
-# Test C param in Greedy #
-MainCGreedyTest.exe: src/MainCGreedyTest.o src/greedy/TOP_Greedy.o $(COMMON_OBJ_FILES)
+MainLocalSearch.exe: src/MainLocalSearch.o $(LS_OBJ_FILES) $(COMMON_OBJ_FILES)
+# Test C param bisection in Greedy #
+ParamBisectionTest.exe: src/ParamBisectionTest.o $(GREEDY_OBJ_FILES) $(COMMON_OBJ_FILES)
 # ??? #
-ParallelLocal.exe: src/ParallelLocal.o src/web/SolverLocal.o src/localSearch/TOP_Costs.o src/localSearch/TOP_Helpers.o src/localSearch/Moves/Swap.o $(COMMON_OBJ_FILES)
+Parallel.exe: src/Parallel.o src/web/SolverLocal.o $(GREEDY_OBJ_FILES) $(BT_OBJ_FILES) $(LS_OBJ_FILES) $(COMMON_OBJ_FILES)
 
 %.o: %.cpp
 	g++ $(CPPFLAGS) -c -o $@ $< -MD

@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
     }
 
     cerr << "LOG: param <" << wProfit << "; " << wTime << "; " << maxDeviation << "; " << wNonCost << ">" << endl; 
-    TOP_Walker tw(in, wProfit, wTime, maxDeviation, wNonCost);
+    TOP_Walker tw(in, wProfit, wTime, maxDeviation, wNonCost, 0);
     TOP_Checker ck;
     Backtrack(tw, ck, maxTime);
     

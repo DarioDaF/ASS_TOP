@@ -73,7 +73,7 @@ class BoundChecker {
     //bool IsFeasible(const Node& n) { return n.IsFeasible(); }; // Can be not implemented
     // And be more restrictive due to learnt nogoods or something like that
     
-    const typename _Node::Output& GetBest() const { return bestNode; }
+    const typename _Node::Output& GetBest() const { return bestNode; } // Copy?
     typename _Node::Cost GetBestCost() const { return bestCost; }
 
   protected:

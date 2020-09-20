@@ -141,7 +141,7 @@ void TOP_Output::Clear() {
     point_profit = in.Point(in.EndPoint()).Profit();
   }
 
-  time_violations = 0; // Clear the time violations
+  time_violations = zeroTravelTime > in.MaxTime() ? in.Cars() : 0; // Clear the time violations (or set them all if impossible)
 }
 
 /**

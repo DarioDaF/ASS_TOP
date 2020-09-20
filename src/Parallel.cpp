@@ -5,23 +5,31 @@
 #include <map>
 #include <set>
 
+#include <algorithm>
+
 #include <thread>
 #include <shared_mutex>
 #include <ctpl_stl.h>
 
 #include <nlohmann/json.hpp>
+
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
+#include <regex>
+
 #include "common/Utils.hpp"
+#include "common/JsonUtils.hpp"
 
 #include "common/TOP_Data.hpp"
 #include "web/SolverLocal.hpp"
+#include "web/SolverGreedy.hpp"
+#include "web/SolverBacktracking.hpp"
 
 using namespace std;
 
-void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std::string desc, nlohmann::json& options) {
+void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std::string desc, nlohmann::json options) {
   auto log = lf.get();
 
   random_device rd; // Can be not random...
@@ -34,7 +42,17 @@ void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std
   TOP_Output out(in);
 
   nullstream nullStream;
-  if(algo == "SD") {
+  transform(algo.begin(), algo.end(), algo.begin(), ::toupper);
+  if(algo == "GREEDY") {
+    WebSolverGreedy greedy;
+    greedy.Solve(in, out, rng, options, nullStream);
+  } else if(algo == "GREEDY RANGE") {
+    WebSolverGreedyRange greedyRange;
+    greedyRange.Solve(in, out, rng, options, nullStream);
+  } else if(algo == "BT") {
+    WebSolverBackTracking bt;
+    bt.Solve(in, out, rng, options, nullStream);
+  } else if(algo == "SD") {
     WebSolverLocalSD sd;
     sd.Solve(in, out, rng, options, nullStream);
   } else if(algo == "TS") {
@@ -58,6 +76,7 @@ int main() {
   
   cout << "Initializing thread pool" << endl;
   ctpl::thread_pool pool(nHWThreads);
+  //ctpl::thread_pool pool(std::max(1U, nHWThreads - 1));
 
   cout << "Reading input" << endl;
 
@@ -76,28 +95,51 @@ int main() {
       ifs >> ins[name];
     }
   }
-  
-  ofstream ofs("outputs/test.out");
+
+  ofstream ofs("outputs/parallel.csv");
   lockflush lf(ofs);
 
   cout << "Starting pool" << endl;
-  for(const auto& [name, in] : ins) {
-    /*
-    for(const auto& algo : { "SD", "HC", "TS", "SA" }) {
-      pool.push(runThread, ref(in), ref(lf), algo, "default", nlohmann::json {});
+  int tasks = 0;
+  {
+    nlohmann::json config;
+    {
+      ifstream ifs("paramIn/parallel.json");
+      if(!ifs) {
+        throw runtime_error("Unable to open configuration file");
+      }
+      ifs >> config;
     }
-    */
-    pool.push(runThread, ref(in), ref(lf), "TS", "30000 max_idle_iterations", nlohmann::json { { "max_idle_iterations", 30000 } });
+
+    for(const auto& action : config) {
+      regex namesRegex(action["names"]);
+      for(const auto& [name, in] : ins) {
+        if(regex_match(name, namesRegex)) {
+          for(const auto& algo : action["algos"]) {
+            pool.push(runThread, ref(in), ref(lf),
+              algo["type"],
+              json_get_or_default(algo, "descr", std::string {}),
+              json_get_or_default(algo, "options", nlohmann::json::object())
+            );
+            ++tasks;
+          }
+        }
+      }
+    }
+    // Descope config to free RAM
   }
+  cout << "Queued " << tasks << " tasks" << endl;
 
   cout << "Waiting on pool" << endl;
   int i = 0;
   do {
     this_thread::sleep_for(chrono::seconds(1));
     cout << ".";
+    cout.flush();
     if(++i > 10) {
       i = 0;
-      cout << endl << "Tasks queued: " << pool.queued() << endl;
+      int q = pool.queued();
+      cout << endl << "Tasks completed: " << 100 * (1 - ((double)q) / tasks) << "% (missing: " << q << ")" << endl;
     }
   } while(pool.n_idle() < pool.size());
   cerr << endl;

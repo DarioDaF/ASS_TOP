@@ -310,7 +310,7 @@ T so_negcmp(const T& x, const T& y) {
 }
 
 /**
- * Returns map[key] if present or def otherwise
+ * Returns map[key] if present or def otherwise.
  */
 template<typename _MAP>
 typename _MAP::mapped_type value_or_default(const _MAP map, const typename _MAP::key_type& key, const typename _MAP::mapped_type& def) {

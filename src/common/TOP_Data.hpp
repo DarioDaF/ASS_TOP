@@ -186,6 +186,7 @@ class TOP_Output {
     const TOP_Input& in;
 
   private:
+
     std::vector<std::vector<idx_t>> car_hops; // car_hops[car][hop] = point
     std::vector<int> visited; // Number of visits for each point
     

@@ -15,11 +15,37 @@ typedef int cost_t;
  */
 class TOP_NodeOutput : public NodeOutput {
   public:
-    TOP_NodeOutput& operator=(const TOP_Output& out) { // Opertaor= 
+    TOP_NodeOutput(const TOP_Output& out) {
+      this->out = new TOP_Output(out);
+    }
+    TOP_NodeOutput& operator=(const TOP_Output& out) { // Opertaor=
+      if(this->out != nullptr) {
+        delete this->out;
+      }
       this->out = new TOP_Output(out);
       return *this;
     }
-    TOP_Output Output() const { return *out; }
+    // IMPORTANT: NodeOutput.out get out copied if this is not implemented!
+    // So GetBest of Checker shares out pointer and crashes if both are destroyed
+    // (double free)
+    TOP_NodeOutput(const TOP_NodeOutput& nout) {
+      this->out = nullptr;
+      if(nout.out != nullptr) {
+        this->out = new TOP_Output(*nout.out);
+      }
+    }
+    TOP_NodeOutput& operator=(const TOP_NodeOutput& nout) { // Opertaor=
+      if(this->out != nullptr) {
+        delete this->out;
+      }
+      this->out = nullptr;
+      if(nout.out != nullptr) {
+        this->out = new TOP_Output(*nout.out);
+      }
+      return *this;
+    }
+    bool HasOutput() const { return out != nullptr; }
+    TOP_Output Output() const { return TOP_Output(*out); } // Should copy
     TOP_NodeOutput() : out(nullptr) {} // Constructor
     ~TOP_NodeOutput() { if(out != nullptr) { delete out; out = nullptr; } } // Destructor
 
@@ -33,7 +59,7 @@ class TOP_NodeOutput : public NodeOutput {
     }
 
   private:
-    TOP_Output* out = nullptr; 
+    TOP_Output* out;
 };
 
 /**
@@ -71,8 +97,8 @@ class TOP_Node : public Node<cost_t, TOP_NodeOutput>, public TOP_Output {
  */
 class TOP_Walker : public TreeWalker<TOP_Node> {
   public:
-    TOP_Walker(const TOP_Input& in, double wProfit, double wTime, double maxDeviation, double wNonCost)
-      : TreeWalker(TOP_Node(in)), in(in), wProfit(wProfit), wTime(wTime), maxDeviation(maxDeviation), wNonCost(wNonCost) {} // Constructor
+    TOP_Walker(const TOP_Input& in, double wProfit, double wTime, double maxDeviation, double wNonCost, double nonGreedyDrop)
+      : TreeWalker(TOP_Node(in)), in(in), wProfit(wProfit), wTime(wTime), maxDeviation(maxDeviation), wNonCost(wNonCost), nonGreedyDrop(nonGreedyDrop) {} // Constructor
 
     void GoToRoot() { // Empty solution  and Clear solution 
       current = TOP_Node(in); 
@@ -116,6 +142,7 @@ class TOP_Walker : public TreeWalker<TOP_Node> {
     double wTime;
     double maxDeviation;
     double wNonCost;
+    double nonGreedyDrop;
 };
 
 /**
