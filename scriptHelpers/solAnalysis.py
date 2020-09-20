@@ -85,6 +85,7 @@ for idx in range(len(res)):
   resGr2.append(float(res[idx][1][3]) * 100) 
   resBt1.append(float(res[idx][2][3]) * 100)
   resBt2.append(float(res[idx][3][3]) * 100)
+  
 
 # Print the output scaled, with all the informations
 plt.style.use('seaborn-darkgrid')
@@ -108,10 +109,29 @@ plt.xlabel("instances")
 plt.ylabel("res/chaoOpt")
 
 for idx in range(len(res)):
-  temp = [float(res[idx][0][2]), float(res[idx][1][2]), float(res[idx][2][2]) , float(res[idx][3][2])]
-  maxN = max(temp)
-  index = temp.index(max(temp))
-  if(ver == 'GB'): 
+  if(ver != 'GB'):
+    z = float(res[idx][0][2])
+    values = [float(res[idx][1][2]), float(res[idx][2][2]), float(res[idx][3][2])]
+    # print(z, " ", values)
+    for k in range(len(values)):
+      if(z != values[k]):
+        temp = [float(res[idx][0][2]), float(res[idx][1][2]), float(res[idx][2][2]) , float(res[idx][3][2])]
+        maxN = max(temp)
+        index = temp.index(max(temp))
+        if(index == 0):
+          alg = "SA"
+        elif(index == 1):
+          alg = "HC"
+        elif(index == 2):
+          alg = "SD"
+        elif(index == 3):
+          alg = "TS" 
+        maxRes.append([res[idx][0][0], float(res[idx][1][1]), float(maxN), float(res[idx][index][3]), alg])
+        # print(maxRes)
+  else:
+    temp = [float(res[idx][0][2]), float(res[idx][1][2]), float(res[idx][2][2]) , float(res[idx][3][2])]
+    maxN = max(temp)
+    index = temp.index(max(temp))
     if(index == 0):
       alg = "GR#1"
     elif(index == 1):
@@ -120,16 +140,7 @@ for idx in range(len(res)):
       alg = "BT#1"
     elif(index == 3):
       alg = "BT#2"
-  else:
-    if(index == 0):
-      alg = "SA"
-    elif(index == 1):
-      alg = "HC"
-    elif(index == 2):
-      alg = "SD"
-    elif(index == 3):
-      alg = "TS"  
-  maxRes.append([res[idx][0][0], float(res[idx][1][1]), float(maxN), float(res[idx][index][3]), alg])
+    maxRes.append([res[idx][0][0], float(res[idx][1][1]), float(maxN), float(res[idx][index][3]), alg])
 
 #Save file
 namefile = "./solutions/resultAnalysis/"
