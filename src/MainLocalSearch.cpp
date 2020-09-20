@@ -184,7 +184,7 @@ int main(int argc, const char* argv[])
       TOP_sa.SetParameter("neighbors_accepted", (unsigned int)100000);
       TOP_sa.SetParameter("neighbors_sampled", (unsigned int)10000000);
       TOP_sa.SetParameter("start_temperature", (double)1000);
-    } 
+    }
     else if(method == string("HC")) {
       TOP_hc.RegisterParameters();
       TOP_hc.SetParameter("max_evaluations", (unsigned long int)std::numeric_limits<unsigned long int>::max());

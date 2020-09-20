@@ -37,6 +37,12 @@ void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std
   if(algo == "SD") {
     WebSolverLocalSD sd;
     sd.Solve(in, out, rng, options, nullStream);
+  } else if(algo == "TS") {
+    WebSolverLocalTS ts;
+    ts.Solve(in, out, rng, options, nullStream);
+  } else if(algo == "SA") {
+    WebSolverLocalSA sa;
+    sa.Solve(in, out, rng, options, nullStream);
   } else if(algo == "HC") {
     WebSolverLocalHC hc;
     hc.Solve(in, out, rng, options, nullStream);
@@ -76,9 +82,12 @@ int main() {
 
   cout << "Starting pool" << endl;
   for(const auto& [name, in] : ins) {
-    for(const auto& algo : { "SD", "HC" }) {
+    /*
+    for(const auto& algo : { "SD", "HC", "TS", "SA" }) {
       pool.push(runThread, ref(in), ref(lf), algo, "default", nlohmann::json {});
     }
+    */
+    pool.push(runThread, ref(in), ref(lf), "TS", "30000 max_idle_iterations", nlohmann::json { { "max_idle_iterations", 30000 } });
   }
 
   cout << "Waiting on pool" << endl;

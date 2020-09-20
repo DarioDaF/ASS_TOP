@@ -10,10 +10,10 @@ class WebSolverLocalSA : public AbstractWebSolver {
     //   Web::RParameter<double, int, long, float, ...>
     // WARNING: Numbers too near the limits create problem on double cast (int -> number(js) -> int)
     Web::RParameter<unsigned long int> max_evaluations { "max_evaluations", "Max Evaluations", std::numeric_limits<long int>::max(), 0, std::numeric_limits<long int>::max() };
-    Web::RParameter<double> cooling_rate { "cooling_rate", "Cooling Rate", 1e-5, 0, 1 };
-    Web::RParameter<double> min_temperature { "min_temperature", "Min Temperature", 0.0001, 0, 1000 };
-    Web::RParameter<unsigned int> neighbors_sampled { "neighbors_sampled", "N# Sampled Neighbors", 100000, 0, 10000000 };
-    Web::RParameter<unsigned int> neighbors_accepted { "neighbors_accepted", "N# Accepted Neighbors", 1000, 0, 10000000 };
+    Web::RParameter<double> cooling_rate { "cooling_rate", "Cooling Rate", 1e-7, 0, 1 };
+    Web::RParameter<double> min_temperature { "min_temperature", "Min Temperature", 1e-6, 0, 1000 };
+    Web::RParameter<unsigned int> neighbors_sampled { "neighbors_sampled", "N# Sampled Neighbors", 10000000, 0, 10000000 };
+    Web::RParameter<unsigned int> neighbors_accepted { "neighbors_accepted", "N# Accepted Neighbors", 100000, 0, 10000000 };
     Web::TParameter<bool> compute_start_temperature { "compute_start_temperature", "Compute Starting Temperature", true };
     Web::RParameter<double> start_temperature { "start_temperature", "StartTemperature", 100, 0, 1000 };
 
@@ -47,7 +47,7 @@ class WebSolverLocalHC : public AbstractWebSolver {
 class WebSolverLocalTS : public AbstractWebSolver {
   private:
     Web::RParameter<unsigned long int> max_evaluations { "max_evaluations", "Max Evaluations", std::numeric_limits<long int>::max(), 0, std::numeric_limits<long int>::max() };
-    Web::RParameter<unsigned long int> max_idle_iterations { "max_idle_iterations", "Max Idle Iterations", 1000000, 0, 100000000 };
+    Web::RParameter<unsigned long int> max_idle_iterations { "max_idle_iterations", "Max Idle Iterations", 10000, 0, 100000000 };
     Web::RParameter<unsigned int> max_tenure { "max_tenure", "Maximum steps to remember tabu", 50, 0, 1000 };
     Web::RParameter<unsigned int> min_tenure { "min_tenure", "Minimum steps to remember tabu", 20, 0, 1000 };
 
