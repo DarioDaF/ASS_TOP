@@ -2,11 +2,11 @@
 
 The project is developed for the Advanced Scheduling System exam of University of Udine. It consists in the resolutions of the Team Orientiring Problem (_TOP_) with different optimization tecniques:
 + **Greedy Algorithm** : solves the problem with greedy tecniques but also explores different partial solutions 
-+ **Parametrized Algorithm** : use Simple Greedy as base and sets its rating parameters weighting in differt ways the ratingPoint components 
-+ **Metaheuristic BackTracking** : use Simple Greedy as base and explores the other solutions branches
-+ **Metaheuristic BackTracking Focus** : similar to set its parameter as Parametrized Algorithm
-+ **Local Search Algorithm** : use EasyLocal++ libraries and algorithms to emiliorate the previous one results
-+ **Web based Solver** : built-in web solver that print the output in the browser using the previous algorithms
++ **Parametrized Greedy Algorithm** : use Simple Greedy as basis and searches the best set parameters that weight the rating Point components 
++ **Metaheuristic BackTracking** : use Simple Greedy as basis and explores the other solutions branches
++ **Metaheuristic BackTracking Focus** : similar to Metaheuristic BackTracking, sets its own parameter as Parametrized Greedy Algorithm
++ **Local Search Algorithm** : use EasyLocal++ libraries and algorithms to improve the previous results provided by the other algorithms
++ **Web based Solver** : built-in web solver that print the output and solve single instance in the browser using the previous algorithms
 
 ### References
 
@@ -16,4 +16,4 @@ The project is developed for the Advanced Scheduling System exam of University o
 
 ### Instances
 
-The source file of _TOP_ can be reached at ![instances](https://drive.google.com/uc?export=download&id=0B6LVUFLjwlvdTEpKQWNXdGJkMVE), from Chao's website.
+The instances of _TOP_ can be reached at ![instances](https://drive.google.com/uc?export=download&id=0B6LVUFLjwlvdTEpKQWNXdGJkMVE), from Chao's website.
