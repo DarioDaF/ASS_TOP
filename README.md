@@ -6,7 +6,7 @@ The project is developed for the Advanced Scheduling System exam of University o
 + **Metaheuristic BackTracking** : use Simple Greedy as basis and explores the other solutions branches
 + **Metaheuristic BackTracking Focus** : similar to Metaheuristic BackTracking, sets its own parameter as Parametrized Greedy Algorithm
 + **Local Search Algorithm** : use EasyLocal++ libraries and algorithms to improve the previous results provided by the other algorithms
-+ **Web based Solver** : built-in web solver that print the output and solve single instance in the browser using the previous algorithms
++ **Web Based Solver** : built-in web solver that print the output and solve single instance in the browser using the previous algorithms
 
 ### References
 
