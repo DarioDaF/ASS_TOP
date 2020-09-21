@@ -1,0 +1,9 @@
+[
+  {
+    "names": ".*",
+    "algos": [
+      { "type": "greedy range", "descr": "default", "options": { "saveBestParams": true }, "output": "outputs/parallel/{algo}/{descr}/{name}.out" }
+    ]
+  }
+]
+

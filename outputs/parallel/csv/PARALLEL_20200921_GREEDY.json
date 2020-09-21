@@ -1,0 +1,10 @@
+[
+  {
+    "names": ".*",
+    "algos": [
+      { "type": "greedy", "descr": "default", "output": "outputs/parallel/{algo}/{descr}/{name}.out" },
+      { "type": "greedy range", "descr": "default", "output": "outputs/parallel/{algo}/{descr}/{name}.out" }
+    ]
+  }
+]
+

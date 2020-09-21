@@ -50,6 +50,7 @@ const std::vector<AbstractWebSolver*> solvers = {
   new WebSolverGreedy(),
   new WebSolverGreedyRange(),
   new WebSolverBackTracking(),
+  new WebSolverBackTrackingFocus(),
   new WebSolverLocalSA(),
   new WebSolverLocalHC(),
   new WebSolverLocalTS(),

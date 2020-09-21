@@ -7,7 +7,7 @@
  * Returns def if j is a null json object
  */
 template<typename T>
-T json_get_or_default(const nlohmann::json& j, T&& def) {
+inline T json_get_or_default(const nlohmann::json& j, T&& def) {
   return j.is_null() ? def : j.get<T>();
 }
 
@@ -15,7 +15,7 @@ T json_get_or_default(const nlohmann::json& j, T&& def) {
  * Returns def if j[key] is missing
  */
 template<typename T, typename K>
-T json_get_or_default(const nlohmann::json& j, const K& key, T&& def) {
+inline T json_get_or_default(const nlohmann::json& j, const K& key, T&& def) {
   if(j.contains(key)) {
     const nlohmann::json& v = j[key];
     return v.get<T>();

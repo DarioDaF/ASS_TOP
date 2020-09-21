@@ -224,10 +224,10 @@ idx_t InsertPoint(TOP_Node& current, idx_t point, idx_t car, double maxDeviation
     if(current.Visited(p) || p == point) {
       continue;
     }
-    double ellipseDist = 
-      current.in.Distance(current.CarPoint(car), p) +
-      current.in.Distance(p, point) - 
-      current.in.Distance(current.CarPoint(car), p) ;
+    double ellipseDist =
+      + current.in.Distance(current.CarPoint(car), p)
+      + current.in.Distance(p, point)
+      - current.in.Distance(current.CarPoint(car), point);
     
     // cerr <<
     //   "LOG: from " << current.CarPoint(car) << " to " <<  point << " taking " <<
@@ -262,10 +262,11 @@ idx_t InsertPoint(TOP_Node& current, idx_t point, idx_t car, double maxDeviation
 
     // Verify the feasibility of the insertion
     double dist =
-      current.TravelTime(car) -
-      current.in.Distance(current.CarPoint(car), node) +
-      current.in.Distance(node, point) + 
-      current.in.Distance(point, current.in.Points()-1);
+      + current.TravelTime(car)
+      - current.in.Distance(current.CarPoint(car), current.in.EndPoint())
+      + current.in.Distance(current.CarPoint(car), node)
+      + current.in.Distance(node, point)
+      + current.in.Distance(point, current.in.EndPoint());
 
     // cerr << "LOG: Distance of point: " << node << " -> " << dist << " on " << current.in.MaxTime() << endl;
 

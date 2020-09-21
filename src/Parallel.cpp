@@ -10,6 +10,7 @@
 #include <thread>
 #include <shared_mutex>
 #include <ctpl_stl.h>
+#include <limits>
 
 #include <nlohmann/json.hpp>
 
@@ -29,7 +30,7 @@ namespace fs = std::filesystem;
 
 using namespace std;
 
-void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std::string desc, nlohmann::json options) {
+void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std::string descr, nlohmann::json options, std::string output) {
   auto log = lf.get();
 
   random_device rd; // Can be not random...
@@ -52,6 +53,9 @@ void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std
   } else if(algo == "BT") {
     WebSolverBackTracking bt;
     bt.Solve(in, out, rng, options, nullStream);
+  } else if(algo == "BT FOCUS") {
+    WebSolverBackTrackingFocus btf;
+    btf.Solve(in, out, rng, options, nullStream);
   } else if(algo == "SD") {
     WebSolverLocalSD sd;
     sd.Solve(in, out, rng, options, nullStream);
@@ -65,20 +69,56 @@ void runThread(int id, const TOP_Input& in, lockflush& lf, std::string algo, std
     WebSolverLocalHC hc;
     hc.Solve(in, out, rng, options, nullStream);
   }
-  log << in.name << "," << algo << "," << desc << "," <<  out.PointProfit() << "," << out.Feasible() << endl;
+  log << in.name << "," << algo << "," << descr << "," <<  out.PointProfit() << "," << out.Feasible() << endl;
   log.flush();
+
+  findAndReplace(output, "{algo}", algo);
+  findAndReplace(output, "{descr}", descr);
+  findAndReplace(output, "{name}", in.name);
+
+  if(output != "") {
+    fs::path outputPath = output;
+    fs::create_directories(outputPath.parent_path());
+    ofstream ofsOutput(output);
+    ofsOutput << out;
+  }
 }
 
-int main() {
-  auto nHWThreads = thread::hardware_concurrency();
+int main(int argc, const char* argv[]) {
+  if(argc < 2 || argc > 3) {
+    cerr
+      << "USAGE: " << argv[0] << " <configFile>.json [<nThreads>]" << endl
+      << endl
+      << "  Processes configFile.json into config.csv using nThreads cores, or hardware concurrency if missing" << endl;
+    return 1;
+  }
 
+  fs::path configFile = argv[1];
+  fs::path outFile = configFile;
+  outFile.replace_extension(".csv");
+  int coresToUse = 0;
+  if(argc > 2) {
+    coresToUse = atoi(argv[2]);
+  }
+
+  auto nHWThreads = thread::hardware_concurrency();
   cout << "HW Threads: " << nHWThreads << endl;
+
+  if(coresToUse == 0) {
+    coresToUse = nHWThreads;
+  } else if(coresToUse < 0) {
+    coresToUse = max(1U, nHWThreads + coresToUse);
+  }
+
+  cout
+    << "Processing: " << configFile << endl
+    << "Result: " << outFile << endl
+    << "Using " << coresToUse << " threads" << endl;
   
   cout << "Initializing thread pool" << endl;
-  ctpl::thread_pool pool(nHWThreads);
-  //ctpl::thread_pool pool(std::max(1U, nHWThreads - 1));
+  ctpl::thread_pool pool(coresToUse);
 
-  cout << "Reading input" << endl;
+  cout << "Reading instances" << endl;
 
   map<string, TOP_Input> ins;
   for(const auto &file : fs::directory_iterator("./instances")) { //For each instance
@@ -96,7 +136,7 @@ int main() {
     }
   }
 
-  ofstream ofs("outputs/parallel.csv");
+  ofstream ofs(outFile);
   lockflush lf(ofs);
 
   cout << "Starting pool" << endl;
@@ -104,7 +144,7 @@ int main() {
   {
     nlohmann::json config;
     {
-      ifstream ifs("paramIn/parallel.json");
+      ifstream ifs(configFile);
       if(!ifs) {
         throw runtime_error("Unable to open configuration file");
       }
@@ -119,7 +159,8 @@ int main() {
             pool.push(runThread, ref(in), ref(lf),
               algo["type"],
               json_get_or_default(algo, "descr", std::string {}),
-              json_get_or_default(algo, "options", nlohmann::json::object())
+              json_get_or_default(algo, "options", nlohmann::json::object()),
+              json_get_or_default(algo, "output", std::string {})
             );
             ++tasks;
           }
@@ -142,7 +183,7 @@ int main() {
       cout << endl << "Tasks completed: " << 100 * (1 - ((double)q) / tasks) << "% (missing: " << q << ")" << endl;
     }
   } while(pool.n_idle() < pool.size());
-  cerr << endl;
+  cout << endl;
   pool.stop(true); // Wait for solution
 
   return 0;

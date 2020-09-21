@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <iostream>
-#include <random>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -430,34 +430,81 @@ void GreedySolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, doubl
   // cerr << "LOG: Currently solved the instance " << solvedSolutions << " times" << endl;
 }
 
-void GreedyRangeSolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, std::ostream& log) {
+struct rangeParams_t {
+  double wTime, maxDev, wNonCost;
+};
+
+void GreedyRangeSolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, bool extendedRanges, bool saveBestParams, std::ostream& log) {
   TOP_Output curr_out(in);
   int bestProfit = 0;
   
-  double wTimeStep = 0.1;
-  double wNonCostStep = 0.5;
+  constexpr double NORM_WTIME_MIN = 0.1;
+  constexpr double NORM_WTIME_MAX = 1.2;
+  constexpr double NORM_WTIME_STEP = 0.1;
+  constexpr double EXT_WTIME_MIN = 2;
+  constexpr double EXT_WTIME_MAX = 3.7;
+  constexpr double EXT_WTIME_STEP = 0.5;
 
-  for(double wTime = 0.1; wTime <= 3.7; wTime += wTimeStep) {
-    if(wTime > 1.2 && wTime < 2) {
-      wTime = 2;
-      wTimeStep = 0.5;
+  constexpr double NORM_WNONCOST_MIN = 0;
+  constexpr double NORM_WNONCOST_MAX = 1;
+  constexpr double NORM_WNONCOST_STEP = 0.5;
+  constexpr double EXT_WNONCOST_MIN = 5;
+  constexpr double EXT_WNONCOST_MAX = 5;
+  constexpr double EXT_WNONCOST_STEP = 0.5;
+
+  double wTimeStep = NORM_WTIME_STEP;
+  double wNonCostStep = NORM_WNONCOST_STEP;
+
+  rangeParams_t best = { .wTime = -1, .maxDev = -1, .wNonCost = -1 };
+  rangeParams_t curr;
+
+  for(curr.wTime = NORM_WTIME_MIN; curr.wTime <= (extendedRanges ? EXT_WTIME_MAX : NORM_WTIME_MAX); curr.wTime += wTimeStep) {
+    if(extendedRanges && curr.wTime > NORM_WTIME_MAX && curr.wTime < EXT_WTIME_MIN) {
+      curr.wTime = EXT_WTIME_MIN;
+      wTimeStep = EXT_WTIME_STEP;
     }
 
-    for(double wNonCost = 0; wNonCost <= 5; wNonCost += wNonCostStep) {
-      if(wNonCost > 1 && wNonCost < 5) {
-        wNonCost = 5;
-        wNonCostStep = 0.5;
+    for(curr.wNonCost = NORM_WNONCOST_MIN; curr.wNonCost <= (extendedRanges ? EXT_WNONCOST_MAX : NORM_WNONCOST_MAX); curr.wNonCost += wNonCostStep) {
+      if(extendedRanges && curr.wNonCost > NORM_WNONCOST_MAX && curr.wNonCost < EXT_WNONCOST_MIN) {
+        curr.wNonCost = EXT_WNONCOST_MIN;
+        wNonCostStep = EXT_WNONCOST_STEP;
       }
 
-      for(double maxDeviation = 0; maxDeviation <= 6; maxDeviation += 0.01) {
+      for(curr.maxDev = 0; curr.maxDev <= 6; curr.maxDev += 0.01) {
         curr_out.Clear();
-        GreedySolver(in, curr_out, rng, 1, wTime, maxDeviation, wNonCost);
+        GreedySolver(in, curr_out, rng, 1, curr.wTime, curr.maxDev, curr.wNonCost);
         if(curr_out.PointProfit() > bestProfit) {
           out = curr_out;
+          best = curr;
           bestProfit = out.PointProfit();
-          log << "Found better solution: " << bestProfit << " with (" << wTime << ", " << maxDeviation << ", " << wNonCost << ")" << std::endl;
+          log << "Found better solution: " << bestProfit << " with (" << best.wTime << ", " << best.maxDev << ", " << best.wNonCost << ")" << std::endl;
         }
       }
     }
+  }
+
+  if(saveBestParams) {
+    ofstream ofs(GetGreedyBestParamsPath(in.name));
+    ofs
+      << "Profit found: " << bestProfit
+      << endl << "Param wTime: ";
+    if(best.wTime < 0) {
+      ofs << "null";
+    } else {
+      ofs << best.wTime;
+    }
+    ofs << endl << "Param maxDeviation: ";
+    if(best.maxDev < 0) {
+      ofs << "null";
+    } else {
+      ofs << best.maxDev;
+    }
+    ofs << endl << "Param wNonCost: ";
+    if(best.wNonCost < 0) {
+      ofs << "null";
+    } else {
+      ofs << best.wNonCost;
+    }
+    ofs << endl;
   }
 }

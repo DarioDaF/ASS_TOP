@@ -267,10 +267,7 @@ int main(int argc, char *argv[]) {
             }
 
             { // Print the parameters of optimum on file
-              string titleDir = "outputs/greedy/paramGreedy/#";
-              titleDir.push_back(*argv[1]);
-              fs::create_directories(titleDir);
-              ofstream os(titleDir / file.path().filename().replace_extension(".out"));
+              ofstream os(GetGreedyBestParamsPath(in.name));
               if (!os) {
                 ++errors;
                 cerr << "  ERROR: Unable to open output file" << endl;

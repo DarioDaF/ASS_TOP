@@ -1,8 +1,0 @@
-[
-  {
-    "names": ".*",
-    "algos": [
-      { "type": "bt", "options": { "maxTime": 120, "nonGreedyDrop": 1000 } }
-    ]
-  }
-]

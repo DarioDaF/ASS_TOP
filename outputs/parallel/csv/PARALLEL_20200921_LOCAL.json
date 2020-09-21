@@ -1,0 +1,11 @@
+[
+  {
+    "names": ".*",
+    "algos": [
+      { "type": "SD", "descr": "default", "output": "outputs/parallel/{algo}/{descr}/{name}.out" },
+      { "type": "SA", "descr": "default", "output": "outputs/parallel/{algo}/{descr}/{name}.out" },
+      { "type": "HC", "descr": "default", "output": "outputs/parallel/{algo}/{descr}/{name}.out" },
+      { "type": "TS", "descr": "default", "output": "outputs/parallel/{algo}/{descr}/{name}.out" }
+    ]
+  }
+]

@@ -4,6 +4,7 @@
 #include <iterator>
 #include <vector>
 #include <map>
+#include <string>
 #include <streambuf>
 #include <mutex>
 #include <shared_mutex>
@@ -192,6 +193,21 @@ class nullstream : public std::ostream {
 };
 
 /**
+ * Finds needle in source and replaces all its occurencies with subst
+ */
+inline void findAndReplace(std::string& source, const std::string& needle, const std::string& subst) {
+  std::size_t start_pos = 0;
+  while(true) {
+    const auto& pos = source.find(needle, start_pos);
+    if(pos == std::string::npos) {
+      break;
+    }
+    source.replace(pos, needle.length(), subst);
+    start_pos = pos + subst.length();
+  }
+}
+
+/**
  * STL Map that is thread safe in insertion and find
  * access to underlining _map is not protected
  */
@@ -267,7 +283,7 @@ std::vector<typename std::iterator_traits<_It>::value_type> min_elements(_It beg
  * @param pred Function-like entity that defines order returning strong_ordering (in seneral < 0, = 0, > 0)
  */
 template<class _It, class _Pred>
-std::vector<typename std::iterator_traits<_It>::value_type> min_elements(_It begin, _It end, _Pred pred) {
+inline std::vector<typename std::iterator_traits<_It>::value_type> min_elements(_It begin, _It end, _Pred pred) {
   return min_elements(begin, end, pred, [](auto x) { return x; });
 }
 
@@ -279,7 +295,7 @@ std::vector<typename std::iterator_traits<_It>::value_type> min_elements(_It beg
  * @param prov Function-like that prerpocesses the elements (mapped onto iterator)
  */
 template<class _Pred, class _Prov>
-std::vector<idx_t> min_elements(idx_t size, _Pred pred, _Prov prov) {
+inline std::vector<idx_t> min_elements(idx_t size, _Pred pred, _Prov prov) {
   return min_elements(NumberIterator(0), NumberIterator(size), pred, prov);
 }
 
@@ -290,7 +306,7 @@ std::vector<idx_t> min_elements(idx_t size, _Pred pred, _Prov prov) {
  * @param pred Function-like entity that defines order returning strong_ordering (in seneral < 0, = 0, > 0)
  */
 template<class _Pred>
-std::vector<idx_t> min_elements(idx_t size, _Pred pred) {
+inline std::vector<idx_t> min_elements(idx_t size, _Pred pred) {
   return min_elements(NumberIterator(0), NumberIterator(size), pred, [](auto x) { return x; });
 }
 
@@ -298,14 +314,14 @@ std::vector<idx_t> min_elements(idx_t size, _Pred pred) {
  * Default comparison predicate
  */
 template<typename T>
-T so_cmp(const T& x, const T& y) {
+inline T so_cmp(const T& x, const T& y) {
   return x - y;
 }
 /**
  * Inverted comparison predicate
  */
 template<typename T>
-T so_negcmp(const T& x, const T& y) {
+inline T so_negcmp(const T& x, const T& y) {
   return y - x;
 }
 
@@ -313,7 +329,7 @@ T so_negcmp(const T& x, const T& y) {
  * Returns map[key] if present or def otherwise.
  */
 template<typename _MAP>
-typename _MAP::mapped_type value_or_default(const _MAP map, const typename _MAP::key_type& key, const typename _MAP::mapped_type& def) {
+inline typename _MAP::mapped_type value_or_default(const _MAP map, const typename _MAP::key_type& key, const typename _MAP::mapped_type& def) {
   typename _MAP::const_iterator it = map.find(key);
   if(it == map.end()) {
     return def;

@@ -19,7 +19,7 @@ LDFLAGS_EASYLOCAL=-lboost_program_options -pthread
 
 LINUX_LD_PATH=$(LIBHTTPSERVER)/lib
 
-CPPFLAGS=-std=c++17 -Og -Wall -ggdb -Wno-unknown-pragmas -Wno-sign-compare
+CPPFLAGS=-std=c++17 -O3 -Wall -Wno-unknown-pragmas -Wno-sign-compare
 LDFLAGS=
 
 ALL_EXE = MainWeb.exe MainParamGr.exe MainMapGr.exe MainGreedy.exe MainBackTracking.exe MainLocal.exe MainLocalSearch.exe ParamBisectionTest.exe Parallel.exe

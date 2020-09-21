@@ -3,6 +3,9 @@ instances/**
 !instances/.keep
 outputs/**
 !outputs/.keep
+!outputs/parallel
+!outputs/parallel/csv
+!outputs/parallel/csv/*.json
 solutions/**
 !solutions/.keep
 src/**/*.o
@@ -10,4 +13,3 @@ src/**/*.d
 *.exe
 node_modules
 web/*.js
-

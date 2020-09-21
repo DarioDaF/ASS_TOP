@@ -1,11 +1,12 @@
-#include "backTracking/TOP_Backtracking.hpp"
-
 #include <fstream>
 #include <sstream>
 #include <filesystem>
 #include <string>
 #include <algorithm>
 #include <vector>
+
+#include "backTracking/TOP_Backtracking.hpp"
+#include "greedy/GreedyParams.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -157,7 +158,7 @@ int main(int argc, char* argv[]) {
       
       //Open the file conteining the params
       // If found param, set it, otherwise use default value
-      ifstream paramStream("./outputs/greedy/paramGreedy/#2/" + in.name + ".out"); 
+      ifstream paramStream(GetGreedyBestParamsPath(in.name)); 
       if (!paramStream) {
         throw runtime_error("ERROR: Cannot find Greedy parameter file: run Greedy algorithm or use default parameters");
       }

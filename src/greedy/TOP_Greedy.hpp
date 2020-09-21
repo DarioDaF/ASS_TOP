@@ -1,8 +1,10 @@
 #ifndef SOLVERS_TOP_Greedy_HPP
 #define SOLVERS_TOP_Greedy_HPP
 
-#include "../common/TOP_Data.hpp"
 #include <random>
+
+#include "../common/TOP_Data.hpp"
+#include "GreedyPaths.hpp"
 
 /***************
  * Declaration *
@@ -30,6 +32,6 @@ void GreedySolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, doubl
  * @param rng seed generator to save the solution and its informations
  * @return [void]
  */
-void GreedyRangeSolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, std::ostream& log = std::cout);
+void GreedyRangeSolver(const TOP_Input& in, TOP_Output& out, std::mt19937& rng, bool extendedRanges = true, bool saveBestParams = false, std::ostream& log = std::cout);
 
 #endif

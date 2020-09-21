@@ -1,0 +1,9 @@
+[
+  {
+    "names": ".*",
+    "algos": [
+      { "type": "bt focus", "descr": "default", "options": { "maxTime": 120, "nonGreedyDrop": 0 }, "output": "outputs/parallel/{algo}/{descr}/{name}.out" },
+      { "type": "bt focus", "descr": "with drop", "options": { "maxTime": 120, "nonGreedyDrop": 1000 }, "output": "outputs/parallel/{algo}/{descr}/{name}.out" }
+    ]
+  }
+]
