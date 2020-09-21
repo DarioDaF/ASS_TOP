@@ -1,51 +1,34 @@
+'''
+  TThe function takes the output from Parallel.cpp and reorder the solutions, compare it with chao's results and
+  made an ".csv" output file with all those informations.
+
+  Usage:
+    python3 ./scriptHelpers/restaker.py
+
+  Input files:
+    - solutions/[algoritm].csv : files ".csv" that contain the results of multi thread c++ executer.
+                                  The file is located in "solutions" directory.
+
+  Output files:
+    - AutoGen[algorithm].csv : file with the information needed. 
+                               The file is located in "solutions" directory.
+'''
+
 import csv
 import sys
 import os
 
 def perGenerator(mySol, chaoOpt):
   if(chaoOpt == 0):
-    return 1
+    return 1.0
   return mySol/chaoOpt
 
-solToTake = ["./solutions/SolGreedy#1.csv", \
-            "./solutions/SolGreedy#2.csv", \
-            "./solutions/SolBacktracking#1.csv", \
-            "./solutions/SolBacktracking#2.csv", \
-            "./solutions/SolLocalSearchGB#SA.csv", \
-            "./solutions/SolLocalSearchGB#HC.csv", \
-            "./solutions/SolLocalSearchGB#SD.csv", \
-            "./solutions/SolLocalSearchGB#TS.csv", \
-            "./solutions/SolLocalSearchLS#SA.csv", \
-            "./solutions/SolLocalSearchLS#HC.csv", \
-            "./solutions/SolLocalSearchLS#SD.csv", \
-            "./solutions/SolLocalSearchLS#TS.csv"]
+solToTake = sys.argv[1]
+algorithmType =sys.argv[2]
+version = sys.argv[3]
 
 chaoPath = "./paramIn/chaoResults.txt"
-
-instancesNumber = 387
-allSolutions = [[0 for x in range(instancesNumber)] for y in range(len(solToTake))]
 chaoResults = [] 
-cnt = 0
-
-for idx in solToTake:
-  with open(idx, newline='') as csvfile:
-    print("Processing file: ", idx)
-    instance = 0
-    spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-    for row in spamreader:
-      if row[0] == "#":
-        continue 
-      x = row[0].split(",")
-      inst = x[0].split('"')
-      if(len(inst) == 1):
-        allSolutions[cnt][instance] = [inst[0], int(x[1])] 
-      else:
-        allSolutions[cnt][instance] = [inst[1], int(x[1])] 
-      instance += 1
-  cnt += 1
-
-# print(allSolutions)
-# allSolutions : colonne = file, righe = istanza, contenuto della cella = riga del file csv da convertire
 
 with open(chaoPath, 'r') as file:
   for line in file.readlines():
@@ -53,32 +36,63 @@ with open(chaoPath, 'r') as file:
     if(temp[0] == 0):
       continue
     chaoResults.append([temp[0], int(temp[1])]) # [InstanceName, int(ChaoRes)]
-# print(chaoResults, len(chaoResults))
+# print(chaoResults)
 
 path = "./solutions/"
 if(not os.path.isdir(path)):
   os.mkdir(path)
 
-for i in range(len(solToTake)):
-  temp = solToTake[i].split("/")
-  nameFileToPrint = temp[2]
-  print(nameFileToPrint)
-  with open(path + "AutoGen" + nameFileToPrint, mode='w') as csv_file:
-    fieldnames = ['# instance', 'chaoOpt', 'result', "percOnOpt"]
-    writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    writer.writeheader()
-    
-    for j in range(len(chaoResults)): 
-      for idx in range(len(allSolutions)):
-        # print(type(allSolutions[idx][i][0]), " ", type(chaoResults[j][0]))
-        if(allSolutions[idx][i][0] == chaoResults[j][0]):
-          print("ok")
-          mySol = allSolutions[idx][i][1]
-          instance = allSolutions[idx][i][0]
-          chaoOpt = chaoResults[j][1]
-          break
-      writer.writerow({'# instance' : instance, 
-                        'chaoOpt' : chaoOpt,
-                        'result' : mySol,
-                        'percOnOpt' : perGenerator(mySol, chaoOpt)})
+if(algorithmType == "GR"):
+  print ("SolBacktracking#" + version + ".csv")
+  f1 = open("./solutions/SolGreedy#" + version + ".csv", "w") 
+elif(algorithmType == "BT"):
+  print ("SolBacktracking#" + version + ".csv")
+  f1 = open("./solutions/SolBacktracking#" + version + ".csv", "w") 
+else:
+  print ("SolLocalSearch.csv")
+  f1 = open("./solutions/SolLocalSearch" + version + "#HC.csv", "w") 
+  f2 = open("./solutions/SolLocalSearch" + version + "#SA.csv", "w") 
+  f3 = open("./solutions/SolLocalSearch" + version + "#TS.csv", "w") 
+  f4 = open("./solutions/SolLocalSearch" + version + "#SD.csv", "w") 
+
+
+with open(solToTake, newline='') as csvfile:
+  spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+  for row in spamreader:
+    instanceName = row[0] + ".txt"
+    algorithm = row[1]
+    infoType = row[2]
+    result = int(row[3])
+
+    for idx in range(len(chaoResults)):
+      if(instanceName == chaoResults[idx][0]):
+        res = result
+        break
+      else:
+        continue
+      
+    chaoOpt = chaoResults[idx][1]
+
+    stringToWrite = "{},{},{},{}\n".format(instanceName, chaoOpt, res, perGenerator(result, chaoOpt))
+    if(algorithmType == "GR"):
+      f1.writelines(stringToWrite) 
+    elif(algorithmType == "BT"):
+      f1.writelines(stringToWrite) 
+    else:
+      if(algorithm == "HC"):
+        f1.writelines(stringToWrite) 
+      elif(algorithm == "SA"):
+        f2.writelines(stringToWrite) 
+      elif(algorithm == "TS"):
+        f3.writelines(stringToWrite) 
+      elif(algorithm == "SD"):
+        f4.writelines(stringToWrite) 
+
+f1.close()
+if(algorithmType == "LS"):
+  f2.close()
+  f3.close()
+  f4.close()
+          
+          
       
