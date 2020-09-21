@@ -16,4 +16,4 @@ The project is developed for the Advanced Scheduling System exam of University o
 
 ### Instances
 
-The instances of _TOP_ can be reached at ![instances](https://drive.google.com/uc?export=download&id=0B6LVUFLjwlvdTEpKQWNXdGJkMVE), from Chao's website.
+The instances of _TOP_ can be reached at ![Chao's website](https://drive.google.com/uc?export=download&id=0B6LVUFLjwlvdTEpKQWNXdGJkMVE).
