@@ -76,7 +76,7 @@ class LocalSolverHelper {
 
       TOP_Output out_prec(in);
       {
-        ifstream is("outputs/routeHops/bestRoutes/GB/" + in.name + ".out");
+        ifstream is("outputs/routeHops/bestRoutes/" + in.name + ".out");
         if (!is) {
           log << "<span style='color: red;'>ERROR: Unable to open bestRoutes Instance file, run from empty solution</span>" << endl;
         } else {
