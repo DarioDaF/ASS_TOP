@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "backTracking/TOP_Backtracking.hpp"
-#include "greedy/GreedyParams.hpp"
+#include "greedy/GreedyPaths.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
