@@ -20,7 +20,10 @@
 '''
 
 import matplotlib.pyplot as plt
-import sys
+import os, sys
+
+rootPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(rootPath)
 
 if(sys.argv[1] == '0'): 
   # Process all the instances

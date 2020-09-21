@@ -9,7 +9,7 @@
     version: 
         - GB : Greedy and Backtracking
         - LS : Local Search from GB
-        - LS2 : Local Search from LS1
+        - LS1 : Local Search from LS1
 
   Input files:
     - Sol[algorithm]#[version].csv : file ".csv" that contain the solution of one version of one algorithm.
@@ -25,11 +25,12 @@ import csv
 import sys
 import os
 
-# def minAlgo(instRes):
-#   return min(instRes[0][3], instRes[1][3], instRes[2][3], instRes[3][3])
-#   return (instRes[0][3] + instRes[1][3] + instRes[2][3] + instRes[3][3])
+rootPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(rootPath)
 
 def minAlgo(instRes):
+#  return min(instRes[0][3], instRes[1][3], instRes[2][3], instRes[3][3])
+#  return (instRes[0][3] + instRes[1][3] + instRes[2][3] + instRes[3][3])
   return instRes[3][3]
 
 ver = sys.argv[1]
@@ -45,12 +46,12 @@ elif(ver == 'LS'):
   solFile = ["./solutions/SolLocalSearchGB#SA.csv", \
              "./solutions/SolLocalSearchGB#HC.csv", \
              "./solutions/SolLocalSearchGB#SD.csv", \
-             "./solutions/SolLocalSearchGB#TS.csv"]
+             "./solutions/SolLocalSearchGB#TS_pumped.csv"]
 else:
   solFile = ["./solutions/SolLocalSearchLS#SA.csv", \
              "./solutions/SolLocalSearchLS#HC.csv", \
              "./solutions/SolLocalSearchLS#SD.csv", \
-             "./solutions/SolLocalSearchLS#TS.csv"]
+             "./solutions/SolLocalSearchLS#TS_pumped.csv"]
 
 instancesNumber = 387
 fileNumber = 4

@@ -26,6 +26,9 @@ import sys
 import csv
 import os
 
+rootPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(rootPath)
+
 def printAlg(n, idx, res, maxRes):
   if(float(maxRes[idx][2]) == 0.0): 
     return 0.0 
@@ -45,12 +48,12 @@ elif(ver == 'LS'):
   solFile = ["./solutions/SolLocalSearchGB#SA.csv", \
              "./solutions/SolLocalSearchGB#HC.csv", \
              "./solutions/SolLocalSearchGB#SD.csv", \
-             "./solutions/SolLocalSearchGB#TS.csv"]
+             "./solutions/SolLocalSearchGB#TS_pumped.csv" ]
 else:
   solFile = ["./solutions/SolLocalSearchLS#SA.csv", \
              "./solutions/SolLocalSearchLS#HC.csv", \
              "./solutions/SolLocalSearchLS#SD.csv", \
-             "./solutions/SolLocalSearchLS#TS.csv"]
+             "./solutions/SolLocalSearchLS#TS_pumped.csv" ]
 
 instancesNumber = 387
 fileNumber = 4
@@ -137,6 +140,8 @@ with open(path + "bestSol" + ver + ".csv", mode='w') as csv_file:
                        'dtTS' : printAlg(3, idx, res, maxRes),
                        'dtMedium' : (printAlg(0, idx, res, maxRes) + printAlg(1, idx, res, maxRes) + printAlg(2, idx, res, maxRes) + printAlg(3, idx, res, maxRes)) / 4})
 
+# Comment old bestRoutes selector
+'''
 if(ver == 'GB'): 
   solPath = "./outputs/routeHops/bestRoutes/GB/"
   if(not os.path.isdir(solPath)):
@@ -190,3 +195,4 @@ elif (ver == "LS1"):
     elif(maxRes[idx][4] == "TS"):
       pathFrom = "./outputs/routeHops/localsearch/LS/TS/" + fileName2[1] + ".out"
     shutil.copy(pathFrom, solPath)
+'''

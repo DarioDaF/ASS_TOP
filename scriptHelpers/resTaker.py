@@ -18,6 +18,9 @@ import csv
 import sys
 import os
 
+rootPath = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.chdir(rootPath)
+
 def perGenerator(mySol, chaoOpt):
   if(chaoOpt == 0):
     return 1.0
