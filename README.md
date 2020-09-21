@@ -8,6 +8,6 @@ The project is developed for the Advanced Scheduling System exam of University o
 + **Local Search Algorithm** : use EasyLocall++ libraries and algorithms to emiliorate the previous one results
 + **Web based Solver** : built-in web solver that print the output in the browser using the previous algorithms
 
-##### References
+### References
 Chao I. Algorithms and solutions to multi-level vehicle routing problems. Ph.D. Dissertation, Applied Mathematics Program, University of Maryland, College Park, USA, 1993.
 Chao I, Golden B, Wasil E. Theory and Methodology - The Team Orienteering Problem. European Journal of Operational Research 1996a; 88; 464-474.
