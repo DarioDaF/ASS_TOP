@@ -5,7 +5,7 @@ The project is developed for the Advanced Scheduling System exam of University o
 + **Parametrized Algorithm** : use Simple Greedy as base and sets its rating parameters weighting in differt ways the ratingPoint components 
 + **Metaheuristic BackTracking** : use Simple Greedy as base and explores the other solutions branches
 + **Metaheuristic BackTracking Focus** : similar to set its parameter as Parametrized Algorithm
-+ **Local Search Algorithm** : use EasyLocall++ libraries and algorithms to emiliorate the previous one results
++ **Local Search Algorithm** : use EasyLocal++ libraries and algorithms to emiliorate the previous one results
 + **Web based Solver** : built-in web solver that print the output in the browser using the previous algorithms
 
 ### References
