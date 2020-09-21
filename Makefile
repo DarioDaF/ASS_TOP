@@ -59,7 +59,7 @@ MainLocal.exe: src/MainLocal.o $(LS_OBJ_FILES) $(COMMON_OBJ_FILES)
 MainLocalSearch.exe: src/MainLocalSearch.o $(LS_OBJ_FILES) $(COMMON_OBJ_FILES)
 # Test C param bisection in Greedy #
 ParamBisectionTest.exe: src/ParamBisectionTest.o $(GREEDY_OBJ_FILES) $(COMMON_OBJ_FILES)
-# ??? #
+# Parallel runner using Web options #
 Parallel.exe: src/Parallel.o src/web/SolverLocal.o $(GREEDY_OBJ_FILES) $(BT_OBJ_FILES) $(LS_OBJ_FILES) $(COMMON_OBJ_FILES)
 
 %.o: %.cpp
