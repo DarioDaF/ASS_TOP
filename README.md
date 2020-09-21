@@ -19,4 +19,4 @@ The project is developed for the Advanced Scheduling System exam of University o
 
 ### Instances
 
-The instances of _TOP_ can be reached at [KU LEUVEN website](https://www.mech.kuleuven.be/en/cib/op#section-3).
+The instances of _TOP_ can be reached at [KU LEUVEN](https://www.mech.kuleuven.be/en/cib/op#section-3) website.
