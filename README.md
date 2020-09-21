@@ -13,7 +13,7 @@ The project is developed for the Advanced Scheduling System exam of University o
 - C. Archetti, A. Hertz, and M.G. Speranza. Metaheuristics for the team orienteering problem. Journal of Heuristics, 13, 49-76, 2007.
 - Chao I. Algorithms and solutions to multi-level vehicle routing problems. Ph.D. Dissertation, Applied Mathematics Program, University of Maryland, College Park, USA, 1993.
 - Chao I, Golden B, Wasil E. Theory and Methodology - The Team Orienteering Problem. European Journal of Operational Research 1996a; 88; 464-474.
-- H. Tang, E. Miller-Hooks, A tabu search heuristic for the team orienteering problem", Computers and Operations Research (2005), vol. 32, 1379-1407.
+- H. Tang, E. Miller-Hooks, A tabu search heuristic for the team orienteering problem. Computers and Operations Research (2005), vol. 32, 1379-1407.
 
 
 
