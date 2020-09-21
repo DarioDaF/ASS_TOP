@@ -24,20 +24,6 @@ using namespace std;
 #define MDEV_MIN 0.0
 #define MDEV_MAX 4.0
 
-void runThread(int id, TOP_Output& out, double wTime, double maxDeviation) {
-  //cerr << "START Thread: " << id << " @ " << maxDeviation << endl;
-
-  random_device rd; // Can be not random...
-  auto millis = chrono::time_point_cast<chrono::milliseconds>(chrono::system_clock::now()).time_since_epoch().count();
-  mt19937::result_type seed =
-    (mt19937::result_type)rd() ^
-    (mt19937::result_type)millis;
-  mt19937 rng(seed);
-
-  GreedySolver(out.in, out, rng, 1.0, wTime, maxDeviation, 0);
-  //cerr << "END Thread: " << id << " @ " << maxDeviation << " -> " << out.PointProfit() << endl;
-}
-
 /*
 
 Se parto da una mesh poco fitta e cerco quanti spazi devo approfondire
@@ -135,7 +121,7 @@ double maxDevFromIdx(int maxDevIdx) {
   return MDEV_MIN + maxDevIdx * (MDEV_MAX - MDEV_MIN) / (1 << MAX_DEPTH);
 }
 
-void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::result_type seed, safe_map<pos_t, int>& profits, sq_vals_t sq_vals, pos_t pos, int depth) {
+void runThread(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::result_type seed, safe_map<pos_t, int>& profits, sq_vals_t sq_vals, pos_t pos, int depth) {
   // Calcola in O
   int oProfit = -1;
   {
@@ -212,28 +198,28 @@ void runThread2(int id, ctpl::thread_pool& pool, const TOP_Input& in, mt19937::r
   }
 
   if(depth < MIN_DEPTH || sq_vals[0][0] != oProfit) {
-    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+    pool.push(runThread, ref(pool), ref(in), seed, ref(profits),
       sq_vals_t { { sq_vals[0][0], dots[0][0] }, { dots[0][1], oProfit } },
       pos_t { .wTimeIdx = pos.wTimeIdx - (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx - (1 << (MAX_DEPTH - depth - 1)) },
       depth + 1
     );
   }
   if(depth < MIN_DEPTH || sq_vals[0][1] != oProfit) {
-    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+    pool.push(runThread, ref(pool), ref(in), seed, ref(profits),
       sq_vals_t { { dots[0][0], sq_vals[0][1] }, { oProfit, dots[1][0] } },
       pos_t { .wTimeIdx = pos.wTimeIdx + (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx - (1 << (MAX_DEPTH - depth - 1)) },
       depth + 1
     );
   }
   if(depth < MIN_DEPTH || sq_vals[1][0] != oProfit) {
-    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+    pool.push(runThread, ref(pool), ref(in), seed, ref(profits),
       sq_vals_t { { dots[0][1], oProfit }, { sq_vals[1][0], dots[1][1] } },
       pos_t { .wTimeIdx = pos.wTimeIdx - (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx + (1 << (MAX_DEPTH - depth - 1)) },
       depth + 1
     );
   }
   if(depth < MIN_DEPTH || sq_vals[1][1] != oProfit) {
-    pool.push(runThread2, ref(pool), ref(in), seed, ref(profits),
+    pool.push(runThread, ref(pool), ref(in), seed, ref(profits),
       sq_vals_t { { oProfit, dots[1][0] }, { dots[1][1], sq_vals[1][1] } },
       pos_t { .wTimeIdx = pos.wTimeIdx + (1 << (MAX_DEPTH - depth - 1)), .maxDevIdx = pos.maxDevIdx + (1 << (MAX_DEPTH - depth - 1)) },
       depth + 1
@@ -302,7 +288,7 @@ int main() {
   }
 
   cout << "Starting pool" << endl;
-  pool.push(runThread2, ref(pool), ref(in), seed, ref(profits), sq_vals,
+  pool.push(runThread, ref(pool), ref(in), seed, ref(profits), sq_vals,
     pos_t { .wTimeIdx = 1 << (MAX_DEPTH-1), .maxDevIdx = 1 << (MAX_DEPTH-1) },
     1
   );
@@ -336,91 +322,6 @@ int main() {
       ofs << wTimeFromIdx(mapEntry.first.wTimeIdx) << '\t' << maxDevFromIdx(mapEntry.first.maxDevIdx) << '\t' << mapEntry.second << endl;
     }
   }
-
-  return 0;
-}
-
-int main_old() {
-  auto nHWThreads = thread::hardware_concurrency();
-
-  cout << "HW Threads: " << nHWThreads << endl;
-  
-  cout << "Initializing thread pool" << endl;
-  ctpl::thread_pool pool(nHWThreads);
-
-  cout << "Reading input" << endl;
-  TOP_Input in;
-  {
-    //ifstream ifs("instances/p5.4.q.txt");
-    ifstream ifs("instances/p7.4.t.txt");
-    if(!ifs) {
-      throw new runtime_error("Unable to open file");
-    }
-    ifs >> in;
-  }
-  
-  cout << "Preparing outputs" << endl;
-  vector<vector<TOP_Output>> outs;
-  for(int i = 0; i < N_WT; ++i) {
-    outs.emplace_back();
-    for(int j = 0; j < N_MDEV; ++j) {
-      outs[i].emplace_back(in);
-    }
-  }
-
-  double inc_wTime = (WT_MAX - WT_MIN) / (N_WT - 1);
-  double inc_mDev = (MDEV_MAX - MDEV_MIN) / (N_MDEV - 1);
-
-  cout << "Inc mDev: " << inc_mDev << " | Inc wTime: " << inc_wTime << endl;
-
-  cout << "Starting pool" << endl;
-  for(int i = 0; i < N_WT; ++i) {
-    double wTime = WT_MIN + i * inc_wTime;
-    for(int j = 0; j < N_MDEV; ++j) {
-      double maxDev = MDEV_MIN + j * inc_mDev;
-      pool.push(runThread, ref(outs[i][j]), wTime, maxDev);
-    }
-  }
-
-  cout << "Waiting on pool" << endl;
-  pool.stop(true); // Wait for solution
-
-  cout << "Solutions:" << endl;
-
-  map<int, int> profit2colour;
-  int n_colours = 0;
-
-  for(int i = 0; i < N_WT; ++i) {
-    for(int j = 0; j < N_MDEV; ++j) {
-      int currProfit = outs[i][j].PointProfit();
-      //cout << currProfit << '\t';
-      auto colour = profit2colour.find(currProfit);
-      if(colour == profit2colour.end()) {
-        // New colour
-        int new_colour = n_colours++;
-        profit2colour[currProfit] = new_colour;
-        cout << new_colour << '\t';
-      } else {
-        cout << colour->second << '\t';
-      }
-    }
-    cout << endl;
-  }
-
-  cout << endl << "Total colours used: " << n_colours << endl;
-
-  /*
-  int prevProfit = 0;
-  for(int i = 0; i < N_WT; ++i) {
-    int currProfit = outs[0][i].PointProfit();
-    double wTime = WT_MIN + i * inc_wTime;
-    if(prevProfit != currProfit) {
-      // Print
-      cout << wTime << " -> " << currProfit << endl;
-      prevProfit = currProfit;
-    }
-  }
-  */
 
   return 0;
 }
