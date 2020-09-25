@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 
     {
       string file = chao[idx].file.erase(chao[idx].file.size()-4);
-      ifstream isPar("./outputs/greedy/paramGreedy/" + file + ".out");
+      ifstream isPar("./outputs/greedy/paramGreedy/#2/" + file + ".out");
       if (!isPar) {
         ++errors;
         throw runtime_error("  ERROR: Unable to open Parameter file");

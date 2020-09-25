@@ -238,9 +238,9 @@ int main(int argc, char *argv[]) {
     for(int j = 0; j < res.size(); j++) { //std
       den += (res[j] - sumSol) * (res[j] - sumSol);
     }
-    dstd = sqrt(den / cnt_istances);
+    dstd = sqrt(den / (cnt_istances - 1));
 
-    double minElem = *min_element(res.begin(), res.end()); //min and max 
+    double minElem = *min_element(res.begin(), res.end()); // min and max 
     double maxElem = *max_element(res.begin(), res.end());
         
     //cerr <<  maxDeviation << " " << sumSol << " " << dstd << " " << minElem << " " << maxElem << endl;

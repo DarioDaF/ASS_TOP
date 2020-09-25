@@ -1,4 +1,3 @@
-
 export type ApiParameter = {
   name: string;
   descr: string;

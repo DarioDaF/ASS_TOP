@@ -237,7 +237,7 @@ bool NextSwap(const TOP_State& st, TOP_MoveSwap& m) {
 
 bool FirstInsert(const TOP_State& st, TOP_MoveSwap& m) {
   //std::cout << "FirstInsert" << std::endl;
-  m.first = { .car = 0, .hop = 0 }; // Unused
+  m.first = { .car = 0, .hop = 0 }; // Unused invalid for insert
   m.second = { .car = 0, .hop = 0 };
   if(!m.second.Increment(st, true)) {
     return false;

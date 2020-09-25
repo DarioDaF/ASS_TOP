@@ -293,6 +293,7 @@ std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit
     // cerr << "LOG: select point " << p << endl;
     pointRating currentPoint, otherCarPoint;
     bool alreadyInsert = false;
+    bool alreadyInsertPlus = false;
     double rating = RatingChoice(current, p, current.in.Cars(), false, wProfit, wTime, wNonCost);
 
     if(rating == -INFINITY) { // The point is already visited or unfeasible
@@ -301,19 +302,34 @@ std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit
 
     // Chose the couple point-car and its rating based on the couple itself
     currentPoint.car = choseCar(current, carSorted, current.in.Cars(), p);
-    currentPoint.point = InsertPoint(current, p, currentPoint.car, maxDeviation); // VEDI IL C!!
+    currentPoint.point = InsertPoint(current, p, currentPoint.car, maxDeviation);
     currentPoint.rating = rating;
+    idx_t indexSwap = 0;
 
     for(idx_t idx = 0; idx < ratingPoints.size(); idx++) { // Do not want duplicates
       if(currentPoint.point == ratingPoints[idx].point) /*&& currentPoint.car == ratingPoints[idx].car)*/ {
-        alreadyInsert = true;
-        break;
+        if(currentPoint.rating < ratingPoints[idx].rating) {
+          alreadyInsert = true;
+          break;
+        }
+        else {
+          indexSwap = idx;
+          alreadyInsertPlus = true;
+          break;
+        }
       }
     }
     if(alreadyInsert) {
       continue;
     }
-    ratingPoints.push_back(currentPoint);
+    else if(alreadyInsertPlus) {
+      ratingPoints[indexSwap].point = currentPoint.point;
+      ratingPoints[indexSwap].car = currentPoint.car;
+      ratingPoints[indexSwap].rating = currentPoint.rating;
+    }
+    else {
+      ratingPoints.push_back(currentPoint);
+    }
 
     // Determinate the rating for each point for the other cars
     for(idx_t c : carIdxs) {
@@ -322,21 +338,36 @@ std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit
       }
       // cerr << "LOG: select car " << c << endl;
       otherCarPoint.car = c;
-      otherCarPoint.point = InsertPoint(current, p, c, maxDeviation); // VEDI IL C!!
+      otherCarPoint.point = InsertPoint(current, p, c, maxDeviation);
       otherCarPoint.rating = RatingChoice(current, p, c, true, wProfit, wTime, wNonCost) - nonGreedyDrop;
 
       alreadyInsert = false;
+      alreadyInsertPlus = false;
       for(idx_t idx = 0; idx < ratingPoints.size(); idx++) { // Do not want duplicates
         if(otherCarPoint.point == ratingPoints[idx].point && otherCarPoint.car == ratingPoints[idx].car) {
-          alreadyInsert = true;
-          break;
+          if(currentPoint.rating < ratingPoints[idx].rating) {
+            alreadyInsert = true;
+            break;
+          }
+          else {
+            indexSwap = idx;
+            alreadyInsertPlus = true;
+            break;
+          }
         }
       }
       if(alreadyInsert) {
         continue;
       }
+      else if(alreadyInsertPlus) {
+        ratingPoints[indexSwap].point = currentPoint.point;
+        ratingPoints[indexSwap].car = currentPoint.car;
+        ratingPoints[indexSwap].rating = currentPoint.rating;
+      }
+      else {
+        ratingPoints.push_back(currentPoint);
+      }
       // cerr << "LOG: insert point modified " << p << " in car " << c << endl;
-      ratingPoints.push_back(otherCarPoint);
     }
   }
 
