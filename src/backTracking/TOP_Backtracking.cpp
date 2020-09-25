@@ -345,7 +345,7 @@ std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit
       alreadyInsertPlus = false;
       for(idx_t idx = 0; idx < ratingPoints.size(); idx++) { // Do not want duplicates
         if(otherCarPoint.point == ratingPoints[idx].point && otherCarPoint.car == ratingPoints[idx].car) {
-          if(currentPoint.rating < ratingPoints[idx].rating) {
+          if(otherCarPoint.rating < ratingPoints[idx].rating) {
             alreadyInsert = true;
             break;
           }
@@ -360,12 +360,12 @@ std::vector<pointRating> ratingVectorGenerator(TOP_Node& current, double wProfit
         continue;
       }
       else if(alreadyInsertPlus) {
-        ratingPoints[indexSwap].point = currentPoint.point;
-        ratingPoints[indexSwap].car = currentPoint.car;
-        ratingPoints[indexSwap].rating = currentPoint.rating;
+        ratingPoints[indexSwap].point = otherCarPoint.point;
+        ratingPoints[indexSwap].car = otherCarPoint.car;
+        ratingPoints[indexSwap].rating = otherCarPoint.rating;
       }
       else {
-        ratingPoints.push_back(currentPoint);
+        ratingPoints.push_back(otherCarPoint);
       }
       // cerr << "LOG: insert point modified " << p << " in car " << c << endl;
     }
